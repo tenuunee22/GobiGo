@@ -7,21 +7,21 @@ export function Footer() {
         <div className="md:flex md:items-center md:justify-between">
           <div className="flex justify-center md:order-2 space-x-6">
             <a href="#" className="text-gray-400 hover:text-gray-500">
-              <span className="sr-only">Facebook</span>
+              <span className="sr-only">Фэйсбүүк</span>
               <Facebook className="h-6 w-6" />
             </a>
             <a href="#" className="text-gray-400 hover:text-gray-500">
-              <span className="sr-only">Instagram</span>
+              <span className="sr-only">Инстаграм</span>
               <Instagram className="h-6 w-6" />
             </a>
             <a href="#" className="text-gray-400 hover:text-gray-500">
-              <span className="sr-only">Twitter</span>
+              <span className="sr-only">Твиттер</span>
               <Twitter className="h-6 w-6" />
             </a>
           </div>
           <div className="mt-8 md:mt-0 md:order-1">
             <p className="text-center text-base text-gray-400">
-              &copy; 2023 GobiGo, Inc. All rights reserved.
+              &copy; 2023 GobiGo, Inc. Бүх эрх хуулиар хамгаалагдсан.
             </p>
           </div>
         </div>

@@ -39,7 +39,7 @@ export function RestaurantCard({
         <div className="flex justify-between items-start">
           <div>
             <h3 className="text-lg font-semibold text-gray-900">{name}</h3>
-            <p className="text-sm text-gray-500">{category} • {subCategory} • {distance}</p>
+            <p className="text-sm text-gray-500">{category} {subCategory ? `• ${subCategory}` : ''} • {distance}</p>
           </div>
           <div className="flex items-center bg-green-100 rounded px-2 py-1">
             <Star className="h-4 w-4 text-green-600 fill-current" />
