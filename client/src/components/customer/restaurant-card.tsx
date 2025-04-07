@@ -48,7 +48,7 @@ export function RestaurantCard({
         </div>
         <div className="mt-4 flex items-center text-sm">
           <span className={deliveryFee === 0 ? "text-green-600 font-medium" : "text-gray-500"}>
-            {deliveryFee === 0 ? "$0 delivery fee" : `$${deliveryFee.toFixed(2)} delivery fee`}
+            {deliveryFee === 0 ? "Үнэгүй хүргэлт" : `${deliveryFee.toFixed(0)}₮ хүргэлт`}
           </span>
           <span className="mx-2 text-gray-300">•</span>
           <span className="text-gray-500">{estimatedTime}</span>

@@ -71,9 +71,9 @@ export function CustomerDashboard() {
 
   // Mock data for order tracking (in a real app, this would come from the database)
   const mockOrderItems = [
-    { name: "Бургер Комбо", quantity: 2, price: 9.99 },
-    { name: "Шарсан төмс", quantity: 1, price: 3.99 },
-    { name: "Кола", quantity: 1, price: 1.99 },
+    { name: "Бургер Комбо", quantity: 2, price: 9999 },
+    { name: "Шарсан төмс", quantity: 1, price: 3990 },
+    { name: "Кола", quantity: 1, price: 1990 },
   ];
   
   const mockDriver = {
@@ -185,12 +185,12 @@ export function CustomerDashboard() {
                     id={business.id}
                     name={business.businessName || business.name}
                     imageUrl={business.imageUrl}
-                    category={business.businessType || "Restaurant"}
+                    category={business.businessType || "Ресторан"}
                     subCategory={business.cuisine || ""}
-                    distance={business.distance || "0.8 miles away"}
+                    distance={business.distance || "1.3 км зайтай"}
                     rating={business.rating || 4.8}
                     deliveryFee={business.deliveryFee || 0}
-                    estimatedTime={business.estimatedTime || "25-35 min"}
+                    estimatedTime={business.estimatedTime || "25-35 мин"}
                     onClick={() => handleRestaurantClick(business.id)}
                   />
                 ))
@@ -210,9 +210,9 @@ export function CustomerDashboard() {
             status={demoStatus}
             driver={mockDriver}
             items={mockOrderItems}
-            subtotal={23.97}
-            deliveryFee={2.49}
-            total={26.46}
+            subtotal={23970}
+            deliveryFee={2490}
+            total={26460}
           />
         ) : null}
       </div>

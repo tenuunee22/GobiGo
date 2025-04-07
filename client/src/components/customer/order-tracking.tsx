@@ -202,14 +202,14 @@ export function OrderTracking({
           </div>
         </div>
         
-        {/* Map placeholder - In a real implementation, this would be a Google Maps component */}
+        {/* Map placeholder with Mongolian text */}
         <div className="w-full h-64 bg-gray-200 rounded-lg mb-4 relative overflow-hidden">
           <div className="absolute inset-0 flex items-center justify-center text-gray-400">
-            Энд Google Maps Жолоочийн бодит цагийн байршил үзүүлэх болно
+            Энд Google Maps жолоочийн бодит цагийн байршил үзүүлэх болно
           </div>
           
           <div className="absolute bottom-4 right-4">
-            <button className="p-2 bg-white rounded-full shadow hover:shadow-md focus:outline-none">
+            <button className="p-2 bg-white rounded-full shadow hover:shadow-md focus:outline-none" aria-label="Миний байршил">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-700" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
               </svg>
@@ -222,20 +222,20 @@ export function OrderTracking({
           {items.map((item, index) => (
             <div key={index} className="flex justify-between text-sm text-gray-600 mb-1">
               <span>{item.quantity}x {item.name}</span>
-              <span>${(item.quantity * item.price).toFixed(2)}</span>
+              <span>{(item.quantity * item.price).toFixed(2)}₮</span>
             </div>
           ))}
           <div className="flex justify-between text-sm text-gray-600 mb-1">
             <span>Дэд дүн</span>
-            <span>${subtotal.toFixed(2)}</span>
+            <span>{subtotal.toFixed(2)}₮</span>
           </div>
           <div className="flex justify-between text-sm text-gray-600 mb-1">
             <span>Хүргэлтийн төлбөр</span>
-            <span>${deliveryFee.toFixed(2)}</span>
+            <span>{deliveryFee.toFixed(2)}₮</span>
           </div>
           <div className="flex justify-between text-sm font-semibold text-gray-900 mt-2 pt-2 border-t border-gray-200">
             <span>Нийт дүн</span>
-            <span>${total.toFixed(2)}</span>
+            <span>{total.toFixed(2)}₮</span>
           </div>
         </div>
       </div>
