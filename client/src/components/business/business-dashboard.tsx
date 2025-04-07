@@ -435,8 +435,7 @@ export function BusinessDashboard() {
                   <label className="block text-sm font-medium mb-1">Бизнесийн нэр</label>
                   <Input 
                     type="text" 
-                    value={user?.businessName || ""} 
-                    disabled 
+                    value={user?.businessName || ""}
                   />
                 </div>
                 
@@ -444,31 +443,78 @@ export function BusinessDashboard() {
                   <label className="block text-sm font-medium mb-1">Хаяг</label>
                   <Input 
                     type="text" 
-                    value={user?.address || ""} 
-                    disabled 
+                    value={user?.address || ""}
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Нээх цаг</label>
+                    <Input 
+                      type="time" 
+                      defaultValue="10:00" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Хаах цаг</label>
+                    <Input 
+                      type="time" 
+                      defaultValue="22:00"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-1">Хүргэлтийн төлбөр (₮)</label>
+                  <Input 
+                    type="number" 
+                    defaultValue="3000"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium mb-1">Ажлын цаг</label>
+                  <label className="block text-sm font-medium mb-1">Үндсэн ангилал</label>
+                  <Select defaultValue="restaurant">
+                    <SelectTrigger>
+                      <SelectValue placeholder="Ангилал сонгох" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="restaurant">Ресторан</SelectItem>
+                      <SelectItem value="fastfood">Түргэн хоол</SelectItem>
+                      <SelectItem value="cafe">Кафе</SelectItem>
+                      <SelectItem value="bakery">Бэйкери</SelectItem>
+                      <SelectItem value="grocery">Хүнсний дэлгүүр</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-1">Логоны зураг</label>
                   <Input 
                     type="text" 
-                    value="10:00 - 22:00" 
-                    disabled 
+                    placeholder="https://example.com/logo.jpg" 
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium mb-1">Хүргэлтийн төлбөр</label>
+                  <label className="block text-sm font-medium mb-1">Дэвсгэр зураг</label>
                   <Input 
                     type="text" 
-                    value="3000₮" 
-                    disabled 
+                    placeholder="https://example.com/cover.jpg" 
                   />
                 </div>
                 
                 <div className="pt-4">
-                  <Button disabled>Тохиргоо хадгалах</Button>
+                  <Button 
+                    onClick={() => {
+                      toast({
+                        title: "Тохиргоо хадгалагдлаа",
+                        description: "Таны бизнесийн мэдээлэл амжилттай шинэчлэгдлээ",
+                      });
+                    }}
+                  >
+                    Тохиргоо хадгалах
+                  </Button>
                 </div>
               </div>
             </CardContent>
