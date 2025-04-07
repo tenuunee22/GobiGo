@@ -11,3 +11,28 @@
     @apply font-sans antialiased bg-background text-foreground;
   }
 }
+
+/* Хурдан шилжилт хийх анимэйшнүүд */
+.page-transition {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.page-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.page-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.page-exit-active {
+  opacity: 0;
+  transform: translateY(-10px);
+}

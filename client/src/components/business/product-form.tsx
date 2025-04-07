@@ -24,8 +24,8 @@ export function ProductForm() {
     
     if (!user || !user.uid) {
       toast({
-        title: "Authentication error",
-        description: "You must be logged in to add products",
+        title: "Нэвтрэх алдаа",
+        description: "Бүтээгдэхүүн нэмэхийн тулд та нэвтэрсэн байх ёстой",
         variant: "destructive",
       });
       return;
@@ -46,8 +46,8 @@ export function ProductForm() {
       await addProduct(user.uid, productData);
       
       toast({
-        title: "Product added",
-        description: `${name} has been added to your product catalog`,
+        title: "Бүтээгдэхүүн нэмэгдлээ",
+        description: `${name} таны бүтээгдэхүүний жагсаалтад нэмэгдлээ`,
       });
       
       // Reset form
@@ -58,8 +58,8 @@ export function ProductForm() {
       setDescription("");
     } catch (error) {
       toast({
-        title: "Failed to add product",
-        description: "Please try again",
+        title: "Бүтээгдэхүүн нэмэхэд алдаа гарлаа",
+        description: "Дахин оролдоно уу",
         variant: "destructive",
       });
     } finally {
@@ -70,14 +70,14 @@ export function ProductForm() {
   return (
     <div className="bg-white shadow rounded-lg">
       <div className="px-6 py-5 border-b border-gray-200">
-        <h2 className="text-lg font-medium text-gray-900">Add a New Product</h2>
+        <h2 className="text-lg font-medium text-gray-900">Шинэ бүтээгдэхүүн нэмэх</h2>
       </div>
       
       <div className="p-6">
         <form className="space-y-6" onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <div>
-              <Label htmlFor="product-name">Product Name</Label>
+              <Label htmlFor="product-name">Бүтээгдэхүүний нэр</Label>
               <Input
                 id="product-name"
                 name="product-name"
@@ -90,10 +90,10 @@ export function ProductForm() {
             </div>
             
             <div>
-              <Label htmlFor="price">Price</Label>
+              <Label htmlFor="price">Үнэ</Label>
               <div className="mt-1 relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span className="text-gray-500 sm:text-sm">$</span>
+                  <span className="text-gray-500 sm:text-sm">₮</span>
                 </div>
                 <Input
                   id="price"
@@ -112,45 +112,45 @@ export function ProductForm() {
             </div>
             
             <div>
-              <Label htmlFor="category">Category</Label>
+              <Label htmlFor="category">Ангилал</Label>
               <Select 
                 value={category} 
                 onValueChange={setCategory}
                 disabled={isLoading}
               >
                 <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="Select category" />
+                  <SelectValue placeholder="Ангилал сонгох" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="pizza">Pizza</SelectItem>
-                  <SelectItem value="sides">Sides</SelectItem>
-                  <SelectItem value="beverages">Beverages</SelectItem>
-                  <SelectItem value="desserts">Desserts</SelectItem>
+                  <SelectItem value="pizza">Пицца</SelectItem>
+                  <SelectItem value="sides">Дагалдах хоол</SelectItem>
+                  <SelectItem value="beverages">Ундаа</SelectItem>
+                  <SelectItem value="desserts">Амттан</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             <div>
-              <Label htmlFor="status">Status</Label>
+              <Label htmlFor="status">Төлөв</Label>
               <Select 
                 value={status} 
                 onValueChange={setStatus}
                 disabled={isLoading}
               >
                 <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="Select status" />
+                  <SelectValue placeholder="Төлөв сонгох" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="out_of_stock">Out of Stock</SelectItem>
-                  <SelectItem value="hidden">Hidden</SelectItem>
+                  <SelectItem value="active">Идэвхтэй</SelectItem>
+                  <SelectItem value="out_of_stock">Дууссан</SelectItem>
+                  <SelectItem value="hidden">Нуугдсан</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
           
           <div>
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">Тайлбар</Label>
             <Textarea
               id="description"
               name="description"
@@ -163,7 +163,7 @@ export function ProductForm() {
           </div>
           
           <div>
-            <Label className="block text-sm font-medium text-gray-700">Product Image</Label>
+            <Label className="block text-sm font-medium text-gray-700">Зураг</Label>
             <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
               <div className="space-y-1 text-center">
                 <Upload className="mx-auto h-12 w-12 text-gray-400" />
@@ -172,13 +172,13 @@ export function ProductForm() {
                     htmlFor="file-upload"
                     className="relative cursor-pointer bg-white rounded-md font-medium text-primary hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary"
                   >
-                    <span>Upload a file</span>
+                    <span>Файл оруулах</span>
                     <input id="file-upload" name="file-upload" type="file" className="sr-only" disabled={isLoading} />
                   </label>
-                  <p className="pl-1">or drag and drop</p>
+                  <p className="pl-1">эсвэл чирж оруулах</p>
                 </div>
                 <p className="text-xs text-gray-500">
-                  PNG, JPG, GIF up to 5MB
+                  PNG, JPG, GIF 5MB хүртэл
                 </p>
               </div>
             </div>
@@ -191,13 +191,13 @@ export function ProductForm() {
               className="mr-3"
               disabled={isLoading}
             >
-              Cancel
+              Цуцлах
             </Button>
             <Button
               type="submit"
               disabled={isLoading}
             >
-              Add Product
+              Бүтээгдэхүүн нэмэх
             </Button>
           </div>
         </form>

@@ -21,39 +21,44 @@ function Router() {
   useEffect(() => {
     if (loading) return;
 
-    // If user is logged in and trying to access login/register page, redirect to dashboard
-    if (user && (location === "/login" || location === "/register" || location === "/")) {
-      const role = user.role || "customer";
-      if (role === "customer") {
-        setLocation("/profile/user");
-      } else if (role === "business") {
-        setLocation("/dashboard/store");
-      } else if (role === "delivery") {
-        setLocation("/dashboard/driver");
+    // Redirect faster with setTimeout 0 to make it happen immediately on the next event loop
+    setTimeout(() => {
+      // If user is logged in and trying to access login/register page, redirect to dashboard
+      if (user && (location === "/login" || location === "/register" || location === "/")) {
+        const role = user.role || "customer";
+        if (role === "customer") {
+          setLocation("/profile/user");
+        } else if (role === "business") {
+          setLocation("/dashboard/store");
+        } else if (role === "delivery") {
+          setLocation("/dashboard/driver");
+        }
       }
-    }
 
-    // If user is not logged in and trying to access protected pages, redirect to login
-    if (!user && location !== "/login" && location !== "/register") {
-      setLocation("/login");
-    }
+      // If user is not logged in and trying to access protected pages, redirect to login
+      if (!user && location !== "/login" && location !== "/register") {
+        setLocation("/login");
+      }
+    }, 0);
   }, [user, loading, location, setLocation]);
 
   if (loading) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+    return <div className="flex items-center justify-center h-screen">Ачааллаж байна...</div>;
   }
 
   return (
-    <Switch>
-      <Route path="/" component={Login} />
-      <Route path="/login" component={Login} />
-      <Route path="/register" component={Register} />
-      <Route path="/dashboard" component={Dashboard} />
-      <Route path="/profile/user" component={UserProfile} />
-      <Route path="/dashboard/store" component={BusinessProfile} />
-      <Route path="/dashboard/driver" component={DriverProfile} />
-      <Route component={NotFound} />
-    </Switch>
+    <div className="page-transition">
+      <Switch>
+        <Route path="/" component={Login} />
+        <Route path="/login" component={Login} />
+        <Route path="/register" component={Register} />
+        <Route path="/dashboard" component={Dashboard} />
+        <Route path="/profile/user" component={UserProfile} />
+        <Route path="/dashboard/store" component={BusinessProfile} />
+        <Route path="/dashboard/driver" component={DriverProfile} />
+        <Route component={NotFound} />
+      </Switch>
+    </div>
   );
 }
 
