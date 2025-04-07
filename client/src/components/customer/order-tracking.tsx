@@ -60,7 +60,7 @@ export function OrderTracking({
   useEffect(() => {
     if (prevStatus && prevStatus !== status) {
       setAnimating(true);
-      const timer = setTimeout(() => setAnimating(false), 1000);
+      const timer = setTimeout(() => setAnimating(false), 600);
       return () => clearTimeout(timer);
     }
     setPrevStatus(status);
@@ -117,7 +117,7 @@ export function OrderTracking({
           {/* Progress bar */}
           <div className="h-2 bg-gray-200 rounded-full">
             <div
-              className="h-2 bg-primary rounded-full transition-all duration-700 ease-in-out"
+              className="h-2 bg-primary rounded-full transition-all duration-400 ease-in-out"
               style={{ width: `${getStatusPercentage()}%` }}
             ></div>
           </div>
@@ -134,7 +134,7 @@ export function OrderTracking({
                   ${status === "placed" && animating ? "animate-bounce" : ""} 
                   transition-all duration-300`}
               >
-                <span className="text-lg" role="img" aria-label="Order placed">
+                <span className="text-lg" role="img" aria-label="Захиалга өгсөн">
                   {statusInfo.placed.emoji}
                 </span>
               </div>
@@ -153,7 +153,7 @@ export function OrderTracking({
                   ${status === "preparing" && animating ? "animate-bounce" : ""} 
                   transition-all duration-300`}
               >
-                <span className="text-lg" role="img" aria-label="Preparing">
+                <span className="text-lg" role="img" aria-label="Бэлтгэж байна">
                   {statusInfo.preparing.emoji}
                 </span>
               </div>
@@ -172,7 +172,7 @@ export function OrderTracking({
                   ${status === "on-the-way" && animating ? "animate-bounce" : ""} 
                   transition-all duration-300`}
               >
-                <span className="text-lg" role="img" aria-label="On the way">
+                <span className="text-lg" role="img" aria-label="Замд явж байна">
                   {statusInfo["on-the-way"].emoji}
                 </span>
               </div>
@@ -191,7 +191,7 @@ export function OrderTracking({
                   ${status === "delivered" && animating ? "animate-bounce" : ""} 
                   transition-all duration-300`}
               >
-                <span className="text-lg" role="img" aria-label="Delivered">
+                <span className="text-lg" role="img" aria-label="Хүргэгдсэн">
                   {statusInfo.delivered.emoji}
                 </span>
               </div>

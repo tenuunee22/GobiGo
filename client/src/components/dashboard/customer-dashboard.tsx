@@ -105,7 +105,7 @@ export function CustomerDashboard() {
             setTimeout(() => setDemoStatus("placed"), 5000);
             break;
         }
-      }, 4000);
+      }, 2000);
     }
     return () => clearTimeout(timer);
   }, [demoStatus, activeOrders.length]);
@@ -135,7 +135,7 @@ export function CustomerDashboard() {
             <div className="md:w-1/2 md:flex md:justify-end">
               <img 
                 src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80" 
-                alt="Food delivery" 
+                alt="Хоол хүргэлт" 
                 className="rounded-lg w-full md:max-w-xs shadow-lg" 
               />
             </div>
