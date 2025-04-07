@@ -51,10 +51,10 @@ export function CustomerDashboard() {
   }, [user, toast]);
 
   const categories = [
-    { id: "restaurants", name: "Restaurants", icon: <Pizza className="h-6 w-6 text-primary" /> },
-    { id: "groceries", name: "Groceries", icon: <ShoppingCart className="h-6 w-6 text-primary" /> },
-    { id: "pharmacy", name: "Pharmacy", icon: <Pill className="h-6 w-6 text-primary" /> },
-    { id: "retail", name: "Retail", icon: <PlusCircle className="h-6 w-6 text-primary" /> },
+    { id: "restaurants", name: "Рестораны", icon: <Pizza className="h-6 w-6 text-primary" /> },
+    { id: "groceries", name: "Хүнсний дэлгүүр", icon: <ShoppingCart className="h-6 w-6 text-primary" /> },
+    { id: "pharmacy", name: "Эмийн сан", icon: <Pill className="h-6 w-6 text-primary" /> },
+    { id: "retail", name: "Жижиглэн худалдаа", icon: <PlusCircle className="h-6 w-6 text-primary" /> },
   ];
 
   const handleCategoryClick = (categoryId: string) => {
@@ -88,12 +88,12 @@ export function CustomerDashboard() {
         <div className="bg-primary rounded-xl shadow-xl overflow-hidden mb-8">
           <div className="px-6 py-12 md:px-12 text-white md:flex justify-between items-center">
             <div className="md:w-1/2 mb-6 md:mb-0">
-              <h2 className="text-3xl font-bold mb-4">Hungry? We've got you covered</h2>
-              <p className="text-xl mb-6">Food delivered to your doorstep in minutes</p>
+              <h2 className="text-3xl font-bold mb-4">Өлссөн үү? Бид таны төлөө бэлэн</h2>
+              <p className="text-xl mb-6">Хоолоо хэдхэн минутын дотор хүлээн авна</p>
               <div className="relative">
                 <Input
                   type="text"
-                  placeholder="Search for restaurants, food, or products..."
+                  placeholder="Рестораны, хоол, бараа бүтээгдэхүүн хайх..."
                   className="w-full px-4 py-3 rounded-lg text-gray-900 focus:outline-none"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -115,7 +115,7 @@ export function CustomerDashboard() {
         
         {/* Categories section */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Categories</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Ангилалууд</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {categories.map((category) => (
               <CategoryCard
@@ -131,8 +131,8 @@ export function CustomerDashboard() {
         {/* Restaurants section */}
         <section className="mb-12">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Popular Restaurants</h2>
-            <a href="#" className="text-primary hover:text-indigo-700 text-sm font-medium">View All</a>
+            <h2 className="text-2xl font-bold text-gray-900">Алдартай рестораны</h2>
+            <a href="#" className="text-primary hover:text-indigo-700 text-sm font-medium">Бүгдийг харах</a>
           </div>
           
           {loading ? (
@@ -167,7 +167,7 @@ export function CustomerDashboard() {
                 ))
               ) : (
                 <div className="col-span-3 text-center py-12">
-                  <p className="text-gray-500">No restaurants found. Try adjusting your search.</p>
+                  <p className="text-gray-500">Ресторан олдсонгүй. Хайлтаа өөрчилж үзнэ үү.</p>
                 </div>
               )}
             </div>

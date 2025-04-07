@@ -82,8 +82,8 @@ export function BusinessDashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Business overview section */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Business Dashboard</h1>
-          <p className="text-gray-600 mt-2">Welcome back, {user?.businessName || user?.name || "Store Owner"}</p>
+          <h1 className="text-3xl font-bold text-gray-900">Бизнесийн хяналтын самбар</h1>
+          <p className="text-gray-600 mt-2">Тавтай морил, {user?.businessName || user?.name || "Дэлгүүрийн эзэн"}</p>
         </div>
         
         {/* Stats cards */}
@@ -94,7 +94,7 @@ export function BusinessDashboard() {
                 <ClipboardList className="h-8 w-8" />
               </div>
               <div className="ml-5">
-                <p className="text-gray-500 text-sm">Today's Orders</p>
+                <p className="text-gray-500 text-sm">Өнөөдрийн захиалгууд</p>
                 <h3 className="text-2xl font-bold text-gray-900">{stats.todaysOrders}</h3>
               </div>
             </div>
@@ -106,7 +106,7 @@ export function BusinessDashboard() {
                 <DollarSign className="h-8 w-8" />
               </div>
               <div className="ml-5">
-                <p className="text-gray-500 text-sm">Today's Revenue</p>
+                <p className="text-gray-500 text-sm">Өнөөдрийн орлого</p>
                 <h3 className="text-2xl font-bold text-gray-900">${stats.todaysRevenue.toFixed(2)}</h3>
               </div>
             </div>
@@ -118,7 +118,7 @@ export function BusinessDashboard() {
                 <Star className="h-8 w-8" />
               </div>
               <div className="ml-5">
-                <p className="text-gray-500 text-sm">Customer Rating</p>
+                <p className="text-gray-500 text-sm">Хэрэглэгчийн үнэлгээ</p>
                 <h3 className="text-2xl font-bold text-gray-900">{stats.customerRating}/5.0</h3>
               </div>
             </div>
@@ -137,7 +137,7 @@ export function BusinessDashboard() {
                 }`}
                 onClick={() => setActiveTab("active-orders")}
               >
-                Active Orders
+                Идэвхтэй захиалгууд
               </button>
               <button 
                 className={`px-6 py-4 border-b-2 font-medium text-sm ${
@@ -147,7 +147,7 @@ export function BusinessDashboard() {
                 }`}
                 onClick={() => setActiveTab("order-history")}
               >
-                Order History
+                Захиалгын түүх
               </button>
               <button 
                 className={`px-6 py-4 border-b-2 font-medium text-sm ${
@@ -157,7 +157,7 @@ export function BusinessDashboard() {
                 }`}
                 onClick={() => setActiveTab("manage-products")}
               >
-                Manage Products
+                Бүтээгдэхүүн удирдах
               </button>
             </nav>
           </div>
@@ -191,7 +191,7 @@ export function BusinessDashboard() {
                   </ul>
                 ) : (
                   <div className="text-center py-12">
-                    <p className="text-gray-500">No active orders at the moment.</p>
+                    <p className="text-gray-500">Одоогоор идэвхтэй захиалга байхгүй байна.</p>
                   </div>
                 )}
               </div>
@@ -224,7 +224,7 @@ export function BusinessDashboard() {
                   </ul>
                 ) : (
                   <div className="text-center py-12">
-                    <p className="text-gray-500">No order history yet.</p>
+                    <p className="text-gray-500">Одоогоор захиалгын түүх байхгүй байна.</p>
                   </div>
                 )}
               </div>
