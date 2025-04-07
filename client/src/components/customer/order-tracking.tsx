@@ -61,7 +61,7 @@ export function OrderTracking({
   return (
     <section className="mb-12">
       <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Your order is on the way</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-4">Таны захиалга замд яваа</h2>
         
         {driver && (
           <div className="flex items-center mb-6">
@@ -76,12 +76,12 @@ export function OrderTracking({
             </div>
             <div>
               <h3 className="text-lg font-semibold text-gray-900">{driver.name}</h3>
-              <p className="text-sm text-gray-500">Your delivery driver • Arriving in {driver.arrivalTime}</p>
+              <p className="text-sm text-gray-500">Таны хүргэлтийн жолооч • {driver.arrivalTime}-д ирнэ</p>
             </div>
             <div className="ml-auto">
               <Button>
                 <Phone className="h-4 w-4 mr-2" />
-                Contact
+                Холбогдох
               </Button>
             </div>
           </div>
@@ -97,19 +97,19 @@ export function OrderTracking({
           <div className="absolute top-4 left-0 w-full flex justify-between">
             <div className="flex flex-col items-center">
               <span className={`w-4 h-4 rounded-full ${status === "placed" || status === "preparing" || status === "on-the-way" || status === "delivered" ? "bg-primary" : "bg-gray-300"}`}></span>
-              <span className={`text-xs font-medium mt-1 ${status === "placed" || status === "preparing" || status === "on-the-way" || status === "delivered" ? "text-gray-600" : "text-gray-400"}`}>Order Placed</span>
+              <span className={`text-xs font-medium mt-1 ${status === "placed" || status === "preparing" || status === "on-the-way" || status === "delivered" ? "text-gray-600" : "text-gray-400"}`}>Захиалга өгсөн</span>
             </div>
             <div className="flex flex-col items-center">
               <span className={`w-4 h-4 rounded-full ${status === "preparing" || status === "on-the-way" || status === "delivered" ? "bg-primary" : "bg-gray-300"}`}></span>
-              <span className={`text-xs font-medium mt-1 ${status === "preparing" || status === "on-the-way" || status === "delivered" ? "text-gray-600" : "text-gray-400"}`}>Preparing</span>
+              <span className={`text-xs font-medium mt-1 ${status === "preparing" || status === "on-the-way" || status === "delivered" ? "text-gray-600" : "text-gray-400"}`}>Бэлтгэж байна</span>
             </div>
             <div className="flex flex-col items-center">
               <span className={`w-4 h-4 rounded-full ${status === "on-the-way" || status === "delivered" ? "bg-primary" : "bg-gray-300"}`}></span>
-              <span className={`text-xs font-medium mt-1 ${status === "on-the-way" || status === "delivered" ? "text-gray-600" : "text-gray-400"}`}>On the way</span>
+              <span className={`text-xs font-medium mt-1 ${status === "on-the-way" || status === "delivered" ? "text-gray-600" : "text-gray-400"}`}>Замд явж байна</span>
             </div>
             <div className="flex flex-col items-center">
               <span className={`w-4 h-4 rounded-full ${status === "delivered" ? "bg-primary" : "bg-gray-300"}`}></span>
-              <span className={`text-xs font-medium mt-1 ${status === "delivered" ? "text-gray-600" : "text-gray-400"}`}>Delivered</span>
+              <span className={`text-xs font-medium mt-1 ${status === "delivered" ? "text-gray-600" : "text-gray-400"}`}>Хүргэгдсэн</span>
             </div>
           </div>
         </div>
@@ -117,7 +117,7 @@ export function OrderTracking({
         {/* Map placeholder - In a real implementation, this would be a Google Maps component */}
         <div className="w-full h-64 bg-gray-200 rounded-lg mb-4 relative overflow-hidden">
           <div className="absolute inset-0 flex items-center justify-center text-gray-400">
-            Google Maps would be integrated here with the driver's real-time location
+            Энд Google Maps Жолоочийн бодит цагийн байршил үзүүлэх болно
           </div>
           
           <div className="absolute bottom-4 right-4">
@@ -130,7 +130,7 @@ export function OrderTracking({
         </div>
         
         <div className="border-t border-gray-200 pt-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Order Summary</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Захиалгын дэлгэрэнгүй</h3>
           {items.map((item, index) => (
             <div key={index} className="flex justify-between text-sm text-gray-600 mb-1">
               <span>{item.quantity}x {item.name}</span>
@@ -138,15 +138,15 @@ export function OrderTracking({
             </div>
           ))}
           <div className="flex justify-between text-sm text-gray-600 mb-1">
-            <span>Subtotal</span>
+            <span>Дэд дүн</span>
             <span>${subtotal.toFixed(2)}</span>
           </div>
           <div className="flex justify-between text-sm text-gray-600 mb-1">
-            <span>Delivery Fee</span>
+            <span>Хүргэлтийн төлбөр</span>
             <span>${deliveryFee.toFixed(2)}</span>
           </div>
           <div className="flex justify-between text-sm font-semibold text-gray-900 mt-2 pt-2 border-t border-gray-200">
-            <span>Total</span>
+            <span>Нийт дүн</span>
             <span>${total.toFixed(2)}</span>
           </div>
         </div>
