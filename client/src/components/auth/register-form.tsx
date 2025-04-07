@@ -86,9 +86,9 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
         <div className="flex justify-center">
           <div className="text-4xl font-bold text-primary">GobiGo</div>
         </div>
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Create your account</h2>
+        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Шинэ бүртгэл үүсгэх</h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Or{" "}
+          Эсвэл{" "}
           <a
             href="#"
             onClick={(e) => {
@@ -97,7 +97,7 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
             }}
             className="font-medium text-primary hover:text-indigo-500"
           >
-            sign in to your existing account
+            бүртгэлтэй хаягаар нэвтрэх
           </a>
         </p>
       </div>
@@ -106,7 +106,7 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
-              <Label htmlFor="user-type">I am registering as a</Label>
+              <Label htmlFor="user-type">Би бүртгүүлж байна</Label>
               <div className="mt-1">
                 <Select 
                   value={userType} 
@@ -114,19 +114,19 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
                   disabled={isLoading}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select user type" />
+                    <SelectValue placeholder="Хэрэглэгчийн төрөл сонгох" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="customer">Customer</SelectItem>
-                    <SelectItem value="business">Business (Store Owner)</SelectItem>
-                    <SelectItem value="delivery">Delivery Personnel</SelectItem>
+                    <SelectItem value="customer">Хэрэглэгч</SelectItem>
+                    <SelectItem value="business">Бизнес (Дэлгүүрийн эзэн)</SelectItem>
+                    <SelectItem value="delivery">Хүргэлтийн ажилтан</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
             <div>
-              <Label htmlFor="name">Full Name</Label>
+              <Label htmlFor="name">Бүтэн нэр</Label>
               <div className="mt-1">
                 <Input
                   id="name"
@@ -141,7 +141,7 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
             </div>
 
             <div>
-              <Label htmlFor="email">Email address</Label>
+              <Label htmlFor="email">Имэйл хаяг</Label>
               <div className="mt-1">
                 <Input
                   id="email"
@@ -157,7 +157,7 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
             </div>
 
             <div>
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Нууц үг</Label>
               <div className="mt-1">
                 <Input
                   id="password"
@@ -173,7 +173,7 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
             </div>
 
             <div>
-              <Label htmlFor="confirm-password">Confirm Password</Label>
+              <Label htmlFor="confirm-password">Нууц үг баталгаажуулах</Label>
               <div className="mt-1">
                 <Input
                   id="confirm-password"
@@ -192,7 +192,7 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
             {userType === "business" && (
               <div className="space-y-6">
                 <div>
-                  <Label htmlFor="business-name">Business Name</Label>
+                  <Label htmlFor="business-name">Бизнесийн нэр</Label>
                   <div className="mt-1">
                     <Input
                       id="business-name"
