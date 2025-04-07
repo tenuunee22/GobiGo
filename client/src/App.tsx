@@ -17,6 +17,15 @@ import RestaurantDetail from "@/pages/restaurant/[id]";
 import OrderDetail from "@/pages/order/[id]";
 import Checkout from "@/pages/checkout";
 
+// Customer components
+import { CustomerDashboard } from "@/components/dashboard/customer-dashboard";
+
+// Business components
+import { BusinessDashboard } from "@/components/business/business-dashboard"; 
+
+// Delivery components
+import { DeliveryDashboard } from "@/components/delivery/delivery-dashboard";
+
 function Router() {
   const { user, loading } = useAuth();
   const [location, setLocation] = useLocation();
@@ -24,25 +33,8 @@ function Router() {
   useEffect(() => {
     if (loading) return;
 
-    // Redirect faster with setTimeout 0 to make it happen immediately on the next event loop
-    setTimeout(() => {
-      // If user is logged in and trying to access login/register page, redirect to dashboard
-      if (user && (location === "/login" || location === "/register" || location === "/")) {
-        const role = user.role || "customer";
-        if (role === "customer") {
-          setLocation("/profile/user");
-        } else if (role === "business") {
-          setLocation("/dashboard/store");
-        } else if (role === "delivery") {
-          setLocation("/dashboard/driver");
-        }
-      }
-
-      // If user is not logged in and trying to access protected pages, redirect to login
-      if (!user && location !== "/login" && location !== "/register") {
-        setLocation("/login");
-      }
-    }, 0);
+    // In this build, we'll skip authentication logic to allow easy testing 
+    // of different user role interfaces
   }, [user, loading, location, setLocation]);
 
   if (loading) {
@@ -52,13 +44,13 @@ function Router() {
   return (
     <div className="page-transition">
       <Switch>
-        <Route path="/" component={Login} />
+        <Route path="/" component={CustomerDashboard} />
         <Route path="/login" component={Login} />
         <Route path="/register" component={Register} />
-        <Route path="/dashboard" component={Dashboard} />
+        <Route path="/dashboard" component={CustomerDashboard} />
         <Route path="/profile/user" component={UserProfile} />
-        <Route path="/dashboard/store" component={BusinessProfile} />
-        <Route path="/dashboard/driver" component={DriverProfile} />
+        <Route path="/dashboard/store" component={BusinessDashboard} />
+        <Route path="/dashboard/driver" component={DeliveryDashboard} />
         <Route path="/restaurant/:id" component={RestaurantDetail} />
         <Route path="/order/:id" component={OrderDetail} />
         <Route path="/checkout" component={Checkout} />

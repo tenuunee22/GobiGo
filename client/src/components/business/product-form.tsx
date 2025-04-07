@@ -1,207 +1,198 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/auth-context";
-import { addProduct } from "@/lib/firebase";
-import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Upload } from "lucide-react";
+import { X } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 
-export function ProductForm() {
+interface ProductFormProps {
+  product?: any;
+  onSave: (productData: any) => void;
+  onCancel: () => void;
+}
+
+export function ProductForm({ product, onSave, onCancel }: ProductFormProps) {
   const { user } = useAuth();
-  const { toast } = useToast();
   const [name, setName] = useState("");
-  const [price, setPrice] = useState("");
-  const [category, setCategory] = useState("pizza");
-  const [status, setStatus] = useState("active");
   const [description, setDescription] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [price, setPrice] = useState("");
+  const [category, setCategory] = useState("main-dish");
+  const [imageUrl, setImageUrl] = useState("");
+  const [available, setAvailable] = useState(true);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Initialize form with product data if editing
+  useEffect(() => {
+    if (product) {
+      setName(product.name || "");
+      setDescription(product.description || "");
+      setPrice(product.price?.toString() || "");
+      setCategory(product.category || "main-dish");
+      setImageUrl(product.imageUrl || "");
+      setAvailable(product.available !== false); // default to true if not specified
+    }
+  }, [product]);
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!user || !user.uid) {
-      toast({
-        title: "Нэвтрэх алдаа",
-        description: "Бүтээгдэхүүн нэмэхийн тулд та нэвтэрсэн байх ёстой",
-        variant: "destructive",
-      });
+    // Basic validation
+    if (!name.trim() || !price.trim()) {
+      alert("Нэр болон үнэ оруулна уу!");
       return;
     }
     
-    setIsLoading(true);
-    
-    try {
-      const productData = {
-        name,
-        price: parseFloat(price),
-        category,
-        status,
-        description,
-        createdAt: new Date(),
-      };
-      
-      await addProduct(user.uid, productData);
-      
-      toast({
-        title: "Бүтээгдэхүүн нэмэгдлээ",
-        description: `${name} таны бүтээгдэхүүний жагсаалтад нэмэгдлээ`,
-      });
-      
-      // Reset form
-      setName("");
-      setPrice("");
-      setCategory("pizza");
-      setStatus("active");
-      setDescription("");
-    } catch (error) {
-      toast({
-        title: "Бүтээгдэхүүн нэмэхэд алдаа гарлаа",
-        description: "Дахин оролдоно уу",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
+    const priceValue = parseInt(price.replace(/[^0-9]/g, ""), 10);
+    if (isNaN(priceValue) || priceValue <= 0) {
+      alert("Зөв үнэ оруулна уу!");
+      return;
     }
+    
+    // Prepare product data
+    const productData = {
+      name,
+      description,
+      price: priceValue,
+      category,
+      imageUrl: imageUrl || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      available,
+      businessUid: user?.uid
+    };
+    
+    onSave(productData);
   };
 
+  const categories = [
+    { value: "main-dish", label: "Үндсэн хоол" },
+    { value: "appetizer", label: "Салад, зууш" },
+    { value: "dessert", label: "Амттан" },
+    { value: "drink", label: "Уух зүйл" },
+    { value: "combo", label: "Комбо" },
+  ];
+
   return (
-    <div className="bg-white shadow rounded-lg">
-      <div className="px-6 py-5 border-b border-gray-200">
-        <h2 className="text-lg font-medium text-gray-900">Шинэ бүтээгдэхүүн нэмэх</h2>
-      </div>
-      
-      <div className="p-6">
-        <form className="space-y-6" onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+    <Card>
+      <CardContent className="pt-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">
+            {product ? "Бүтээгдэхүүн засах" : "Шинэ бүтээгдэхүүн нэмэх"}
+          </h2>
+          <Button variant="ghost" size="icon" onClick={onCancel}>
+            <X className="h-5 w-5" />
+          </Button>
+        </div>
+        
+        <form onSubmit={handleSubmit}>
+          <div className="space-y-4">
             <div>
-              <Label htmlFor="product-name">Бүтээгдэхүүний нэр</Label>
+              <Label htmlFor="name">Бүтээгдэхүүний нэр</Label>
               <Input
-                id="product-name"
-                name="product-name"
+                id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="mt-1"
+                placeholder="Бүтээгдэхүүний нэрийг оруулна уу"
                 required
-                disabled={isLoading}
               />
             </div>
             
             <div>
-              <Label htmlFor="price">Үнэ</Label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span className="text-gray-500 sm:text-sm">₮</span>
-                </div>
-                <Input
-                  id="price"
-                  name="price"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  placeholder="0.00"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  className="pl-7"
-                  required
-                  disabled={isLoading}
-                />
-              </div>
+              <Label htmlFor="description">Тайлбар</Label>
+              <Textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Бүтээгдэхүүний тайлбарыг оруулна уу"
+                rows={3}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="price">Үнэ (₮)</Label>
+              <Input
+                id="price"
+                value={price}
+                onChange={(e) => {
+                  // Allow only numbers and format with thousand separators
+                  const value = e.target.value.replace(/[^0-9]/g, "");
+                  if (value) {
+                    setPrice(parseInt(value, 10).toLocaleString());
+                  } else {
+                    setPrice("");
+                  }
+                }}
+                placeholder="Үнэ"
+                required
+              />
             </div>
             
             <div>
               <Label htmlFor="category">Ангилал</Label>
-              <Select 
-                value={category} 
+              <Select
+                value={category}
                 onValueChange={setCategory}
-                disabled={isLoading}
               >
-                <SelectTrigger className="mt-1">
+                <SelectTrigger id="category">
                   <SelectValue placeholder="Ангилал сонгох" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="pizza">Пицца</SelectItem>
-                  <SelectItem value="sides">Дагалдах хоол</SelectItem>
-                  <SelectItem value="beverages">Ундаа</SelectItem>
-                  <SelectItem value="desserts">Амттан</SelectItem>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat.value} value={cat.value}>
+                      {cat.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
             
             <div>
-              <Label htmlFor="status">Төлөв</Label>
-              <Select 
-                value={status} 
-                onValueChange={setStatus}
-                disabled={isLoading}
-              >
-                <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="Төлөв сонгох" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Идэвхтэй</SelectItem>
-                  <SelectItem value="out_of_stock">Дууссан</SelectItem>
-                  <SelectItem value="hidden">Нуугдсан</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          
-          <div>
-            <Label htmlFor="description">Тайлбар</Label>
-            <Textarea
-              id="description"
-              name="description"
-              rows={3}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="mt-1"
-              disabled={isLoading}
-            />
-          </div>
-          
-          <div>
-            <Label className="block text-sm font-medium text-gray-700">Зураг</Label>
-            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-              <div className="space-y-1 text-center">
-                <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                <div className="flex text-sm text-gray-600">
-                  <label
-                    htmlFor="file-upload"
-                    className="relative cursor-pointer bg-white rounded-md font-medium text-primary hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary"
-                  >
-                    <span>Файл оруулах</span>
-                    <input id="file-upload" name="file-upload" type="file" className="sr-only" disabled={isLoading} />
-                  </label>
-                  <p className="pl-1">эсвэл чирж оруулах</p>
+              <Label htmlFor="imageUrl">Зургийн холбоос</Label>
+              <Input
+                id="imageUrl"
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                placeholder="https://example.com/food-image.jpg"
+              />
+              
+              {imageUrl && (
+                <div className="mt-2 relative">
+                  <img 
+                    src={imageUrl} 
+                    alt={name} 
+                    className="w-full h-40 object-cover rounded-md"
+                    onError={(e) => {
+                      // Handle image load error
+                      const target = e.target as HTMLImageElement;
+                      target.src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60";
+                    }}
+                  />
                 </div>
-                <p className="text-xs text-gray-500">
-                  PNG, JPG, GIF 5MB хүртэл
-                </p>
-              </div>
+              )}
             </div>
-          </div>
-          
-          <div className="flex justify-end">
-            <Button
-              type="button"
-              variant="outline"
-              className="mr-3"
-              disabled={isLoading}
-            >
-              Цуцлах
-            </Button>
-            <Button
-              type="submit"
-              disabled={isLoading}
-            >
-              Бүтээгдэхүүн нэмэх
-            </Button>
+            
+            <div className="flex items-center space-x-2">
+              <input
+                id="available"
+                type="checkbox"
+                checked={available}
+                onChange={(e) => setAvailable(e.target.checked)}
+                className="rounded-sm"
+              />
+              <Label htmlFor="available">Боломжтой</Label>
+            </div>
+            
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button type="button" variant="outline" onClick={onCancel}>
+                Цуцлах
+              </Button>
+              <Button type="submit">
+                {product ? "Шинэчлэх" : "Нэмэх"}
+              </Button>
+            </div>
           </div>
         </form>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

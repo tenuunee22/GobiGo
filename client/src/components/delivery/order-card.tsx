@@ -1,7 +1,18 @@
+import React from "react";
+import { 
+  Card, 
+  CardContent
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { updateOrderStatus } from "@/lib/firebase";
-import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { 
+  MapPin, 
+  Navigation, 
+  Building, 
+  PhoneCall, 
+  CheckCircle
+} from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 interface OrderCardProps {
   id: string;
@@ -26,103 +37,145 @@ export function OrderCard({
   restaurant,
   deliveryDistance,
   estimatedEarnings,
-  isAvailable = true,
+  isAvailable = false,
   status,
   customer,
-  onStatusChange,
+  onStatusChange
 }: OrderCardProps) {
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
-
-  const handleAccept = async () => {
-    setIsLoading(true);
-    try {
-      await updateOrderStatus(id, "picked_up", { driverId: "current-driver-id" });
-      toast({
-        title: "Order accepted",
-        description: "You have accepted this delivery order",
-      });
-      onStatusChange();
-    } catch (error) {
-      toast({
-        title: "Failed to accept order",
-        description: "Please try again",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
+  
+  const getStatusBadge = () => {
+    if (isAvailable) return <Badge variant="secondary">Боломжтой</Badge>;
+    
+    let variant: "default" | "secondary" | "outline" = "default";
+    let label = "";
+    
+    switch (status) {
+      case "ready":
+        variant = "secondary";
+        label = "Бэлэн болсон";
+        break;
+      case "on-the-way":
+        variant = "default";
+        label = "Хүргэлтэнд гарсан";
+        break;
+      case "delivered":
+        variant = "outline";
+        label = "Хүргэгдсэн";
+        break;
+      case "completed":
+        variant = "outline";
+        label = "Дууссан";
+        break;
+      default:
+        variant = "outline";
+        label = status || "Бэлэн";
+    }
+    
+    return <Badge variant={variant}>{label}</Badge>;
+  };
+  
+  const getActionButton = () => {
+    if (isAvailable) {
+      return (
+        <Button onClick={onStatusChange} className="w-full">
+          Хүргэлт авах
+        </Button>
+      );
+    }
+    
+    switch (status) {
+      case "ready":
+        return (
+          <Button onClick={onStatusChange} className="w-full">
+            <Navigation className="mr-2 h-4 w-4" />
+            Хүргэлтэнд гарах
+          </Button>
+        );
+      case "on-the-way":
+        return (
+          <Button onClick={onStatusChange} className="w-full">
+            <CheckCircle className="mr-2 h-4 w-4" />
+            Хүргэлт хийсэн
+          </Button>
+        );
+      case "delivered":
+        return (
+          <Button onClick={onStatusChange} className="w-full">
+            Дуусгах
+          </Button>
+        );
+      case "completed":
+        return (
+          <Button disabled className="w-full">
+            Дууссан
+          </Button>
+        );
+      default:
+        return (
+          <Button onClick={onStatusChange} className="w-full">
+            Үргэлжлүүлэх
+          </Button>
+        );
     }
   };
-
-  const handleComplete = async () => {
-    setIsLoading(true);
-    try {
-      await updateOrderStatus(id, "delivered");
-      toast({
-        title: "Delivery completed",
-        description: "The delivery has been marked as completed",
-      });
-      onStatusChange();
-    } catch (error) {
-      toast({
-        title: "Failed to complete delivery",
-        description: "Please try again",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+  
   return (
-    <li className="py-5">
-      <div className="flex items-start justify-between">
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-gray-900 truncate">
-            {restaurant.name} → {restaurant.distance} away
-          </p>
-          <p className="text-sm text-gray-500 mt-1">
-            {deliveryDistance} delivery distance
-          </p>
-          <div className="mt-2 flex">
-            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-              ${estimatedEarnings.toFixed(2)} Estimated earnings
-            </span>
+    <Card className="overflow-hidden">
+      <CardContent className="p-0">
+        <div className="p-4">
+          <div className="flex justify-between items-start mb-3">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="font-medium">{restaurant.name}</span>
+                {getStatusBadge()}
+              </div>
+              <div className="flex items-center text-sm text-gray-600">
+                <Building className="mr-1 h-4 w-4" />
+                <span>{restaurant.distance} зайтай</span>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-sm">Захиалга #{id.substring(0, 6)}</div>
+              <div className="font-semibold">{estimatedEarnings.toLocaleString()}₮</div>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3 mb-3">
+            <div className="bg-gray-50 rounded-md p-2">
+              <div className="text-xs text-gray-500">Зай</div>
+              <div className="font-medium">{deliveryDistance}</div>
+            </div>
+            <div className="bg-gray-50 rounded-md p-2">
+              <div className="text-xs text-gray-500">Дундаж хугацаа</div>
+              <div className="font-medium">15-20 мин</div>
+            </div>
           </div>
           
           {!isAvailable && customer && (
-            <div className="mt-3">
-              <p className="text-sm font-medium text-gray-900">
-                {customer.name}
-              </p>
-              <p className="text-xs text-gray-500">
-                Delivery: {customer.address}
-              </p>
-            </div>
+            <>
+              <Separator className="my-3" />
+              
+              <div className="space-y-2 mb-3">
+                <div className="flex items-start gap-2">
+                  <MapPin className="h-4 w-4 text-gray-500 mt-0.5" />
+                  <div>
+                    <div className="text-sm font-medium">Хүргэлтийн хаяг</div>
+                    <div className="text-sm text-gray-600">{customer.address}</div>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <PhoneCall className="h-4 w-4 text-gray-500" />
+                  <div className="text-sm">{customer.name} - 9911****</div>
+                </div>
+              </div>
+            </>
           )}
+          
+          {/* Action button */}
+          {getActionButton()}
         </div>
-        
-        <div className="ml-4 flex-shrink-0">
-          {isAvailable ? (
-            <Button
-              onClick={handleAccept}
-              disabled={isLoading}
-              size="sm"
-            >
-              Accept
-            </Button>
-          ) : (
-            <Button
-              onClick={handleComplete}
-              disabled={isLoading}
-              className="bg-green-600 hover:bg-green-700"
-              size="sm"
-            >
-              Complete Delivery
-            </Button>
-          )}
-        </div>
-      </div>
-    </li>
+      </CardContent>
+    </Card>
   );
 }
