@@ -1,5 +1,6 @@
 import { Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
 
 interface OrderItem {
   name: string;
@@ -43,6 +44,28 @@ export function OrderTracking({
   currentLocation,
   destination,
 }: OrderTrackingProps) {
+  // Animation state management
+  const [animating, setAnimating] = useState(false);
+  const [prevStatus, setPrevStatus] = useState<string | null>(null);
+  
+  // Status emojis and descriptions
+  const statusInfo = {
+    placed: { emoji: "📝", label: "Захиалга өгсөн", description: "Таны захиалгыг хүлээн авлаа!" },
+    preparing: { emoji: "👨‍🍳", label: "Бэлтгэж байна", description: "Таны хоолыг бэлтгэж байна" },
+    "on-the-way": { emoji: "🛵", label: "Замд явж байна", description: "Хоол замдаа явж байна" },
+    delivered: { emoji: "🎉", label: "Хүргэгдсэн", description: "Сайхан хооллоорой!" }
+  };
+  
+  // Watch for status changes to trigger animation
+  useEffect(() => {
+    if (prevStatus && prevStatus !== status) {
+      setAnimating(true);
+      const timer = setTimeout(() => setAnimating(false), 1000);
+      return () => clearTimeout(timer);
+    }
+    setPrevStatus(status);
+  }, [status, prevStatus]);
+  
   const getStatusPercentage = () => {
     switch (status) {
       case "placed":
@@ -61,7 +84,9 @@ export function OrderTracking({
   return (
     <section className="mb-12">
       <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Таны захиалга замд яваа</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-4">
+          {statusInfo[status]?.description || "Таны захиалга замд яваа"}
+        </h2>
         
         {driver && (
           <div className="flex items-center mb-6">
@@ -87,29 +112,92 @@ export function OrderTracking({
           </div>
         )}
         
-        <div className="relative mb-6">
+        {/* Animated timeline with emojis */}
+        <div className="relative mb-10">
+          {/* Progress bar */}
           <div className="h-2 bg-gray-200 rounded-full">
             <div
-              className="h-2 bg-primary rounded-full transition-all duration-500 ease-in-out"
+              className="h-2 bg-primary rounded-full transition-all duration-700 ease-in-out"
               style={{ width: `${getStatusPercentage()}%` }}
             ></div>
           </div>
-          <div className="absolute top-4 left-0 w-full flex justify-between">
+          
+          {/* Timeline points with emojis */}
+          <div className="absolute top-6 left-0 w-full flex justify-between">
+            {/* Placed */}
             <div className="flex flex-col items-center">
-              <span className={`w-4 h-4 rounded-full ${status === "placed" || status === "preparing" || status === "on-the-way" || status === "delivered" ? "bg-primary" : "bg-gray-300"}`}></span>
-              <span className={`text-xs font-medium mt-1 ${status === "placed" || status === "preparing" || status === "on-the-way" || status === "delivered" ? "text-gray-600" : "text-gray-400"}`}>Захиалга өгсөн</span>
+              <div 
+                className={`w-10 h-10 flex items-center justify-center rounded-full mb-1 
+                  ${status === "placed" || status === "preparing" || status === "on-the-way" || status === "delivered" 
+                    ? "bg-primary text-white" 
+                    : "bg-gray-200 text-gray-400"} 
+                  ${status === "placed" && animating ? "animate-bounce" : ""} 
+                  transition-all duration-300`}
+              >
+                <span className="text-lg" role="img" aria-label="Order placed">
+                  {statusInfo.placed.emoji}
+                </span>
+              </div>
+              <span className={`text-xs font-medium ${status === "placed" || status === "preparing" || status === "on-the-way" || status === "delivered" ? "text-gray-700" : "text-gray-400"}`}>
+                {statusInfo.placed.label}
+              </span>
             </div>
+            
+            {/* Preparing */}
             <div className="flex flex-col items-center">
-              <span className={`w-4 h-4 rounded-full ${status === "preparing" || status === "on-the-way" || status === "delivered" ? "bg-primary" : "bg-gray-300"}`}></span>
-              <span className={`text-xs font-medium mt-1 ${status === "preparing" || status === "on-the-way" || status === "delivered" ? "text-gray-600" : "text-gray-400"}`}>Бэлтгэж байна</span>
+              <div 
+                className={`w-10 h-10 flex items-center justify-center rounded-full mb-1 
+                  ${status === "preparing" || status === "on-the-way" || status === "delivered" 
+                    ? "bg-primary text-white" 
+                    : "bg-gray-200 text-gray-400"} 
+                  ${status === "preparing" && animating ? "animate-bounce" : ""} 
+                  transition-all duration-300`}
+              >
+                <span className="text-lg" role="img" aria-label="Preparing">
+                  {statusInfo.preparing.emoji}
+                </span>
+              </div>
+              <span className={`text-xs font-medium ${status === "preparing" || status === "on-the-way" || status === "delivered" ? "text-gray-700" : "text-gray-400"}`}>
+                {statusInfo.preparing.label}
+              </span>
             </div>
+            
+            {/* On the way */}
             <div className="flex flex-col items-center">
-              <span className={`w-4 h-4 rounded-full ${status === "on-the-way" || status === "delivered" ? "bg-primary" : "bg-gray-300"}`}></span>
-              <span className={`text-xs font-medium mt-1 ${status === "on-the-way" || status === "delivered" ? "text-gray-600" : "text-gray-400"}`}>Замд явж байна</span>
+              <div 
+                className={`w-10 h-10 flex items-center justify-center rounded-full mb-1 
+                  ${status === "on-the-way" || status === "delivered" 
+                    ? "bg-primary text-white" 
+                    : "bg-gray-200 text-gray-400"} 
+                  ${status === "on-the-way" && animating ? "animate-bounce" : ""} 
+                  transition-all duration-300`}
+              >
+                <span className="text-lg" role="img" aria-label="On the way">
+                  {statusInfo["on-the-way"].emoji}
+                </span>
+              </div>
+              <span className={`text-xs font-medium ${status === "on-the-way" || status === "delivered" ? "text-gray-700" : "text-gray-400"}`}>
+                {statusInfo["on-the-way"].label}
+              </span>
             </div>
+            
+            {/* Delivered */}
             <div className="flex flex-col items-center">
-              <span className={`w-4 h-4 rounded-full ${status === "delivered" ? "bg-primary" : "bg-gray-300"}`}></span>
-              <span className={`text-xs font-medium mt-1 ${status === "delivered" ? "text-gray-600" : "text-gray-400"}`}>Хүргэгдсэн</span>
+              <div 
+                className={`w-10 h-10 flex items-center justify-center rounded-full mb-1 
+                  ${status === "delivered" 
+                    ? "bg-primary text-white" 
+                    : "bg-gray-200 text-gray-400"} 
+                  ${status === "delivered" && animating ? "animate-bounce" : ""} 
+                  transition-all duration-300`}
+              >
+                <span className="text-lg" role="img" aria-label="Delivered">
+                  {statusInfo.delivered.emoji}
+                </span>
+              </div>
+              <span className={`text-xs font-medium ${status === "delivered" ? "text-gray-700" : "text-gray-400"}`}>
+                {statusInfo.delivered.label}
+              </span>
             </div>
           </div>
         </div>

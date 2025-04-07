@@ -71,15 +71,44 @@ export function CustomerDashboard() {
 
   // Mock data for order tracking (in a real app, this would come from the database)
   const mockOrderItems = [
-    { name: "Burger Combo", quantity: 2, price: 9.99 },
-    { name: "Fries", quantity: 1, price: 3.99 },
+    { name: "Бургер Комбо", quantity: 2, price: 9.99 },
+    { name: "Шарсан төмс", quantity: 1, price: 3.99 },
+    { name: "Кола", quantity: 1, price: 1.99 },
   ];
   
   const mockDriver = {
     id: "driver1",
-    name: "Michael Brown",
-    arrivalTime: "10-15 mins"
+    name: "Бат-Эрдэнэ",
+    arrivalTime: "10-15 минут"
   };
+  
+  // Test animation by changing status
+  const [demoStatus, setDemoStatus] = useState<"placed" | "preparing" | "on-the-way" | "delivered">("placed");
+  
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (activeOrders.length > 0) {
+      // Auto cycle through statuses for demo purposes
+      timer = setTimeout(() => {
+        switch (demoStatus) {
+          case "placed":
+            setDemoStatus("preparing");
+            break;
+          case "preparing":
+            setDemoStatus("on-the-way");
+            break;
+          case "on-the-way":
+            setDemoStatus("delivered");
+            break;
+          case "delivered":
+            // Reset after 5 seconds in delivered state
+            setTimeout(() => setDemoStatus("placed"), 5000);
+            break;
+        }
+      }, 4000);
+    }
+    return () => clearTimeout(timer);
+  }, [demoStatus, activeOrders.length]);
 
   return (
     <div className="py-10">
@@ -174,11 +203,11 @@ export function CustomerDashboard() {
           )}
         </section>
         
-        {/* Active order tracking section */}
-        {activeOrders.length > 0 ? (
+        {/* Active order tracking section with demo status animation */}
+        {(activeOrders.length > 0 || true) ? ( // Force show order for demo
           <OrderTracking
-            orderId={activeOrders[0].id}
-            status="on-the-way"
+            orderId={activeOrders.length > 0 ? activeOrders[0].id : "demo-123"}
+            status={demoStatus}
             driver={mockDriver}
             items={mockOrderItems}
             subtotal={23.97}
