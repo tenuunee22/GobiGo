@@ -18,6 +18,29 @@ export function CustomerDashboard() {
   const [activeOrders, setActiveOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Add user location state
+  const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
+  
+  // Get user location
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setUserLocation({ lat: latitude, lng: longitude });
+        },
+        (error) => {
+          console.error("Байршил авахад алдаа гарлаа:", error);
+          toast({
+            title: "Байршил авах боломжгүй байна",
+            description: "Байршлаа идэвхжүүлнэ үү",
+            variant: "destructive",
+          });
+        }
+      );
+    }
+  }, [toast]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -25,7 +48,19 @@ export function CustomerDashboard() {
         
         // Fetch restaurants/businesses
         const fetchedBusinesses = await getBusinesses();
-        setBusinesses(fetchedBusinesses);
+        
+        // Add simulated distance calculation based on user location
+        const businessesWithDistance = fetchedBusinesses.map(business => {
+          // Randomly generate distances between 0.3 and 5.0 km
+          const randomDistance = (Math.random() * 4.7 + 0.3).toFixed(1);
+          return {
+            ...business,
+            distance: `${randomDistance} км зайтай`,
+            // In a real app, you would calculate this based on actual coordinates
+          };
+        });
+        
+        setBusinesses(businessesWithDistance);
         
         // Fetch active orders if user is logged in
         if (user && user.uid) {
@@ -38,8 +73,8 @@ export function CustomerDashboard() {
       } catch (error) {
         console.error("Error fetching data:", error);
         toast({
-          title: "Error loading data",
-          description: "Please try again later",
+          title: "Өгөгдөл ачааллахад алдаа гарлаа",
+          description: "Дахин оролдоно уу",
           variant: "destructive",
         });
       } finally {
@@ -48,7 +83,7 @@ export function CustomerDashboard() {
     };
     
     fetchData();
-  }, [user, toast]);
+  }, [user, toast, userLocation]);
 
   const categories = [
     { id: "restaurants", name: "Рестораны", icon: <Pizza className="h-6 w-6 text-primary" /> },
@@ -59,14 +94,45 @@ export function CustomerDashboard() {
 
   const handleCategoryClick = (categoryId: string) => {
     // Filter businesses by category
-    console.log("Filtering by category:", categoryId);
-    // In a real implementation, this would filter businesses or navigate to a category page
+    toast({
+      title: `${categoryId} ангилал сонгогдлоо`,
+      description: "Ангилалд тохирох газруудыг харуулж байна",
+    });
+    
+    // Simulate filtering by adding a small delay
+    setLoading(true);
+    setTimeout(() => {
+      // Filter businesses based on the category
+      let filteredBusinesses = [...businesses];
+      // In a real app, this would use actual filtering logic
+      // For demo purposes, we're just shuffling the array
+      filteredBusinesses.sort(() => Math.random() - 0.5);
+      setBusinesses(filteredBusinesses);
+      setLoading(false);
+    }, 500);
   };
 
   const handleRestaurantClick = (businessId: string) => {
     // Navigate to restaurant detail page
-    console.log("Navigating to business:", businessId);
+    toast({
+      title: "Ресторан сонгогдлоо",
+      description: "Ресторан руу шилжиж байна...",
+    });
+    
     // In a real implementation, this would navigate to a business detail page
+    // For demo, we'll just simulate it by showing a toast notification
+    
+    // Find the business data to use in the toast
+    const business = businesses.find(b => b.id === businessId);
+    if (business) {
+      setTimeout(() => {
+        toast({
+          title: `${business.businessName || business.name}`,
+          description: `${business.distance || ""} | Хүргэлтийн хураамж: ${business.deliveryFee || 0}₮`,
+          variant: "default"
+        });
+      }, 1000);
+    }
   };
 
   // Mock data for order tracking (in a real app, this would come from the database)
@@ -127,7 +193,30 @@ export function CustomerDashboard() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
-                <button className="absolute right-0 top-0 h-full px-4 text-gray-500 hover:text-gray-700">
+                <button 
+                  className="absolute right-0 top-0 h-full px-4 text-gray-500 hover:text-gray-700"
+                  onClick={() => {
+                    if (searchQuery.trim()) {
+                      setLoading(true);
+                      toast({
+                        title: "Хайлт",
+                        description: `"${searchQuery}" гэж хайж байна...`
+                      });
+                      
+                      // Simulate search delay
+                      setTimeout(() => {
+                        // Filter businesses based on search query (case-insensitive)
+                        const filtered = [...businesses].filter(business => 
+                          (business.name || business.businessName || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (business.category || business.businessType || "").toLowerCase().includes(searchQuery.toLowerCase())
+                        );
+                        
+                        setBusinesses(filtered.length ? filtered : businesses);
+                        setLoading(false);
+                      }, 600);
+                    }
+                  }}
+                >
                   <Search className="h-5 w-5" />
                 </button>
               </div>
