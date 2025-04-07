@@ -32,11 +32,32 @@ export function LoginForm({ onToggleForm }: LoginFormProps) {
         description: "Welcome back!",
       });
       
-      // The auth context will handle the rest
+      // Get user data from Firestore to determine role
+      const userData = await import("@/lib/firebase").then(m => m.getUserData(userCredential.uid));
+      if (userData) {
+        // Set user data in auth context
+        setUser({
+          uid: userCredential.uid,
+          email: userCredential.email,
+          displayName: userCredential.displayName,
+          ...userData
+        });
+        
+        // Redirect based on role
+        const role = userData.role || "customer";
+        if (role === "customer") {
+          setLocation("/profile/user");
+        } else if (role === "business") {
+          setLocation("/dashboard/store");
+        } else if (role === "delivery") {
+          setLocation("/dashboard/driver");
+        }
+      }
     } catch (error: any) {
+      console.error("Login error:", error);
       toast({
         title: "Login failed",
-        description: error.message,
+        description: error.message || "An error occurred during login",
         variant: "destructive",
       });
     } finally {
@@ -47,17 +68,38 @@ export function LoginForm({ onToggleForm }: LoginFormProps) {
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     try {
-      await loginWithGoogle();
+      const userCredential = await loginWithGoogle();
       toast({
         title: "Login successful",
         description: "Welcome back!",
       });
       
-      // The auth context will handle the rest
+      // Get user data from Firestore to determine role
+      const userData = await import("@/lib/firebase").then(m => m.getUserData(userCredential.uid));
+      if (userData) {
+        // Set user data in auth context
+        setUser({
+          uid: userCredential.uid,
+          email: userCredential.email,
+          displayName: userCredential.displayName,
+          ...userData
+        });
+        
+        // Redirect based on role
+        const role = userData.role || "customer";
+        if (role === "customer") {
+          setLocation("/profile/user");
+        } else if (role === "business") {
+          setLocation("/dashboard/store");
+        } else if (role === "delivery") {
+          setLocation("/dashboard/driver");
+        }
+      }
     } catch (error: any) {
+      console.error("Google login error:", error);
       toast({
         title: "Google login failed",
-        description: error.message,
+        description: error.message || "An error occurred during Google login",
         variant: "destructive",
       });
     } finally {
