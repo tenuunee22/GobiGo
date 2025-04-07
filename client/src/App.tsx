@@ -13,6 +13,9 @@ import Dashboard from "@/pages/dashboard/index";
 import UserProfile from "@/pages/profile/user";
 import BusinessProfile from "@/pages/profile/business";
 import DriverProfile from "@/pages/profile/driver";
+import RestaurantDetail from "@/pages/restaurant/[id]";
+import OrderDetail from "@/pages/order/[id]";
+import Checkout from "@/pages/checkout";
 
 function Router() {
   const { user, loading } = useAuth();
@@ -56,6 +59,9 @@ function Router() {
         <Route path="/profile/user" component={UserProfile} />
         <Route path="/dashboard/store" component={BusinessProfile} />
         <Route path="/dashboard/driver" component={DriverProfile} />
+        <Route path="/restaurant/:id" component={RestaurantDetail} />
+        <Route path="/order/:id" component={OrderDetail} />
+        <Route path="/checkout" component={Checkout} />
         <Route component={NotFound} />
       </Switch>
     </div>

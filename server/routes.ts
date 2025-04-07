@@ -3,6 +3,13 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertUserSchema, insertProductSchema, insertOrderSchema, insertOrderItemSchema } from "@shared/schema";
 import { z } from "zod";
+import Stripe from "stripe";
+
+if (!process.env.STRIPE_SECRET_KEY) {
+  console.warn("Missing Stripe secret key! Payment functionality will not work.");
+}
+
+const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // All routes are prefixed with /api
@@ -217,6 +224,129 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(updatedOrder);
     } catch (error) {
       res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Stripe payment endpoints
+  app.post("/api/create-payment-intent", async (req, res) => {
+    try {
+      if (!stripe) {
+        return res.status(500).json({ 
+          message: "Payment service not available. Please check server configuration." 
+        });
+      }
+
+      const { amount, orderId, customerName, customerEmail } = req.body;
+      
+      if (!amount || amount < 1) {
+        return res.status(400).json({ message: "Valid amount is required" });
+      }
+
+      // Create a PaymentIntent with the order amount and currency
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100), // Convert to smallest currency unit (cents/tögrög)
+        currency: "mnt", // Mongolian tögrög
+        // Store order information in the metadata
+        metadata: {
+          orderId: orderId || '',
+          customerName: customerName || 'Guest',
+          customerEmail: customerEmail || ''
+        },
+        description: `GobiGo Order #${orderId || 'New'}`,
+        payment_method_types: ['card'],
+      });
+
+      // Return the client secret to the client
+      res.json({
+        clientSecret: paymentIntent.client_secret,
+        paymentIntentId: paymentIntent.id
+      });
+    } catch (error: any) {
+      console.error("Error creating payment intent:", error);
+      res.status(500).json({ 
+        message: "Error creating payment intent", 
+        error: error.message 
+      });
+    }
+  });
+  
+  // QPay integration endpoint (simulate QPay for demonstration purposes)
+  app.post("/api/create-qpay-payment", async (req, res) => {
+    try {
+      if (!stripe) {
+        return res.status(500).json({ 
+          message: "Payment service not available. Please check server configuration." 
+        });
+      }
+
+      const { amount, orderId, customerName, customerPhone } = req.body;
+      
+      if (!amount || amount < 1) {
+        return res.status(400).json({ message: "Valid amount is required" });
+      }
+
+      // In a real implementation, this would call the QPay API
+      // For demonstration purposes, we'll use Stripe as the backend
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100),
+        currency: "mnt",
+        metadata: {
+          orderId: orderId || '',
+          customerName: customerName || 'Guest',
+          customerPhone: customerPhone || '',
+          paymentMethod: 'QPay'
+        },
+        description: `GobiGo QPay Payment for Order #${orderId || 'New'}`,
+        payment_method_types: ['card'], // In a real QPay integration, this would be different
+      });
+
+      // Simulate QPay callback URL and payment information
+      res.json({
+        success: true,
+        qpayInvoiceId: `QPAY-${Date.now()}`,
+        qrCodeUrl: "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" + 
+                  encodeURIComponent(`https://qpay.mn/payment/${paymentIntent.id}`),
+        paymentIntentId: paymentIntent.id,
+        amount: amount,
+        deepLink: {
+          qPay: `qpay://payment/invoice?invoiceId=${paymentIntent.id}&callback=gobigo://order/callback`,
+          eBarimt: `ebarimt://payment?amount=${amount}&orderId=${orderId || 'New'}`
+        }
+      });
+    } catch (error: any) {
+      console.error("Error creating QPay payment:", error);
+      res.status(500).json({ 
+        message: "Error creating QPay payment", 
+        error: error.message 
+      });
+    }
+  });
+
+  // Check payment status endpoint
+  app.get("/api/check-payment/:paymentIntentId", async (req, res) => {
+    try {
+      if (!stripe) {
+        return res.status(500).json({ 
+          message: "Payment service not available. Please check server configuration." 
+        });
+      }
+
+      const { paymentIntentId } = req.params;
+      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+      
+      res.json({
+        id: paymentIntent.id,
+        status: paymentIntent.status,
+        amount: paymentIntent.amount / 100, // Convert back from smallest currency unit
+        currency: paymentIntent.currency,
+        metadata: paymentIntent.metadata,
+      });
+    } catch (error: any) {
+      console.error("Error checking payment status:", error);
+      res.status(500).json({ 
+        message: "Error checking payment status", 
+        error: error.message 
+      });
     }
   });
 

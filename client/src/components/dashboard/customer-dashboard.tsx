@@ -119,20 +119,8 @@ export function CustomerDashboard() {
       description: "Ресторан руу шилжиж байна...",
     });
     
-    // In a real implementation, this would navigate to a business detail page
-    // For demo, we'll just simulate it by showing a toast notification
-    
-    // Find the business data to use in the toast
-    const business = businesses.find(b => b.id === businessId);
-    if (business) {
-      setTimeout(() => {
-        toast({
-          title: `${business.businessName || business.name}`,
-          description: `${business.distance || ""} | Хүргэлтийн хураамж: ${business.deliveryFee || 0}₮`,
-          variant: "default"
-        });
-      }, 1000);
-    }
+    // Navigate to restaurant detail page
+    setLocation(`/restaurant/${businessId}`);
   };
 
   // Mock data for order tracking (in a real app, this would come from the database)
