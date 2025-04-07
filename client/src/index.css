@@ -12,14 +12,14 @@
   }
 }
 
-/* Хурдан шилжилт хийх анимэйшнүүд */
+/* Хурдан шилжилт хийх анимэйшнүүд - Профайл хуудас руу шилжих хурдасгасан */
 .page-transition {
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
 .page-enter {
   opacity: 0;
-  transform: translateY(10px);
+  transform: translateY(5px);
 }
 
 .page-enter-active {
@@ -34,5 +34,5 @@
 
 .page-exit-active {
   opacity: 0;
-  transform: translateY(-10px);
+  transform: translateY(-5px);
 }

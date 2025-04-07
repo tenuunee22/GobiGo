@@ -32,8 +32,8 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
     // Validation
     if (password !== confirmPassword) {
       toast({
-        title: "Passwords don't match",
-        description: "Please make sure your passwords match",
+        title: "Нууц үг таарахгүй байна",
+        description: "Нууц үгээ дахин шалгана уу",
         variant: "destructive",
       });
       setIsLoading(false);
@@ -64,14 +64,14 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
       await registerUser(email, password, userData);
       
       toast({
-        title: "Registration successful",
-        description: "Welcome to GobiGo!",
+        title: "Бүртгэл амжилттай үүслээ",
+        description: "ГобиГоу-д тавтай морил!",
       });
 
       // Redirect based on role will be handled by auth context
     } catch (error: any) {
       toast({
-        title: "Registration failed",
+        title: "Бүртгэл үүсгэхэд алдаа гарлаа",
         description: error.message,
         variant: "destructive",
       });
@@ -84,7 +84,7 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
     <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gray-50">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-          <div className="text-4xl font-bold text-primary">GobiGo</div>
+          <div className="text-4xl font-bold text-primary">ГобиГоу</div>
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Шинэ бүртгэл үүсгэх</h2>
         <p className="mt-2 text-center text-sm text-gray-600">
@@ -207,7 +207,7 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
                 </div>
 
                 <div>
-                  <Label htmlFor="business-type">Business Type</Label>
+                  <Label htmlFor="business-type">Бизнесийн төрөл</Label>
                   <div className="mt-1">
                     <Select 
                       value={businessType} 
@@ -215,13 +215,13 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
                       disabled={isLoading}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select business type" />
+                        <SelectValue placeholder="Бизнесийн төрөл сонгох" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="restaurant">Restaurant</SelectItem>
-                        <SelectItem value="grocery">Grocery Store</SelectItem>
-                        <SelectItem value="retail">Retail Store</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
+                        <SelectItem value="restaurant">Ресторан</SelectItem>
+                        <SelectItem value="grocery">Хүнсний дэлгүүр</SelectItem>
+                        <SelectItem value="retail">Жижиглэн худалдааны дэлгүүр</SelectItem>
+                        <SelectItem value="other">Бусад</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -233,7 +233,7 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
             {userType === "delivery" && (
               <div className="space-y-6">
                 <div>
-                  <Label htmlFor="vehicle-type">Vehicle Type</Label>
+                  <Label htmlFor="vehicle-type">Тээврийн хэрэгслийн төрөл</Label>
                   <div className="mt-1">
                     <Select 
                       value={vehicleType} 
@@ -241,20 +241,20 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
                       disabled={isLoading}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select vehicle type" />
+                        <SelectValue placeholder="Тээврийн хэрэгслийн төрөл сонгох" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="car">Car</SelectItem>
-                        <SelectItem value="motorcycle">Motorcycle</SelectItem>
-                        <SelectItem value="bicycle">Bicycle</SelectItem>
-                        <SelectItem value="scooter">Scooter</SelectItem>
+                        <SelectItem value="car">Автомашин</SelectItem>
+                        <SelectItem value="motorcycle">Мотоцикл</SelectItem>
+                        <SelectItem value="bicycle">Унадаг дугуй</SelectItem>
+                        <SelectItem value="scooter">Скүтер</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
 
                 <div>
-                  <Label htmlFor="license-number">License Number</Label>
+                  <Label htmlFor="license-number">Жолооны үнэмлэхийн дугаар</Label>
                   <div className="mt-1">
                     <Input
                       id="license-number"
@@ -276,7 +276,7 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
                 className="w-full"
                 disabled={isLoading}
               >
-                Create Account
+                Бүртгэл үүсгэх
               </Button>
             </div>
           </form>

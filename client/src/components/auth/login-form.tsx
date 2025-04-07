@@ -28,8 +28,8 @@ export function LoginForm({ onToggleForm }: LoginFormProps) {
     try {
       const userCredential = await loginUser(email, password);
       toast({
-        title: "Login successful",
-        description: "Welcome back!",
+        title: "Амжилттай нэвтэрлээ",
+        description: "Тавтай морил!",
       });
       
       // Get user data from Firestore to determine role
@@ -56,8 +56,8 @@ export function LoginForm({ onToggleForm }: LoginFormProps) {
     } catch (error: any) {
       console.error("Login error:", error);
       toast({
-        title: "Login failed",
-        description: error.message || "An error occurred during login",
+        title: "Нэвтрэх үйлдэл амжилтгүй болсон",
+        description: error.message || "Нэвтрэх үед алдаа гарлаа",
         variant: "destructive",
       });
     } finally {
@@ -70,8 +70,8 @@ export function LoginForm({ onToggleForm }: LoginFormProps) {
     try {
       const userCredential = await loginWithGoogle();
       toast({
-        title: "Login successful",
-        description: "Welcome back!",
+        title: "Амжилттай нэвтэрлээ",
+        description: "Тавтай морил!",
       });
       
       // Get user data from Firestore to determine role
@@ -98,8 +98,8 @@ export function LoginForm({ onToggleForm }: LoginFormProps) {
     } catch (error: any) {
       console.error("Google login error:", error);
       toast({
-        title: "Google login failed",
-        description: error.message || "An error occurred during Google login",
+        title: "Google-ээр нэвтрэх амжилтгүй болсон",
+        description: error.message || "Google-ээр нэвтрэх үед алдаа гарлаа",
         variant: "destructive",
       });
     } finally {
