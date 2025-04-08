@@ -428,13 +428,19 @@ export function BusinessDashboard() {
               {filteredProducts.map((product) => (
                 <Card key={product.id} className="overflow-hidden">
                   <div 
-                    className="h-40 bg-center bg-cover" 
+                    className="h-40 bg-center bg-cover bg-gray-100" 
                     style={{ 
                       backgroundImage: product.imageUrl 
                         ? `url(${product.imageUrl})` 
-                        : "url(https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60)" 
+                        : "none"
                     }}
-                  ></div>
+                  >
+                    {!product.imageUrl && (
+                      <div className="h-full w-full flex items-center justify-center text-gray-400">
+                        <span>Зураггүй</span>
+                      </div>
+                    )}
+                  </div>
                   <CardContent className="p-4">
                     <h3 className="font-semibold text-lg mb-1">{product.name}</h3>
                     <p className="text-sm text-gray-600 mb-2">{product.description}</p>

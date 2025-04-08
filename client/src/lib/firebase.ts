@@ -29,6 +29,12 @@ import {
   deleteDoc,
   serverTimestamp
 } from "firebase/firestore";
+import { 
+  getStorage, 
+  ref, 
+  uploadBytes, 
+  getDownloadURL 
+} from "firebase/storage";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -497,10 +503,50 @@ export const updateBusinessLocation = async (uid: string, location: { lat: numbe
   }
 };
 
+// Initialize Firebase storage
+const storage = getStorage(app);
+
+// Upload a file to Firebase storage
+export const uploadFile = async (uid: string, file: File, path: string): Promise<string> => {
+  try {
+    // Create a storage reference with unique filename (timestamp + original name)
+    const timestamp = new Date().getTime();
+    const fileName = `${timestamp}_${file.name}`;
+    const storageRef = ref(storage, `${uid}/${path}/${fileName}`);
+    
+    // Upload the file
+    const snapshot = await uploadBytes(storageRef, file);
+    
+    // Get download URL
+    const downloadURL = await getDownloadURL(snapshot.ref);
+    
+    return downloadURL;
+  } catch (error) {
+    console.error("Error uploading file:", error);
+    throw error;
+  }
+};
+
+// Update business profile data including logo, banner, etc.
+export const updateBusinessProfile = async (uid: string, profileData: any) => {
+  try {
+    const userRef = doc(db, "users", uid);
+    await updateDoc(userRef, {
+      ...profileData,
+      updatedAt: serverTimestamp()
+    });
+    return true;
+  } catch (error) {
+    console.error("Error updating business profile:", error);
+    throw error;
+  }
+};
+
 export { 
   app, 
   auth, 
   db, 
+  storage,
   onAuthStateChanged,
   recaptchaVerifier
 };
