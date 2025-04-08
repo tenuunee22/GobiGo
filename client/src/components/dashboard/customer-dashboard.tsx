@@ -702,14 +702,15 @@ export function CustomerDashboard() {
                 className="h-full"
               >
                 <RestaurantCard 
-                  id={business.id}
-                  name={business.name}
-                  imageUrl={business.imageUrl}
-                  category={business.category}
-                  rating={business.rating}
-                  address={business.address}
-                  deliveryTime={business.deliveryTime || "30-40 мин"}
-                  minOrder={business.minOrder || 5000}
+                  id={business.id || ""}
+                  name={business.name || ""}
+                  imageUrl={business.imageUrl || ""}
+                  category={business.category || ""}
+                  distance={business.distance || "2.5 км"}
+                  rating={business.rating || 4.0}
+                  deliveryFee={business.deliveryFee || 0}
+                  estimatedTime={business.deliveryTime || "30-40 мин"}
+                  onClick={() => setLocation(`/restaurant/${business.id}`)}
                 />
               </motion.div>
             ))}
