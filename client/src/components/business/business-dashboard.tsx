@@ -1,14 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/auth-context";
-import { 
-  getBusinessOrders, 
-  getBusinessProducts, 
-  updateOrderStatus, 
-  addProduct, 
-  updateProduct, 
-  deleteProduct,
-  subscribeToBusinessProducts
-} from "@/lib/firebase";
+import { getBusinessOrders, getBusinessProducts, updateOrderStatus, addProduct, updateProduct, deleteProduct } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OrderItem } from "@/components/business/order-item";
@@ -51,8 +43,6 @@ export function BusinessDashboard() {
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
 
   useEffect(() => {
-    let unsubscribe: (() => void) | undefined;
-    
     const fetchData = async () => {
       if (!user?.uid) return;
 
@@ -63,11 +53,9 @@ export function BusinessDashboard() {
         const fetchedOrders = await getBusinessOrders(user.uid);
         setOrders(fetchedOrders);
         
-        // Subscribe to real-time updates for products
-        unsubscribe = subscribeToBusinessProducts(user.uid, (updatedProducts) => {
-          setProducts(updatedProducts);
-          setLoading(false);
-        });
+        // Fetch products for this business
+        const fetchedProducts = await getBusinessProducts(user.uid);
+        setProducts(fetchedProducts);
         
         // Calculate statistics
         let totalEarnings = 0;
@@ -115,18 +103,12 @@ export function BusinessDashboard() {
           description: "Дахин оролдоно уу",
           variant: "destructive"
         });
+      } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-    
-    // Clean up subscription on unmount
-    return () => {
-      if (unsubscribe) {
-        unsubscribe();
-      }
-    };
   }, [user, toast]);
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
@@ -182,8 +164,14 @@ export function BusinessDashboard() {
     try {
       if (selectedProduct) {
         // Update existing product
-        await updateProduct(selectedProduct.id, productData);
-        // We don't need to update the local state anymore as we are using real-time subscriptions
+        const updatedProduct = await updateProduct(selectedProduct.id, productData);
+        
+        // Update local state
+        setProducts(prev => 
+          prev.map(p => 
+            p.id === selectedProduct.id ? { ...p, ...updatedProduct } : p
+          )
+        );
         
         toast({
           title: "Бүтээгдэхүүн шинэчлэгдлээ",
@@ -191,8 +179,10 @@ export function BusinessDashboard() {
         });
       } else {
         // Add new product
-        await addProduct(user?.uid || "", productData);
-        // We don't need to update the local state anymore as we are using real-time subscriptions
+        const newProduct = await addProduct(user?.uid || "", productData);
+        
+        // Update local state
+        setProducts(prev => [...prev, newProduct]);
         
         toast({
           title: "Бүтээгдэхүүн нэмэгдлээ",
@@ -214,7 +204,9 @@ export function BusinessDashboard() {
   const handleDeleteProduct = async (productId: string) => {
     try {
       await deleteProduct(productId);
-      // We don't need to update the local state anymore as we are using real-time subscriptions
+      
+      // Update local state
+      setProducts(prev => prev.filter(p => p.id !== productId));
       
       toast({
         title: "Бүтээгдэхүүн устгагдлаа",

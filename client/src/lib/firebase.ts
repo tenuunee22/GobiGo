@@ -21,13 +21,7 @@ import {
   getDocs,
   updateDoc,
   deleteDoc,
-  serverTimestamp,
-  writeBatch,
-  limit,
-  orderBy,
-  startAfter,
-  enableIndexedDbPersistence,
-  onSnapshot
+  serverTimestamp
 } from "firebase/firestore";
 
 // Firebase configuration
@@ -54,9 +48,6 @@ try {
 }
 const auth = getAuth();
 const db = getFirestore();
-
-// Firebase persistence is available but we'll implement it with better multi-tab support in a future update
-
 const googleProvider = new GoogleAuthProvider();
 
 // User related functions
@@ -193,11 +184,7 @@ export const deleteProduct = async (productId: string) => {
 export const getBusinessProducts = async (businessId: string) => {
   try {
     const productsRef = collection(db, "products");
-    const q = query(
-      productsRef, 
-      where("businessId", "==", businessId),
-      orderBy("createdAt", "desc")
-    );
+    const q = query(productsRef, where("businessId", "==", businessId));
     const querySnapshot = await getDocs(q);
     
     const products: any[] = [];
@@ -208,34 +195,6 @@ export const getBusinessProducts = async (businessId: string) => {
     return products;
   } catch (error) {
     console.error("Error getting business products:", error);
-    throw error;
-  }
-};
-
-// Subscribe to real-time updates for business products
-export const subscribeToBusinessProducts = (
-  businessId: string, 
-  callback: (products: any[]) => void
-) => {
-  try {
-    const productsRef = collection(db, "products");
-    const q = query(
-      productsRef, 
-      where("businessId", "==", businessId),
-      orderBy("createdAt", "desc")
-    );
-    
-    return onSnapshot(q, (querySnapshot) => {
-      const products: any[] = [];
-      querySnapshot.forEach((doc) => {
-        products.push({ id: doc.id, ...doc.data() });
-      });
-      callback(products);
-    }, (error) => {
-      console.error("Error in products snapshot listener:", error);
-    });
-  } catch (error) {
-    console.error("Error setting up products subscription:", error);
     throw error;
   }
 };
@@ -259,25 +218,12 @@ export const createOrder = async (orderData: any) => {
 export const getCustomerOrders = async (customerId: string) => {
   try {
     const ordersRef = collection(db, "orders");
-    const q = query(
-      ordersRef, 
-      where("customerId", "==", customerId)
-      // orderBy removed temporarily due to index issues
-      // We need to create a composite index for this query
-    );
+    const q = query(ordersRef, where("customerId", "==", customerId));
     const querySnapshot = await getDocs(q);
     
-    // Sort in memory instead 
     const orders: any[] = [];
     querySnapshot.forEach((doc) => {
       orders.push({ id: doc.id, ...doc.data() });
-    });
-    
-    // Manual sorting by createdAt in descending order
-    orders.sort((a, b) => {
-      const dateA = a.createdAt?.toMillis?.() || 0;
-      const dateB = b.createdAt?.toMillis?.() || 0;
-      return dateB - dateA;
     });
     
     return orders;
@@ -287,42 +233,10 @@ export const getCustomerOrders = async (customerId: string) => {
   }
 };
 
-// Subscribe to real-time customer order updates
-export const subscribeToCustomerOrders = (
-  customerId: string,
-  callback: (orders: any[]) => void
-) => {
-  try {
-    const ordersRef = collection(db, "orders");
-    const q = query(
-      ordersRef, 
-      where("customerId", "==", customerId),
-      orderBy("createdAt", "desc")
-    );
-    
-    return onSnapshot(q, (querySnapshot) => {
-      const orders: any[] = [];
-      querySnapshot.forEach((doc) => {
-        orders.push({ id: doc.id, ...doc.data() });
-      });
-      callback(orders);
-    }, (error) => {
-      console.error("Error in customer orders snapshot listener:", error);
-    });
-  } catch (error) {
-    console.error("Error setting up customer orders subscription:", error);
-    throw error;
-  }
-};
-
 export const getBusinessOrders = async (businessId: string) => {
   try {
     const ordersRef = collection(db, "orders");
-    const q = query(
-      ordersRef, 
-      where("businessId", "==", businessId),
-      orderBy("createdAt", "desc")
-    );
+    const q = query(ordersRef, where("businessId", "==", businessId));
     const querySnapshot = await getDocs(q);
     
     const orders: any[] = [];
@@ -337,43 +251,10 @@ export const getBusinessOrders = async (businessId: string) => {
   }
 };
 
-// Subscribe to real-time business order updates
-export const subscribeToBusinessOrders = (
-  businessId: string,
-  callback: (orders: any[]) => void
-) => {
-  try {
-    const ordersRef = collection(db, "orders");
-    const q = query(
-      ordersRef, 
-      where("businessId", "==", businessId),
-      orderBy("createdAt", "desc")
-    );
-    
-    return onSnapshot(q, (querySnapshot) => {
-      const orders: any[] = [];
-      querySnapshot.forEach((doc) => {
-        orders.push({ id: doc.id, ...doc.data() });
-      });
-      callback(orders);
-    }, (error) => {
-      console.error("Error in business orders snapshot listener:", error);
-    });
-  } catch (error) {
-    console.error("Error setting up business orders subscription:", error);
-    throw error;
-  }
-};
-
 export const getAvailableOrders = async () => {
   try {
     const ordersRef = collection(db, "orders");
-    const q = query(
-      ordersRef, 
-      where("status", "==", "accepted"), 
-      where("driverId", "==", null),
-      orderBy("createdAt", "desc")
-    );
+    const q = query(ordersRef, where("status", "==", "accepted"), where("driverId", "==", null));
     const querySnapshot = await getDocs(q);
     
     const orders: any[] = [];
@@ -388,42 +269,10 @@ export const getAvailableOrders = async () => {
   }
 };
 
-// Subscribe to real-time available order updates
-export const subscribeToAvailableOrders = (
-  callback: (orders: any[]) => void
-) => {
-  try {
-    const ordersRef = collection(db, "orders");
-    const q = query(
-      ordersRef, 
-      where("status", "==", "accepted"), 
-      where("driverId", "==", null),
-      orderBy("createdAt", "desc")
-    );
-    
-    return onSnapshot(q, (querySnapshot) => {
-      const orders: any[] = [];
-      querySnapshot.forEach((doc) => {
-        orders.push({ id: doc.id, ...doc.data() });
-      });
-      callback(orders);
-    }, (error) => {
-      console.error("Error in available orders snapshot listener:", error);
-    });
-  } catch (error) {
-    console.error("Error setting up available orders subscription:", error);
-    throw error;
-  }
-};
-
 export const getDriverOrders = async (driverId: string) => {
   try {
     const ordersRef = collection(db, "orders");
-    const q = query(
-      ordersRef, 
-      where("driverId", "==", driverId),
-      orderBy("createdAt", "desc")
-    );
+    const q = query(ordersRef, where("driverId", "==", driverId));
     const querySnapshot = await getDocs(q);
     
     const orders: any[] = [];
@@ -434,34 +283,6 @@ export const getDriverOrders = async (driverId: string) => {
     return orders;
   } catch (error) {
     console.error("Error getting driver orders:", error);
-    throw error;
-  }
-};
-
-// Subscribe to real-time driver order updates
-export const subscribeToDriverOrders = (
-  driverId: string,
-  callback: (orders: any[]) => void
-) => {
-  try {
-    const ordersRef = collection(db, "orders");
-    const q = query(
-      ordersRef, 
-      where("driverId", "==", driverId),
-      orderBy("createdAt", "desc")
-    );
-    
-    return onSnapshot(q, (querySnapshot) => {
-      const orders: any[] = [];
-      querySnapshot.forEach((doc) => {
-        orders.push({ id: doc.id, ...doc.data() });
-      });
-      callback(orders);
-    }, (error) => {
-      console.error("Error in driver orders snapshot listener:", error);
-    });
-  } catch (error) {
-    console.error("Error setting up driver orders subscription:", error);
     throw error;
   }
 };
@@ -506,40 +327,6 @@ export const getBusinesses = async (category?: string) => {
     return businesses;
   } catch (error) {
     console.error("Error getting businesses:", error);
-    throw error;
-  }
-};
-
-// Subscribe to real-time business listings updates
-export const subscribeToBusinesses = (
-  callback: (businesses: any[]) => void,
-  category?: string
-) => {
-  try {
-    const usersRef = collection(db, "users");
-    let q;
-    
-    if (category) {
-      q = query(
-        usersRef, 
-        where("role", "==", "business"),
-        where("businessType", "==", category)
-      );
-    } else {
-      q = query(usersRef, where("role", "==", "business"));
-    }
-    
-    return onSnapshot(q, (querySnapshot) => {
-      const businesses: any[] = [];
-      querySnapshot.forEach((doc) => {
-        businesses.push({ id: doc.id, ...doc.data() });
-      });
-      callback(businesses);
-    }, (error) => {
-      console.error("Error in businesses snapshot listener:", error);
-    });
-  } catch (error) {
-    console.error("Error setting up businesses subscription:", error);
     throw error;
   }
 };
