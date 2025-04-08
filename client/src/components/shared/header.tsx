@@ -54,7 +54,7 @@ export function Header() {
           <>
             <Button 
               variant="ghost" 
-              className="flex items-center gap-2" 
+              className="flex items-center gap-2 text-white hover:bg-white/20" 
               onClick={() => handleNavigate("/dashboard/store")}
             >
               <Store className="h-4 w-4" />
@@ -62,7 +62,7 @@ export function Header() {
             </Button>
             <Button 
               variant="ghost" 
-              className="flex items-center gap-2" 
+              className="flex items-center gap-2 text-white hover:bg-white/20" 
               onClick={() => handleNavigate("/profile/business")}
             >
               <User className="h-4 w-4" />
@@ -75,7 +75,7 @@ export function Header() {
           <>
             <Button 
               variant="ghost" 
-              className="flex items-center gap-2" 
+              className="flex items-center gap-2 text-white hover:bg-white/20" 
               onClick={() => handleNavigate("/dashboard/driver")}
             >
               <Truck className="h-4 w-4" />
@@ -83,7 +83,7 @@ export function Header() {
             </Button>
             <Button 
               variant="ghost" 
-              className="flex items-center gap-2" 
+              className="flex items-center gap-2 text-white hover:bg-white/20" 
               onClick={() => handleNavigate("/profile/driver")}
             >
               <User className="h-4 w-4" />
@@ -96,7 +96,7 @@ export function Header() {
           <>
             <Button 
               variant="ghost" 
-              className="flex items-center gap-2" 
+              className="flex items-center gap-2 text-white hover:bg-white/20" 
               onClick={() => handleNavigate("/")}
             >
               <ShoppingBag className="h-4 w-4" />
@@ -104,7 +104,7 @@ export function Header() {
             </Button>
             <Button 
               variant="ghost" 
-              className="flex items-center gap-2" 
+              className="flex items-center gap-2 text-white hover:bg-white/20" 
               onClick={() => handleNavigate("/profile/user")}
             >
               <User className="h-4 w-4" />
@@ -226,14 +226,14 @@ export function Header() {
   };
 
   return (
-    <header className="bg-white border-b sticky top-0 z-50">
+    <header className="header-gradient text-white sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex-shrink-0 cursor-pointer" onClick={() => handleNavigate("/")}>
             <div className="flex items-center">
-              <span className="font-bold text-xl text-primary">GobiGo</span>
-              <span className="ml-1 text-gray-500 text-sm">Хүргэлт</span>
+              <span className="font-bold text-xl text-white">GobiGo</span>
+              <span className="ml-1 text-gray-200 text-sm">Хүргэлт</span>
             </div>
           </div>
           
@@ -246,7 +246,7 @@ export function Header() {
           <div className="hidden md:flex items-center">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="rounded-full">
+                <Button variant="ghost" className="rounded-full text-white hover:bg-white/20">
                   <User className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
@@ -275,7 +275,7 @@ export function Header() {
           <div className="md:hidden">
             <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-10 w-10">
+                <Button variant="ghost" size="icon" className="h-10 w-10 text-white hover:bg-white/20">
                   <Menu className="h-6 w-6" />
                 </Button>
               </SheetTrigger>
