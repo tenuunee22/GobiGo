@@ -166,14 +166,7 @@ export function LoginForm({ onToggleForm }: LoginFormProps) {
                 </Label>
               </div>
 
-              <div className="text-sm">
-                <a
-                  href="#"
-                  className="font-medium text-primary hover:text-indigo-500"
-                >
-                  Нууц үгээ мартсан?
-                </a>
-              </div>
+              {/* Removed "Forgot password" link */}
             </div>
 
             <div>
