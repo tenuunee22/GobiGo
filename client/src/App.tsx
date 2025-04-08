@@ -30,6 +30,9 @@ import { BusinessDashboard } from "@/components/business/business-dashboard";
 // Delivery components
 import { DeliveryDashboard } from "@/components/delivery/delivery-dashboard";
 
+// Auth components
+import { RoleSelection } from "@/components/auth/role-selection";
+
 function Router() {
   const { user, loading } = useAuth();
   const [location, setLocation] = useLocation();
@@ -37,18 +40,48 @@ function Router() {
   useEffect(() => {
     if (loading) return;
 
-    // In this build, we'll skip authentication logic to allow easy testing 
-    // of different user role interfaces
+    // Redirect based on user role
+    if (user && location === "/") {
+      switch(user.role) {
+        case "business":
+          setLocation("/dashboard/store");
+          break;
+        case "delivery":
+          setLocation("/dashboard/driver");
+          break;
+        case "customer":
+          setLocation("/dashboard");
+          break;
+        default:
+          // Default dashboard for customers or users with unspecified roles
+          setLocation("/dashboard");
+      }
+    }
   }, [user, loading, location, setLocation]);
 
   if (loading) {
     return <div className="flex items-center justify-center h-screen">Ачааллаж байна...</div>;
   }
 
+  // Determine which dashboard to show based on user role
+  const DashboardComponent = () => {
+    if (!user) return <CustomerDashboard />; // Non-authenticated users see customer view
+    
+    switch(user.role) {
+      case "business":
+        return <BusinessDashboard />;
+      case "delivery":
+        return <DeliveryDashboard />;
+      case "customer":
+      default:
+        return <CustomerDashboard />;
+    }
+  };
+
   return (
     <div className="page-transition p-1">
       <Switch>
-        <Route path="/" component={CustomerDashboard} />
+        <Route path="/" component={DashboardComponent} />
         <Route path="/login" component={Login} />
         <Route path="/register" component={Register} />
         <Route path="/dashboard" component={CustomerDashboard} />
@@ -60,6 +93,7 @@ function Router() {
         <Route path="/restaurant/:id" component={RestaurantDetail} />
         <Route path="/order/:id" component={OrderDetail} />
         <Route path="/checkout" component={Checkout} />
+        <Route path="/role-selection" component={RoleSelection} />
         <Route component={NotFound} />
       </Switch>
     </div>
@@ -68,18 +102,19 @@ function Router() {
 
 function App() {
   const [location] = useLocation();
+  const { needsRoleSelection, loading } = useAuth();
   const isLoginPage = location === "/login" || location === "/register";
   
   return (
     <QueryClientProvider client={queryClient}>
       <OnboardingProvider>
         <div className="flex flex-col min-h-screen">
-          {!isLoginPage && <Header />}
+          {!isLoginPage && !needsRoleSelection && <Header />}
           <main className="flex-grow">
-            <Router />
+            {needsRoleSelection && !loading ? <RoleSelection /> : <Router />}
           </main>
-          {!isLoginPage && <OnboardingModal />}
-          {!isLoginPage && <OnboardingHintButton position="bottom-right" />}
+          {!isLoginPage && !needsRoleSelection && <OnboardingModal />}
+          {!isLoginPage && !needsRoleSelection && <OnboardingHintButton position="bottom-right" />}
         </div>
         <Toaster />
       </OnboardingProvider>
