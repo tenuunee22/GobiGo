@@ -142,7 +142,7 @@ export function BusinessDashboard() {
       const businessType = user?.businessType || "restaurant";
       
       // Additional data to include in the update
-      const additionalData = {
+      const additionalData: Record<string, any> = {
         businessId: user?.uid,
         businessName: user?.businessName || user?.name || "Бизнес"
       };

@@ -62,22 +62,61 @@ try {
 const auth = getAuth();
 const db = getFirestore();
 
-// Enable offline data persistence if supported by browser
-try {
-  enableIndexedDbPersistence(db).catch((err) => {
-    if (err.code === 'failed-precondition') {
-      // Multiple tabs open, persistence can only be enabled in one tab at a time
-      console.warn('Firebase persistence could not be enabled: Multiple tabs open');
-    } else if (err.code === 'unimplemented') {
-      // The current browser doesn't support persistence
-      console.warn('Firebase persistence not supported by this browser');
-    }
-  });
-} catch (err) {
-  console.warn('Error enabling persistence:', err);
+// Disable offline data persistence for better multi-tab support
+// This resolves the "failed-precondition" errors in development
+const disablePersistence = true;
+let persistenceEnabled = false;
+
+if (!disablePersistence) {
+  try {
+    enableIndexedDbPersistence(db).then(() => {
+      persistenceEnabled = true;
+      console.log("Firebase persistence enabled successfully");
+    }).catch((err) => {
+      if (err.code === 'failed-precondition') {
+        // Multiple tabs open, persistence can only be enabled in one tab at a time
+        console.warn('Firebase persistence could not be enabled: Multiple tabs open');
+      } else if (err.code === 'unimplemented') {
+        // The current browser doesn't support persistence
+        console.warn('Firebase persistence not supported by this browser');
+      }
+    });
+  } catch (err) {
+    console.warn('Error enabling persistence:', err);
+  }
+} else {
+  console.info('Firebase persistence explicitly disabled for multi-tab support');
 }
 
-// Firebase persistence is available but we'll implement it with better multi-tab support in a future update
+// Utility function to handle Firebase errors with better user feedback
+export const handleFirebaseError = (error: any, fallbackMessage = "Хүсэлт гүйцэтгэхэд алдаа гарлаа") => {
+  console.error("Firebase error:", error);
+  
+  // Map common Firebase error codes to user-friendly messages
+  const errorMessages: {[key: string]: string} = {
+    'auth/user-not-found': 'Имэйл хаяг эсвэл нууц үг буруу байна',
+    'auth/wrong-password': 'Имэйл хаяг эсвэл нууц үг буруу байна',
+    'auth/email-already-in-use': 'Энэ имэйл хаяг бүртгэлтэй байна',
+    'auth/weak-password': 'Нууц үг хэтэрхий богино байна. 6-с дээш тэмдэгт оруулна уу.',
+    'auth/invalid-email': 'Имэйл хаяг буруу байна',
+    'auth/user-disabled': 'Энэ хэрэглэгчийн эрх хаагдсан байна',
+    'auth/requires-recent-login': 'Энэ үйлдлийг гүйцэтгэхийн тулд дахин нэвтэрнэ үү',
+    'auth/network-request-failed': 'Сүлжээний алдаа гарлаа. Интернэт холболтоо шалгана уу.',
+    'permission-denied': 'Таны эрх хүрэхгүй байна',
+    'failed-precondition': 'Үйлдлийг одоо гүйцэтгэх боломжгүй байна',
+    'not-found': 'Хайсан өгөгдөл олдсонгүй'
+  };
+  
+  // Extract the error code and find appropriate message
+  const errorCode = error?.code || '';
+  const userMessage = errorMessages[errorCode] || fallbackMessage;
+  
+  return {
+    code: errorCode,
+    message: userMessage,
+    originalError: error
+  };
+}
 
 const googleProvider = new GoogleAuthProvider();
 

@@ -36,11 +36,31 @@ function Router() {
   const { user, loading } = useAuth();
   const [location, setLocation] = useLocation();
 
+  // Handle protected routes
   useEffect(() => {
     if (loading) return;
 
-    // In this build, we'll skip authentication logic to allow easy testing 
-    // of different user role interfaces
+    const currentPath = location;
+    
+    // Protect profile and dashboard routes for non-authenticated users
+    if (!user) {
+      const protectedPaths = [
+        '/profile', 
+        '/dashboard',
+        '/order',
+        '/checkout'
+      ];
+      
+      // Check if current location is a protected path
+      const isProtectedPath = protectedPaths.some(path => 
+        currentPath.startsWith(path)
+      );
+      
+      // Redirect to login if trying to access protected routes while not logged in
+      if (isProtectedPath && currentPath !== '/login') {
+        setLocation('/login');
+      }
+    }
   }, [user, loading, location, setLocation]);
 
   if (loading) {
