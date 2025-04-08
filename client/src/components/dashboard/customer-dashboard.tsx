@@ -5,13 +5,16 @@ import { CategoryCard } from "@/components/customer/category-card";
 import { RestaurantCard } from "@/components/customer/restaurant-card";
 import { OrderTracking } from "@/components/customer/order-tracking";
 import { useToast } from "@/hooks/use-toast";
+import { useLoading } from "@/contexts/loading-context";
 import { useLocation } from "wouter";
 import { Search, Pizza, ShoppingCart, PlusCircle, Pill } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { FoodLoader } from "@/components/shared/food-loader";
 
 export function CustomerDashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { showLoading, hideLoading } = useLoading();
   const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [businesses, setBusinesses] = useState<any[]>([]);
@@ -45,6 +48,7 @@ export function CustomerDashboard() {
     const fetchData = async () => {
       try {
         setLoading(true);
+        showLoading("Рестораныг ачааллаж байна...", "burger");
         
         // Fetch restaurants/businesses
         const fetchedBusinesses = await getBusinesses();
@@ -64,6 +68,8 @@ export function CustomerDashboard() {
         
         // Fetch active orders if user is logged in
         if (user && user.uid) {
+          // Switch the food type for order loading
+          showLoading("Захиалгыг ачааллаж байна...", "pizza");
           const orders = await getCustomerOrders(user.uid);
           const active = orders.filter(order => 
             order.status !== "completed" && order.status !== "cancelled"
@@ -79,11 +85,12 @@ export function CustomerDashboard() {
         });
       } finally {
         setLoading(false);
+        hideLoading();
       }
     };
     
     fetchData();
-  }, [user, toast, userLocation]);
+  }, [user, toast, userLocation, showLoading, hideLoading]);
 
   const categories = [
     { id: "restaurants", name: "Рестораны", icon: <Pizza className="h-6 w-6 text-primary" /> },
@@ -99,8 +106,11 @@ export function CustomerDashboard() {
       description: "Ангилалд тохирох газруудыг харуулж байна",
     });
     
-    // Simulate filtering by adding a small delay
+    // Show loading animation with noodles food character 
+    showLoading("Ангилалын мэдээллийг ачааллаж байна...", "noodles");
     setLoading(true);
+    
+    // Simulate filtering by adding a small delay
     setTimeout(() => {
       // Filter businesses based on the category
       let filteredBusinesses = [...businesses];
@@ -109,18 +119,24 @@ export function CustomerDashboard() {
       filteredBusinesses.sort(() => Math.random() - 0.5);
       setBusinesses(filteredBusinesses);
       setLoading(false);
-    }, 500);
+      hideLoading();
+    }, 1200); // Longer delay to show the animation
   };
 
   const handleRestaurantClick = (businessId: string) => {
-    // Navigate to restaurant detail page
+    // Show loading animation while navigating
+    showLoading("Ресторан руу шилжиж байна...", "burger");
+    
     toast({
       title: "Ресторан сонгогдлоо",
       description: "Ресторан руу шилжиж байна...",
     });
     
-    // Navigate to restaurant detail page
-    setLocation(`/restaurant/${businessId}`);
+    // Add slight delay for smooth transition
+    setTimeout(() => {
+      // Navigate to restaurant detail page
+      setLocation(`/restaurant/${businessId}`);
+    }, 800);
   };
 
   // Mock data for order tracking (in a real app, this would come from the database)
@@ -185,6 +201,8 @@ export function CustomerDashboard() {
                   className="absolute right-0 top-0 h-full px-4 text-gray-500 hover:text-gray-700"
                   onClick={() => {
                     if (searchQuery.trim()) {
+                      // Show donut character during search
+                      showLoading(`"${searchQuery}" гэж хайж байна...`, "donut");
                       setLoading(true);
                       toast({
                         title: "Хайлт",
@@ -201,7 +219,8 @@ export function CustomerDashboard() {
                         
                         setBusinesses(filtered.length ? filtered : businesses);
                         setLoading(false);
-                      }, 600);
+                        hideLoading();
+                      }, 1000);
                     }
                   }}
                 >
@@ -244,11 +263,17 @@ export function CustomerDashboard() {
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="bg-white rounded-lg shadow animate-pulse h-72">
-                  <div className="w-full h-48 bg-gray-300"></div>
+                <div key={i} className="bg-white rounded-lg shadow h-72 flex flex-col">
+                  <div className="w-full h-48 bg-gray-100 flex items-center justify-center">
+                    <FoodLoader 
+                      foodType={i === 1 ? "burger" : i === 2 ? "pizza" : "noodles"} 
+                      text="" 
+                      size="medium" 
+                    />
+                  </div>
                   <div className="p-4">
-                    <div className="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                    <div className="h-4 bg-gray-300 rounded w-3/4 mb-2 animate-pulse"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/2 animate-pulse"></div>
                   </div>
                 </div>
               ))}
