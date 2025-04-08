@@ -7,8 +7,8 @@ interface RestaurantCardProps {
   category: string;
   subCategory?: string;
   distance: string;
-  rating: number;
-  deliveryFee: number;
+  rating: number | string;
+  deliveryFee: number | string;
   estimatedTime: string;
   onClick: () => void;
 }
@@ -25,6 +25,42 @@ export function RestaurantCard({
   estimatedTime,
   onClick,
 }: RestaurantCardProps) {
+  // Format rating safely for display
+  const formattedRating = () => {
+    if (typeof rating === 'number') {
+      return rating.toFixed(1);
+    }
+    if (typeof rating === 'string') {
+      const numRating = parseFloat(rating);
+      return isNaN(numRating) ? rating : numRating.toFixed(1);
+    }
+    return "5.0"; // Default fallback
+  };
+
+  // Format delivery fee safely for display
+  const formattedDeliveryFee = () => {
+    if (deliveryFee === 0) {
+      return "Үнэгүй хүргэлт";
+    }
+    
+    if (typeof deliveryFee === 'number') {
+      return `${deliveryFee.toFixed(0)}₮ хүргэлт`;
+    }
+    
+    if (typeof deliveryFee === 'string') {
+      if (deliveryFee === "0") return "Үнэгүй хүргэлт";
+      const numFee = parseFloat(deliveryFee);
+      return isNaN(numFee) ? `${deliveryFee}₮ хүргэлт` : `${numFee.toFixed(0)}₮ хүргэлт`;
+    }
+    
+    return "2500₮ хүргэлт"; // Default fallback
+  };
+
+  // Check if delivery is free
+  const isFreeDelivery = () => {
+    return deliveryFee === 0 || deliveryFee === "0";
+  };
+
   return (
     <div 
       className="bg-white rounded-lg shadow overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
@@ -43,12 +79,14 @@ export function RestaurantCard({
           </div>
           <div className="flex items-center bg-green-100 rounded px-2 py-1">
             <Star className="h-4 w-4 text-green-600 fill-current" />
-            <span className="text-sm font-medium text-green-700 ml-1">{rating.toFixed(1)}</span>
+            <span className="text-sm font-medium text-green-700 ml-1">
+              {formattedRating()}
+            </span>
           </div>
         </div>
         <div className="mt-4 flex items-center text-sm">
-          <span className={deliveryFee === 0 ? "text-green-600 font-medium" : "text-gray-500"}>
-            {deliveryFee === 0 ? "Үнэгүй хүргэлт" : `${deliveryFee.toFixed(0)}₮ хүргэлт`}
+          <span className={isFreeDelivery() ? "text-green-600 font-medium" : "text-gray-500"}>
+            {formattedDeliveryFee()}
           </span>
           <span className="mx-2 text-gray-300">•</span>
           <span className="text-gray-500">{estimatedTime}</span>
