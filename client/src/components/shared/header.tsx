@@ -120,8 +120,6 @@ export function Header() {
   
   // Мобайл хэсэгт харуулах цэсүүд
   const getMobileMenuItems = () => {
-    const userRole = user?.role || "customer";
-    
     // Үндсэн цэсүүд бүх хэрэглэгчид харагдана
     const baseMenuItems = (
       <>
@@ -139,7 +137,26 @@ export function Header() {
       </>
     );
     
+    // If not logged in, show only login button
+    if (!user) {
+      return (
+        <>
+          {baseMenuItems}
+          <hr className="my-4" />
+          <Button 
+            variant="ghost" 
+            className="w-full justify-start flex items-center gap-3" 
+            onClick={() => handleNavigate("/login")}
+          >
+            <User className="h-5 w-5" />
+            Нэвтрэх
+          </Button>
+        </>
+      );
+    }
+    
     // Хэрэглэгчийн төрлөөс хамаарч харагдах нэмэлт цэсүүд
+    const userRole = user.role || "customer";
     let roleMenuItems;
     
     switch (userRole) {
@@ -207,6 +224,14 @@ export function Header() {
               <User className="h-5 w-5" />
               Тохиргоо
             </Button>
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start flex items-center gap-3" 
+              onClick={() => handleNavigate("/order/history")}
+            >
+              <ClipboardList className="h-5 w-5" />
+              Захиалгын түүх
+            </Button>
           </>
         );
     }
@@ -216,6 +241,18 @@ export function Header() {
         {baseMenuItems}
         {roleMenuItems}
         <hr className="my-4" />
+        <Button 
+          variant="ghost" 
+          className="w-full justify-start flex items-center gap-3" 
+          onClick={() => {
+            // Reset onboarding to see again
+            localStorage.removeItem('onboardingComplete');
+            window.location.reload();
+          }}
+        >
+          <HelpCircle className="h-5 w-5" />
+          Танилцуулга харах
+        </Button>
         <Button 
           variant="ghost" 
           className="w-full justify-start flex items-center gap-3" 
@@ -245,65 +282,77 @@ export function Header() {
             {getUserTypeNav()}
           </nav>
           
-          {/* User menu */}
-          <div className="hidden md:flex items-center">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="rounded-full text-white hover:bg-white/20">
-                  <User className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {user?.role === "customer" || !user ? (
-                  <>
-                    <DropdownMenuItem onClick={() => handleNavigate("/profile/user")}>
-                      <User className="mr-2 h-4 w-4" />
-                      <span>Хувийн мэдээлэл</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleNavigate("/order/history")}>
-                      <User className="mr-2 h-4 w-4" />
-                      <span>Өмнөх захиалгууд</span>
-                    </DropdownMenuItem>
-                  </>
-                ) : user?.role === "business" ? (
-                  <>
-                    <DropdownMenuItem onClick={() => handleNavigate("/profile/business")}>
-                      <User className="mr-2 h-4 w-4" />
-                      <span>Бизнесийн мэдээлэл</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleNavigate("/dashboard/store")}>
-                      <ShoppingBag className="mr-2 h-4 w-4" />
-                      <span>Барааны жагсаалт</span>
-                    </DropdownMenuItem>
-                  </>
-                ) : (
-                  <>
-                    <DropdownMenuItem onClick={() => handleNavigate("/profile/driver")}>
-                      <User className="mr-2 h-4 w-4" />
-                      <span>Хувийн мэдээлэл</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleNavigate("/dashboard/driver")}>
-                      <Truck className="mr-2 h-4 w-4" />
-                      <span>Хүргэлтүүд</span>
-                    </DropdownMenuItem>
-                  </>
-                )}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => {
-                  // Reset onboarding to see again
-                  localStorage.removeItem('onboardingComplete');
-                  window.location.reload();
-                }}>
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Танилцуулга харах</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleNavigate("/login")}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Гарах</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+          {/* User menu - only show when logged in */}
+          {user ? (
+            <div className="hidden md:flex items-center">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="rounded-full text-white hover:bg-white/20">
+                    <User className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {user.role === "customer" ? (
+                    <>
+                      <DropdownMenuItem onClick={() => handleNavigate("/profile/user")}>
+                        <User className="mr-2 h-4 w-4" />
+                        <span>Хувийн мэдээлэл</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleNavigate("/order/history")}>
+                        <ClipboardList className="mr-2 h-4 w-4" />
+                        <span>Өмнөх захиалгууд</span>
+                      </DropdownMenuItem>
+                    </>
+                  ) : user.role === "business" ? (
+                    <>
+                      <DropdownMenuItem onClick={() => handleNavigate("/profile/business")}>
+                        <User className="mr-2 h-4 w-4" />
+                        <span>Бизнесийн мэдээлэл</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleNavigate("/dashboard/store")}>
+                        <ShoppingBag className="mr-2 h-4 w-4" />
+                        <span>Барааны жагсаалт</span>
+                      </DropdownMenuItem>
+                    </>
+                  ) : (
+                    <>
+                      <DropdownMenuItem onClick={() => handleNavigate("/profile/driver")}>
+                        <User className="mr-2 h-4 w-4" />
+                        <span>Хувийн мэдээлэл</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleNavigate("/dashboard/driver")}>
+                        <Truck className="mr-2 h-4 w-4" />
+                        <span>Хүргэлтүүд</span>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => {
+                    // Reset onboarding to see again
+                    localStorage.removeItem('onboardingComplete');
+                    window.location.reload();
+                  }}>
+                    <HelpCircle className="mr-2 h-4 w-4" />
+                    <span>Танилцуулга харах</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleNavigate("/login")}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Гарах</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          ) : (
+            <div className="hidden md:flex items-center">
+              <Button 
+                variant="ghost" 
+                className="text-white hover:bg-white/20"
+                onClick={() => handleNavigate("/login")}
+              >
+                Нэвтрэх
+              </Button>
+            </div>
+          )}
           
           {/* Mobile menu button */}
           <div className="md:hidden">

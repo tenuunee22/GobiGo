@@ -7,7 +7,10 @@ import {
   onAuthStateChanged,
   GoogleAuthProvider,
   signInWithPopup,
-  updateProfile
+  updateProfile,
+  PhoneAuthProvider,
+  signInWithPhoneNumber,
+  RecaptchaVerifier
 } from "firebase/auth";
 import { 
   getFirestore, 
@@ -50,6 +53,7 @@ try {
 const auth = getAuth();
 const db = getFirestore();
 const googleProvider = new GoogleAuthProvider();
+let recaptchaVerifier: RecaptchaVerifier | null = null;
 
 // User related functions
 export const registerUser = async (email: string, password: string, userData: any) => {
@@ -419,9 +423,67 @@ export const getBusinesses = async (category?: string) => {
   }
 };
 
+// Phone login functions
+export const setupRecaptcha = (containerId: string) => {
+  try {
+    if (!recaptchaVerifier) {
+      recaptchaVerifier = new RecaptchaVerifier(auth, containerId, {
+        size: 'normal',
+        callback: () => {
+          console.log('Captcha solved!');
+        },
+        'expired-callback': () => {
+          console.log('Captcha expired!');
+        }
+      });
+    }
+    return recaptchaVerifier;
+  } catch (error) {
+    console.error("Error setting up recaptcha:", error);
+    throw error;
+  }
+};
+
+export const sendPhoneVerificationCode = async (phoneNumber: string, recaptchaContainerId: string) => {
+  try {
+    const verifier = setupRecaptcha(recaptchaContainerId);
+    const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, verifier);
+    return confirmationResult;
+  } catch (error) {
+    console.error("Error sending verification code:", error);
+    throw error;
+  }
+};
+
+export const verifyPhoneCode = async (confirmationResult: any, code: string) => {
+  try {
+    const userCredential = await confirmationResult.confirm(code);
+    const user = userCredential.user;
+    
+    // Check if user data exists
+    const userDoc = await getDoc(doc(db, "users", user.uid));
+    
+    if (!userDoc.exists()) {
+      // User is logging in for the first time
+      await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid,
+        phoneNumber: user.phoneNumber,
+        role: "customer", // Default role
+        createdAt: serverTimestamp()
+      });
+    }
+    
+    return user;
+  } catch (error) {
+    console.error("Error verifying code:", error);
+    throw error;
+  }
+};
+
 export { 
   app, 
   auth, 
   db, 
-  onAuthStateChanged
+  onAuthStateChanged,
+  recaptchaVerifier
 };
