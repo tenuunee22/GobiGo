@@ -48,4 +48,4 @@ This project is proprietary and is not open for redistribution or copying withou
 
 ---
 
-Designed and developed with ❤️ by the GobiGo Team
+Designed and developed with ❤️ by [te_nuunee22](https://github.com/te_nuunee22)
