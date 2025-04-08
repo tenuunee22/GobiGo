@@ -111,16 +111,24 @@ export function DeliveryDashboard() {
         {user && <WelcomeBanner className="mb-6" />}
       
         {/* Delivery overview section */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Delivery Dashboard</h1>
-          <p className="text-gray-600 mt-2">Хүргэлтийн мэдээлэл, {user?.name || "Driver"}</p>
+        <div className="mb-8 fade-in">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent flex items-center">
+            <span className="mr-3 text-indigo-500 tada text-2xl">🚚</span>
+            Delivery Dashboard 
+          </h1>
+          <p className="text-gray-600 mt-2">Хүргэлтийн мэдээлэл, <span className="font-semibold text-indigo-600">{user?.name || "Driver"}</span></p>
         </div>
         
         {/* Status toggle switch */}
-        <div className="bg-white shadow rounded-lg p-6 mb-8">
+        <div className="bg-white shadow rounded-lg p-6 mb-8 slide-in-left dashboard-card-hover">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-medium text-gray-900">Your Status</h2>
+              <h2 className="text-lg font-medium bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent flex items-center">
+                <span className={`mr-2 text-sm ${isOnline ? "bounce-soft" : "pulse"}`}>
+                  {isOnline ? "🟢" : "🔴"}
+                </span>
+                Your Status
+              </h2>
               <p className="text-sm text-gray-500 mt-1">Toggle your availability for deliveries</p>
             </div>
             <div className="flex items-center">
@@ -137,21 +145,30 @@ export function DeliveryDashboard() {
         </div>
         
         {/* Today's earnings */}
-        <div className="bg-white shadow rounded-lg p-6 mb-8">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Today's Earnings</h2>
+        <div className="bg-white shadow rounded-lg p-6 mb-8 slide-in-right dashboard-card-hover">
+          <h2 className="text-lg font-medium bg-gradient-to-r from-amber-500 to-yellow-600 bg-clip-text text-transparent flex items-center mb-4">
+            <span className="mr-2 wiggle">💰</span>
+            Today's Earnings
+          </h2>
           <div className="flex items-center">
-            <div className="flex-1">
-              <p className="text-3xl font-bold text-gray-900">${earnings.today.toFixed(2)}</p>
-              <p className="text-sm text-gray-500 mt-1">From {earnings.deliveries} deliveries</p>
+            <div className="flex-1 bounce-in">
+              <p className="text-3xl font-bold bg-gradient-to-r from-amber-500 to-yellow-600 bg-clip-text text-transparent">
+                ${earnings.today.toFixed(2)}
+              </p>
+              <p className="text-sm text-gray-500 mt-1 flex items-center">
+                From {earnings.deliveries} deliveries <span className="ml-1 bounce-soft">🚚</span>
+              </p>
             </div>
-            <div className="w-1/2">
+            <div className="w-1/2 fade-in">
               <div className="bg-gray-200 rounded-full h-4">
                 <div 
-                  className="bg-primary rounded-full h-4 transition-all duration-500 ease-in-out" 
+                  className="bg-gradient-to-r from-amber-500 to-yellow-600 rounded-full h-4 transition-all duration-500 ease-in-out progress-loading" 
                   style={{ width: `${earnings.progress}%` }}
                 ></div>
               </div>
-              <p className="text-sm text-gray-500 mt-1">{earnings.progress}% of daily goal</p>
+              <p className="text-sm text-gray-500 mt-1 flex items-center">
+                <span className="pulse mr-1">🎯</span> {earnings.progress}% of daily goal
+              </p>
             </div>
           </div>
         </div>
@@ -159,8 +176,11 @@ export function DeliveryDashboard() {
         {/* Available orders and current delivery */}
         <div className="grid gap-8 md:grid-cols-2">
           {/* Available orders */}
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Available Orders</h2>
+          <div className="bg-white shadow rounded-lg p-6 slide-in-left dashboard-card-hover">
+            <h2 className="text-lg font-medium bg-gradient-to-r from-blue-600 to-indigo-500 bg-clip-text text-transparent flex items-center mb-4">
+              <span className="mr-2 jelly">📋</span>
+              Available Orders
+            </h2>
             
             <div className="flow-root">
               {loading ? (
@@ -198,14 +218,17 @@ export function DeliveryDashboard() {
           
           {/* Current delivery */}
           {currentOrder ? (
-            <div className="bg-white shadow rounded-lg p-6">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">Current Delivery</h2>
+            <div className="bg-white shadow rounded-lg p-6 slide-in-right dashboard-card-hover">
+              <h2 className="text-lg font-medium bg-gradient-to-r from-green-600 to-teal-500 bg-clip-text text-transparent flex items-center mb-4">
+                <span className="mr-2 delivery-pulse">🚚</span>
+                Current Delivery
+              </h2>
               
               <div className="mb-4">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-sm font-semibold text-gray-900">Order #{currentOrder.orderNumber || currentOrder.id.slice(-6)} • {currentOrder.items?.length || 2} items</h3>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-yellow-100 text-yellow-800">
-                    On the way
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-yellow-100 text-yellow-800 pulse">
+                    <span className="mr-1 text-xs">🚗</span> On the way
                   </span>
                 </div>
                 
@@ -253,7 +276,7 @@ export function DeliveryDashboard() {
               
               <div className="flex space-x-3">
                 <Button 
-                  className="flex-1"
+                  className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-md transition-all duration-300 hover:scale-105"
                   onClick={() => {
                     // Open Google Maps with the delivery coordinates
                     const customerLat = currentOrder.deliveryLat || 47.9234676;
@@ -263,34 +286,46 @@ export function DeliveryDashboard() {
                     window.open(mapsUrl, '_blank');
                   }}
                 >
-                  <Navigation className="h-4 w-4 mr-2" />
-                  Navigate
+                  <Navigation className="h-4 w-4 mr-2 bounce-soft" />
+                  <span className="flex items-center">
+                    Navigate <span className="ml-1 text-xs pulse">🧭</span>
+                  </span>
                 </Button>
-                <Button variant="outline" className="flex-1">
-                  <Phone className="h-4 w-4 mr-2" />
-                  Contact Customer
+                <Button 
+                  variant="outline" 
+                  className="flex-1 border-indigo-200 hover:bg-indigo-50 transition-all duration-300 hover:scale-105"
+                >
+                  <Phone className="h-4 w-4 mr-2 wiggle" />
+                  <span className="flex items-center">
+                    Contact <span className="ml-1 text-xs jelly">📱</span>
+                  </span>
                 </Button>
               </div>
               
               <div className="mt-4">
                 <Button 
-                  className="w-full bg-green-600 hover:bg-green-700"
+                  className="w-full bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 shadow-md transition-all duration-300 hover:scale-105"
                   onClick={() => {
                     handleOrderStatusChange();
                   }}
                 >
-                  Complete Delivery
+                  <span className="flex items-center">
+                    <span className="mr-2 text-xs tada">✅</span>
+                    Complete Delivery
+                  </span>
                 </Button>
               </div>
             </div>
           ) : (
-            <div className="bg-white shadow rounded-lg p-6 flex flex-col items-center justify-center text-center">
-              <div className="p-6 rounded-full bg-gray-100 mb-4">
-                <Navigation className="h-10 w-10 text-gray-400" />
+            <div className="bg-white shadow rounded-lg p-6 flex flex-col items-center justify-center text-center slide-in-right dashboard-card-hover">
+              <div className="p-6 rounded-full bg-gradient-to-r from-gray-50 to-blue-50 mb-4 shadow-sm">
+                <Navigation className="h-10 w-10 text-indigo-400 pulse" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No Active Delivery</h3>
+              <h3 className="text-lg font-medium bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2 flex items-center">
+                <span className="mr-2 bounce-soft">🔍</span> No Active Delivery
+              </h3>
               <p className="text-gray-500 max-w-xs">
-                When you accept a delivery order, you will see the details and navigation here.
+                When you accept a delivery order, you will see the details and navigation here. <span className="text-xs jelly inline-block ml-1">👇</span>
               </p>
             </div>
           )}

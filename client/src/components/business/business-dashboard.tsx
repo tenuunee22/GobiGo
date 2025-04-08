@@ -374,17 +374,50 @@ export function BusinessDashboard() {
       
       <Tabs defaultValue="orders">
         <TabsList className="mb-4">
-          <TabsTrigger value="orders">Захиалгууд</TabsTrigger>
-          <TabsTrigger value="shop">Дэлгүүр</TabsTrigger>
+          <TabsTrigger value="orders">
+            <span className="flex items-center gap-1">
+              <span className="text-amber-500 jelly">📋</span>
+              Захиалгууд
+            </span>
+          </TabsTrigger>
+          <TabsTrigger value="shop" className="relative">
+            <span className="flex items-center gap-1">
+              <span className="text-indigo-500 bounce-soft">🏪</span>
+              Дэлгүүр
+            </span>
+            <span className="absolute -top-1 -right-1 text-xs text-green-500 pulse">✓</span>
+          </TabsTrigger>
           <TabsTrigger value="delivery-tracking" className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700 relative overflow-hidden border-b-4 border-indigo-700">
             <Navigation className="h-4 w-4 text-white wobble" />
             <span className="font-medium">Хүргэлт хянах</span>
             <span className="absolute -right-1 -top-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse">3</span>
           </TabsTrigger>
-          <TabsTrigger value="products">Бүтээгдэхүүн</TabsTrigger>
-          <TabsTrigger value="earnings">Орлого</TabsTrigger>
-          <TabsTrigger value="sales">Борлуулалт</TabsTrigger>
-          <TabsTrigger value="settings">Тохиргоо</TabsTrigger>
+          <TabsTrigger value="products" className="relative">
+            <span className="flex items-center gap-1">
+              <span className="text-green-500 spin-slow">🍔</span>
+              Бүтээгдэхүүн
+            </span>
+            <span className="absolute -top-1 -right-1 text-xs text-amber-500 tada">+2</span>
+          </TabsTrigger>
+          <TabsTrigger value="earnings" className="relative">
+            <span className="flex items-center gap-1">
+              <span className="text-amber-500 wiggle">💵</span>
+              <span className="bg-gradient-to-r from-amber-500 to-amber-600 bg-clip-text text-transparent">Орлого</span>
+            </span>
+            <span className="absolute -top-1 -right-1 text-xs text-green-500 pulse">↑</span>
+          </TabsTrigger>
+          <TabsTrigger value="sales">
+            <span className="flex items-center gap-1">
+              <span className="text-blue-500 bounce-slow">📊</span>
+              Борлуулалт
+            </span>
+          </TabsTrigger>
+          <TabsTrigger value="settings">
+            <span className="flex items-center gap-1">
+              <span className="text-gray-500 spin-slow">⚙️</span>
+              Тохиргоо
+            </span>
+          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="orders" className="space-y-4">
@@ -427,9 +460,9 @@ export function BusinessDashboard() {
         </TabsContent>
         
         <TabsContent value="products">
-          <div className="mb-4">
-            <Button onClick={handleAddProduct}>
-              <Plus className="mr-2 h-4 w-4" /> Бүтээгдэхүүн нэмэх
+          <div className="mb-4 slide-in-top">
+            <Button onClick={handleAddProduct} className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-md">
+              <Plus className="mr-2 h-4 w-4 jelly" /> <span className="flex items-center">Бүтээгдэхүүн нэмэх <span className="ml-1 text-xs tada">🍔</span></span>
             </Button>
           </div>
           
@@ -469,11 +502,26 @@ export function BusinessDashboard() {
                     <div className="flex justify-between items-center">
                       <span className="font-medium">{product.price.toLocaleString()}₮</span>
                       <div className="flex space-x-2">
-                        <Button size="sm" onClick={() => handleEditProduct(product)}>
-                          <Settings className="mr-2 h-4 w-4" /> Засах
+                        <Button 
+                          size="sm" 
+                          onClick={() => handleEditProduct(product)} 
+                          className="bg-blue-500 hover:bg-blue-600 transition-all duration-300 hover:scale-105 shadow-sm"
+                        >
+                          <Settings className="mr-2 h-4 w-4 spin-slow" /> 
+                          <span className="flex items-center">
+                            Засах <span className="ml-1 text-xs jelly">✏️</span>
+                          </span>
                         </Button>
-                        <Button size="sm" variant="destructive" onClick={() => handleDeleteProduct(product.id)}>
-                          <Trash2 className="mr-2 h-4 w-4" /> Устгах
+                        <Button 
+                          size="sm" 
+                          variant="destructive" 
+                          onClick={() => handleDeleteProduct(product.id)}
+                          className="transition-all duration-300 hover:scale-105 shadow-sm"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4 wobble" /> 
+                          <span className="flex items-center">
+                            Устгах <span className="ml-1 text-xs bounce-soft">🗑️</span>
+                          </span>
                         </Button>
                       </div>
                     </div>
@@ -484,20 +532,29 @@ export function BusinessDashboard() {
           ) : (
             <div className="text-center py-10">
               <p className="text-gray-500">Одоогоор бүтээгдэхүүн байхгүй байна</p>
-              <Button onClick={handleAddProduct} className="mt-4">
-                <Plus className="mr-2 h-4 w-4" /> Бүтээгдэхүүн нэмэх
+              <Button 
+                onClick={handleAddProduct} 
+                className="mt-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-md transition-all duration-300 hover:scale-105"
+              >
+                <Plus className="mr-2 h-4 w-4 wiggle" /> 
+                <span className="flex items-center">
+                  Бүтээгдэхүүн нэмэх <span className="ml-1 text-xs jelly">🍔</span>
+                </span>
               </Button>
             </div>
           )}
         </TabsContent>
         
         <TabsContent value="shop">
-          <Card>
+          <Card className="slide-in-left">
             <CardHeader>
-              <CardTitle>Дэлгүүрийн хуудас</CardTitle>
+              <CardTitle className="flex items-center">
+                <span className="text-indigo-500 bounce-soft mr-2">🏪</span>
+                <span className="bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text text-transparent">Дэлгүүрийн хуудас</span>
+              </CardTitle>
               <p className="text-sm text-gray-500">Энэ хэсэгт таны дэлгүүрийн үзэгдэх байдал харагдана</p>
             </CardHeader>
-            <CardContent>
+            <CardContent className="slide-in-bottom">
               <div className="mb-6">
                 <h2 className="text-xl font-bold mb-4">{user?.businessName || "Танай дэлгүүр"}</h2>
                 
@@ -604,16 +661,30 @@ export function BusinessDashboard() {
                   ) : (
                     <div className="text-center py-6 bg-gray-50 rounded-lg">
                       <p className="text-gray-500">Одоогоор бүтээгдэхүүн байхгүй байна</p>
-                      <Button onClick={handleAddProduct} size="sm" className="mt-2">
-                        <Plus className="mr-1 h-3 w-3" /> Бүтээгдэхүүн нэмэх
+                      <Button 
+                        onClick={handleAddProduct} 
+                        size="sm" 
+                        className="mt-2 bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 shadow-sm transition-all duration-300 hover:scale-105"
+                      >
+                        <Plus className="mr-1 h-3 w-3 bounce-soft" /> 
+                        <span className="flex items-center">
+                          Бүтээгдэхүүн нэмэх <span className="ml-1 text-xs jelly">🧁</span>
+                        </span>
                       </Button>
                     </div>
                   )}
                   
                   {filteredProducts.length > 8 && (
                     <div className="text-center mt-4">
-                      <Button variant="outline">
-                        Бүгдийг харах ({filteredProducts.length})
+                      <Button 
+                        variant="outline" 
+                        className="transition-all duration-300 hover:shadow-md hover:bg-gray-50 hover:scale-105 border-indigo-200"
+                      >
+                        <span className="flex items-center">
+                          <span className="text-xs mr-2 pulse">🔍</span>
+                          Бүгдийг харах ({filteredProducts.length})
+                          <span className="ml-2 text-xs bounce-soft">👉</span>
+                        </span>
                       </Button>
                     </div>
                   )}
@@ -689,11 +760,14 @@ export function BusinessDashboard() {
         </TabsContent>
         
         <TabsContent value="earnings">
-          <Card>
+          <Card className="bounce-in">
             <CardHeader>
-              <CardTitle>Орлогын мэдээлэл</CardTitle>
+              <CardTitle className="flex items-center">
+                <span className="text-amber-500 wiggle mr-2">💵</span>
+                <span className="bg-gradient-to-r from-amber-500 to-amber-600 bg-clip-text text-transparent">Орлогын мэдээлэл</span>
+              </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="slide-in-right">
               <div className="mb-8">
                 <h3 className="text-lg font-semibold mb-4">Орлогын хураангуй</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -1184,11 +1258,14 @@ export function BusinessDashboard() {
         </TabsContent>
         
         <TabsContent value="settings">
-          <Card>
+          <Card className="slide-in-bottom">
             <CardHeader>
-              <CardTitle>Бизнес тохиргоо</CardTitle>
+              <CardTitle className="flex items-center">
+                <span className="text-gray-500 spin-slow mr-2">⚙️</span>
+                <span className="bg-gradient-to-r from-gray-700 to-gray-900 bg-clip-text text-transparent">Бизнес тохиргоо</span>
+              </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="fade-in">
               <p className="text-gray-500 mb-6">
                 Энэ хэсэгт та өөрийн бизнесийн үндсэн тохиргоог хийх боломжтой.
               </p>
@@ -1267,7 +1344,7 @@ export function BusinessDashboard() {
                   />
                 </div>
                 
-                <div className="pt-4">
+                <div className="pt-4 slide-in-top">
                   <Button 
                     onClick={() => {
                       toast({
@@ -1275,8 +1352,13 @@ export function BusinessDashboard() {
                         description: "Таны бизнесийн мэдээлэл амжилттай шинэчлэгдлээ",
                       });
                     }}
+                    className="bg-gradient-to-r from-gray-700 to-gray-900 hover:from-gray-800 hover:to-black shadow-lg transition-all duration-300 hover:scale-105"
                   >
-                    Тохиргоо хадгалах
+                    <span className="flex items-center">
+                      <span className="text-xs mr-2 spin-slow">⚙️</span>
+                      Тохиргоо хадгалах
+                      <span className="ml-2 text-xs tada">✓</span>
+                    </span>
                   </Button>
                 </div>
               </div>
@@ -1376,9 +1458,14 @@ export function BusinessDashboard() {
                 </div>
                 
                 <div className="mt-6 pt-4 border-t">
-                  <Button className="w-full" variant="default">
-                    <Phone className="mr-2 h-4 w-4" />
-                    Хэрэглэгчтэй холбогдох
+                  <Button 
+                    className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-md transition-all duration-300 hover:scale-105"
+                    variant="default"
+                  >
+                    <Phone className="mr-2 h-4 w-4 wiggle" />
+                    <span className="flex items-center">
+                      Хэрэглэгчтэй холбогдох <span className="ml-2 text-xs pulse">📱</span>
+                    </span>
                   </Button>
                 </div>
               </CardContent>
