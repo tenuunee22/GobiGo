@@ -1,373 +1,338 @@
-import { useState } from "react";
-import { useLocation } from "wouter";
+import { Link } from "wouter";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/auth-context";
+import { logoutUser } from "@/lib/firebase";
+import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { 
-  Sheet, 
-  SheetContent, 
-  SheetTrigger 
-} from "@/components/ui/sheet";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
-import { 
-  Menu, 
-  User, 
-  LogOut, 
-  Store, 
-  Truck, 
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import {
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuList,
+  NavigationMenuLink,
+} from "@/components/ui/navigation-menu";
+import {
+  Home,
+  User,
+  Store,
+  LogOut,
+  Menu,
+  Package,
+  Search,
+  Clock,
   ShoppingBag,
-  Pizza,
-  Image,
-  Camera,
-  ClipboardList,
-  HelpCircle 
+  DollarSign,
+  Car,
+  Settings,
+  ChevronDown
 } from "lucide-react";
 
 export function Header() {
-  const [location, setLocation] = useLocation();
   const { user } = useAuth();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { toast } = useToast();
+  const isMobile = useIsMobile();
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [greeting, setGreeting] = useState("");
   
-  const handleNavigate = (path: string) => {
-    setLocation(path);
-    setIsMenuOpen(false);
-  };
-  
-  const getUserRoleBasedLink = () => {
-    if (!user) return "/login";
-    
-    // This could be extended to check user.role and return different links
-    // based on the user's role (customer, business, delivery)
-    // For demo purposes, make all role-related pages accessible
-    return "/profile/user";
-  };
-  
-  // Хэрэглэгчийн төрлөөс хамаарч харуулах цэсүүд
-  const getUserTypeNav = () => {
-    const userRole = user?.role || "customer"; // Хэрэглэгчийн төрөл
-    
-    switch (userRole) {
-      case "business":
-        return (
-          <>
-            <Button 
-              variant="ghost" 
-              className="flex items-center gap-2 text-white hover:bg-white/20" 
-              onClick={() => handleNavigate("/dashboard/store")}
-            >
-              <Store className="h-4 w-4" />
-              Бараа бүтээгдэхүүн
-            </Button>
-            <Button 
-              variant="ghost" 
-              className="flex items-center gap-2 text-white hover:bg-white/20" 
-              onClick={() => handleNavigate("/profile/business")}
-            >
-              <User className="h-4 w-4" />
-              Тохиргоо
-            </Button>
-          </>
-        );
-      case "delivery":
-        return (
-          <>
-            <Button 
-              variant="ghost" 
-              className="flex items-center gap-2 text-white hover:bg-white/20" 
-              onClick={() => handleNavigate("/dashboard/driver")}
-            >
-              <Truck className="h-4 w-4" />
-              Хүргэлтүүд
-            </Button>
-            <Button 
-              variant="ghost" 
-              className="flex items-center gap-2 text-white hover:bg-white/20" 
-              onClick={() => handleNavigate("/profile/driver")}
-            >
-              <User className="h-4 w-4" />
-              Тохиргоо
-            </Button>
-          </>
-        );
-      default: // customer
-        return (
-          <>
-            <Button 
-              variant="ghost" 
-              className="flex items-center gap-2 text-white hover:bg-white/20" 
-              onClick={() => handleNavigate("/")}
-            >
-              <ShoppingBag className="h-4 w-4" />
-              Захиалах
-            </Button>
-            <Button 
-              variant="ghost" 
-              className="flex items-center gap-2 text-white hover:bg-white/20" 
-              onClick={() => handleNavigate("/profile/user")}
-            >
-              <User className="h-4 w-4" />
-              Тохиргоо
-            </Button>
-          </>
-        );
+  // Set greeting based on time of day
+  useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) {
+      setGreeting("Өглөөний мэнд");
+    } else if (hour >= 12 && hour < 18) {
+      setGreeting("Өдрийн мэнд");
+    } else {
+      setGreeting("Оройн мэнд");
     }
-  };
+  }, []);
   
-  // Мобайл хэсэгт харуулах цэсүүд
-  const getMobileMenuItems = () => {
-    // Үндсэн цэсүүд бүх хэрэглэгчид харагдана
-    const baseMenuItems = (
-      <>
-        <div className="my-2 text-sm font-medium text-gray-500 uppercase">
-          Үндсэн цэс
-        </div>
-        <Button 
-          variant="ghost" 
-          className="w-full justify-start flex items-center gap-3" 
-          onClick={() => handleNavigate("/")}
-        >
-          <ShoppingBag className="h-5 w-5" />
-          Захиалах
-        </Button>
-      </>
-    );
+  // Change header on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 10) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
     
-    // If not logged in, show only login button
-    if (!user) {
-      return (
-        <>
-          {baseMenuItems}
-          <hr className="my-4" />
-          <Button 
-            variant="ghost" 
-            className="w-full justify-start flex items-center gap-3" 
-            onClick={() => handleNavigate("/login")}
-          >
-            <User className="h-5 w-5" />
-            Нэвтрэх
-          </Button>
-        </>
-      );
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+  
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+      toast({
+        title: "Амжилттай гарлаа",
+        description: "Таны бүртгэлээс гарлаа",
+      });
+    } catch (error) {
+      toast({
+        title: "Алдаа гарлаа",
+        description: "Гарах үед алдаа гарлаа. Дахин оролдоно уу.",
+        variant: "destructive",
+      });
     }
-    
-    // Хэрэглэгчийн төрлөөс хамаарч харагдах нэмэлт цэсүүд
-    const userRole = user.role || "customer";
-    let roleMenuItems;
-    
-    switch (userRole) {
-      case "business":
-        roleMenuItems = (
-          <>
-            <div className="my-2 text-sm font-medium text-gray-500 uppercase mt-4">
-              Бизнесийн цэс
-            </div>
-            <Button 
-              variant="ghost" 
-              className="w-full justify-start flex items-center gap-3" 
-              onClick={() => handleNavigate("/dashboard/store")}
-            >
-              <Store className="h-5 w-5" />
-              Бараа бүтээгдэхүүн
-            </Button>
-            <Button 
-              variant="ghost" 
-              className="w-full justify-start flex items-center gap-3" 
-              onClick={() => handleNavigate("/profile/business")}
-            >
-              <User className="h-5 w-5" />
-              Тохиргоо
-            </Button>
-          </>
-        );
-        break;
-      case "delivery":
-        roleMenuItems = (
-          <>
-            <div className="my-2 text-sm font-medium text-gray-500 uppercase mt-4">
-              Хүргэлтийн цэс
-            </div>
-            <Button 
-              variant="ghost" 
-              className="w-full justify-start flex items-center gap-3" 
-              onClick={() => handleNavigate("/dashboard/driver")}
-            >
-              <Truck className="h-5 w-5" />
-              Хүргэлтүүд
-            </Button>
-            <Button 
-              variant="ghost" 
-              className="w-full justify-start flex items-center gap-3" 
-              onClick={() => handleNavigate("/profile/driver")}
-            >
-              <User className="h-5 w-5" />
-              Тохиргоо
-            </Button>
-          </>
-        );
-        break;
-      default: // customer
-        roleMenuItems = (
-          <>
-            <div className="my-2 text-sm font-medium text-gray-500 uppercase mt-4">
-              Хэрэглэгчийн цэс
-            </div>
-            <Button 
-              variant="ghost" 
-              className="w-full justify-start flex items-center gap-3" 
-              onClick={() => handleNavigate("/profile/user")}
-            >
-              <User className="h-5 w-5" />
-              Тохиргоо
-            </Button>
-            <Button 
-              variant="ghost" 
-              className="w-full justify-start flex items-center gap-3" 
-              onClick={() => handleNavigate("/order/history")}
-            >
-              <ClipboardList className="h-5 w-5" />
-              Захиалгын түүх
-            </Button>
-          </>
-        );
-    }
-    
-    return (
-      <>
-        {baseMenuItems}
-        {roleMenuItems}
-        <hr className="my-4" />
-        <Button 
-          variant="ghost" 
-          className="w-full justify-start flex items-center gap-3" 
-          onClick={() => {
-            // Reset onboarding to see again
-            localStorage.removeItem('onboardingComplete');
-            window.location.reload();
-          }}
-        >
-          <HelpCircle className="h-5 w-5" />
-          Танилцуулга харах
-        </Button>
-        <Button 
-          variant="ghost" 
-          className="w-full justify-start flex items-center gap-3" 
-          onClick={() => handleNavigate("/login")}
-        >
-          <LogOut className="h-5 w-5" />
-          Гарах
-        </Button>
-      </>
-    );
   };
 
+  // Get correct profile link based on user role
+  const getProfileLink = () => {
+    if (!user) return "/login";
+    
+    switch (user.role) {
+      case "business":
+        return "/profile/business";
+      case "delivery":
+        return "/profile/driver";
+      case "customer":
+      default:
+        return "/profile/user";
+    }
+  };
+  
+  // Content for customer
+  const customerNav = () => (
+    <>
+      <NavigationMenuItem>
+        <Link href="/dashboard">
+          <div className="px-3 py-2 flex items-center gap-2 hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer">
+            <Home size={18} /> Нүүр
+          </div>
+        </Link>
+      </NavigationMenuItem>
+      <NavigationMenuItem>
+        <Link href="/search">
+          <div className="px-3 py-2 flex items-center gap-2 hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer">
+            <Search size={18} /> Хайх
+          </div>
+        </Link>
+      </NavigationMenuItem>
+      <NavigationMenuItem>
+        <Link href="/orders">
+          <div className="px-3 py-2 flex items-center gap-2 hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer">
+            <Clock size={18} /> Захиалгууд
+          </div>
+        </Link>
+      </NavigationMenuItem>
+      <NavigationMenuItem>
+        <Link href="/cart">
+          <div className="px-3 py-2 flex items-center gap-2 hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer">
+            <ShoppingBag size={18} /> Сагс
+          </div>
+        </Link>
+      </NavigationMenuItem>
+    </>
+  );
+  
+  // Content for business
+  const businessNav = () => (
+    <>
+      <NavigationMenuItem>
+        <Link href="/dashboard/store">
+          <div className="px-3 py-2 flex items-center gap-2 hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer">
+            <Store size={18} /> Дэлгүүр
+          </div>
+        </Link>
+      </NavigationMenuItem>
+      <NavigationMenuItem>
+        <Link href="/products">
+          <div className="px-3 py-2 flex items-center gap-2 hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer">
+            <Package size={18} /> Бүтээгдэхүүн
+          </div>
+        </Link>
+      </NavigationMenuItem>
+      <NavigationMenuItem>
+        <Link href="/business-orders">
+          <div className="px-3 py-2 flex items-center gap-2 hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer">
+            <Clock size={18} /> Захиалгууд
+          </div>
+        </Link>
+      </NavigationMenuItem>
+      <NavigationMenuItem>
+        <Link href="/earnings">
+          <div className="px-3 py-2 flex items-center gap-2 hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer">
+            <DollarSign size={18} /> Орлого
+          </div>
+        </Link>
+      </NavigationMenuItem>
+    </>
+  );
+  
+  // Content for delivery driver
+  const deliveryNav = () => (
+    <>
+      <NavigationMenuItem>
+        <Link href="/dashboard/driver">
+          <div className="px-3 py-2 flex items-center gap-2 hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer">
+            <Car size={18} /> Хүргэлт
+          </div>
+        </Link>
+      </NavigationMenuItem>
+      <NavigationMenuItem>
+        <Link href="/delivery-history">
+          <div className="px-3 py-2 flex items-center gap-2 hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer">
+            <Clock size={18} /> Хүргэлтийн түүх
+          </div>
+        </Link>
+      </NavigationMenuItem>
+      <NavigationMenuItem>
+        <Link href="/earnings">
+          <div className="px-3 py-2 flex items-center gap-2 hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer">
+            <DollarSign size={18} /> Орлого
+          </div>
+        </Link>
+      </NavigationMenuItem>
+    </>
+  );
+  
+  // Mobile drawer content
+  const mobileNavItems = () => {
+    if (!user) return customerNav();
+    
+    switch (user.role) {
+      case "business":
+        return businessNav();
+      case "delivery":
+        return deliveryNav();
+      case "customer":
+      default:
+        return customerNav();
+    }
+  };
+  
+  // Desktop navigation content
+  const desktopNavItems = () => {
+    if (!user) return customerNav();
+    
+    switch (user.role) {
+      case "business":
+        return businessNav();
+      case "delivery":
+        return deliveryNav();
+      case "customer":
+      default:
+        return customerNav();
+    }
+  };
+  
   return (
-    <header className="header-gradient text-white sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <div className="flex-shrink-0 cursor-pointer" onClick={() => handleNavigate("/")}>
-            <div className="flex items-center">
-              <span className="font-bold text-xl text-white">GobiGo</span>
-              <span className="ml-1 text-gray-200 text-sm">Хүргэлт</span>
-            </div>
+    <header className={`sticky top-0 z-50 transition-all duration-300 ${isScrolled ? "bg-white shadow-md" : "bg-transparent"}`}>
+      <div className="container mx-auto px-4 py-3">
+        <div className="flex justify-between items-center">
+          {/* Logo and Welcome Message */}
+          <div className="flex items-center gap-2">
+            <Link href="/">
+              <span className="text-xl font-bold text-primary cursor-pointer">GobiGo</span>
+            </Link>
+            
+            {user && (
+              <div className="hidden md:block ml-4 text-sm text-gray-600">
+                {greeting}, {user.name || user.displayName || "Хэрэглэгч"}!
+              </div>
+            )}
           </div>
           
-          {/* Desktop navigation */}
-          <nav className="hidden md:flex space-x-6">
-            {getUserTypeNav()}
-          </nav>
+          {/* Navigation - Desktop */}
+          {!isMobile && (
+            <NavigationMenu className="hidden md:block">
+              <NavigationMenuList className="flex gap-1">
+                {desktopNavItems()}
+              </NavigationMenuList>
+            </NavigationMenu>
+          )}
           
-          {/* User menu - only show when logged in */}
-          {user ? (
-            <div className="hidden md:flex items-center">
+          {/* User Menu */}
+          <div className="flex items-center gap-4">
+            {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="rounded-full text-white hover:bg-white/20">
-                    <User className="h-5 w-5" />
+                  <Button variant="ghost" className="p-0 h-auto hover:bg-transparent">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={user.profileImage} alt={user.name || user.displayName || "User"} />
+                      <AvatarFallback className="bg-primary text-primary-foreground">
+                        {(user.name || user.displayName || "U").charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <ChevronDown size={16} className="ml-1" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  {user.role === "customer" ? (
-                    <>
-                      <DropdownMenuItem onClick={() => handleNavigate("/profile/user")}>
-                        <User className="mr-2 h-4 w-4" />
-                        <span>Хувийн мэдээлэл</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleNavigate("/order/history")}>
-                        <ClipboardList className="mr-2 h-4 w-4" />
-                        <span>Өмнөх захиалгууд</span>
-                      </DropdownMenuItem>
-                    </>
-                  ) : user.role === "business" ? (
-                    <>
-                      <DropdownMenuItem onClick={() => handleNavigate("/profile/business")}>
-                        <User className="mr-2 h-4 w-4" />
-                        <span>Бизнесийн мэдээлэл</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleNavigate("/dashboard/store")}>
-                        <ShoppingBag className="mr-2 h-4 w-4" />
-                        <span>Барааны жагсаалт</span>
-                      </DropdownMenuItem>
-                    </>
-                  ) : (
-                    <>
-                      <DropdownMenuItem onClick={() => handleNavigate("/profile/driver")}>
-                        <User className="mr-2 h-4 w-4" />
-                        <span>Хувийн мэдээлэл</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleNavigate("/dashboard/driver")}>
-                        <Truck className="mr-2 h-4 w-4" />
-                        <span>Хүргэлтүүд</span>
-                      </DropdownMenuItem>
-                    </>
-                  )}
+                  <DropdownMenuLabel>Миний бүртгэл</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => {
-                    // Reset onboarding to see again
-                    localStorage.removeItem('onboardingComplete');
-                    window.location.reload();
-                  }}>
-                    <HelpCircle className="mr-2 h-4 w-4" />
-                    <span>Танилцуулга харах</span>
+                  <DropdownMenuItem asChild>
+                    <Link href={getProfileLink()}>
+                      <div className="flex items-center gap-2 cursor-pointer">
+                        <User size={16} /> Профайл
+                      </div>
+                    </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleNavigate("/login")}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Гарах</span>
+                  <DropdownMenuItem asChild>
+                    <Link href="/settings">
+                      <div className="flex items-center gap-2 cursor-pointer">
+                        <Settings size={16} /> Тохиргоо
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+                    <LogOut size={16} className="mr-2" /> Гарах
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            </div>
-          ) : (
-            <div className="hidden md:flex items-center">
-              <Button 
-                variant="ghost" 
-                className="text-white hover:bg-white/20"
-                onClick={() => handleNavigate("/login")}
-              >
-                Нэвтрэх
+            ) : (
+              <Button asChild>
+                <Link href="/login">Нэвтрэх</Link>
               </Button>
-            </div>
-          )}
-          
-          {/* Mobile menu button */}
-          <div className="md:hidden">
-            <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-10 w-10 text-white hover:bg-white/20">
-                  <Menu className="h-6 w-6" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-[80%] sm:w-[350px]">
-                <div className="mt-8 flex flex-col space-y-3">
-                  {getMobileMenuItems()}
-                </div>
-              </SheetContent>
-            </Sheet>
+            )}
+            
+            {/* Mobile Menu Trigger */}
+            {isMobile && (
+              <Drawer>
+                <DrawerTrigger asChild>
+                  <Button variant="outline" size="icon">
+                    <Menu />
+                  </Button>
+                </DrawerTrigger>
+                <DrawerContent>
+                  <DrawerHeader>
+                    <DrawerTitle>GobiGo</DrawerTitle>
+                  </DrawerHeader>
+                  <div className="px-4 py-2 space-y-2">
+                    <NavigationMenu className="flex flex-col w-full">
+                      <NavigationMenuList className="flex flex-col w-full gap-1">
+                        {mobileNavItems()}
+                      </NavigationMenuList>
+                    </NavigationMenu>
+                  </div>
+                  <DrawerFooter>
+                    <DrawerClose asChild>
+                      <Button variant="outline">Хаах</Button>
+                    </DrawerClose>
+                  </DrawerFooter>
+                </DrawerContent>
+              </Drawer>
+            )}
           </div>
         </div>
       </div>

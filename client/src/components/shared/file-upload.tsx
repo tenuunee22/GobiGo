@@ -1,158 +1,219 @@
-import React, { useState, useRef, ChangeEvent } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { ImageIcon, Upload, X, FileImage } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useState, useEffect, useRef } from "react";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { AlertCircle, ImagePlus, X, Camera, FileUp, FileImage } from "lucide-react";
 
 interface FileUploadProps {
   onFileSelect: (file: File) => void;
   onFileRemove?: () => void;
-  accept?: string;
-  maxSizeMB?: number;
   label?: string;
   previewUrl?: string;
+  maxSizeMB?: number;
+  acceptedTypes?: string;
   disabled?: boolean;
 }
 
 export function FileUpload({
   onFileSelect,
   onFileRemove,
-  accept = "image/*",
-  maxSizeMB = 5,
-  label = "Зураг оруулах",
+  label = "Файл оруулах",
   previewUrl,
-  disabled = false
+  maxSizeMB = 5,
+  acceptedTypes = "image/*",
+  disabled = false,
 }: FileUploadProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | undefined>(previewUrl);
   const [isDragging, setIsDragging] = useState(false);
-  const { toast } = useToast();
-
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const maxSize = maxSizeMB * 1024 * 1024; // Convert MB to bytes
+  
+  // Update preview if previewUrl changes
+  useEffect(() => {
+    setPreview(previewUrl);
+  }, [previewUrl]);
+  
+  // Handle file selection from input
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
     handleFile(file);
   };
-
+  
+  // Handle file drop
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragging(false);
+    
+    if (disabled) return;
+    
+    const file = event.dataTransfer.files?.[0];
+    handleFile(file);
+  };
+  
+  // Validate and process file
   const handleFile = (file?: File) => {
-    if (!file) return;
-
-    // Validate file size
-    const maxSizeBytes = maxSizeMB * 1024 * 1024;
-    if (file.size > maxSizeBytes) {
-      toast({
-        title: 'Файл хэтэрхий том байна',
-        description: `${maxSizeMB}MB-ээс бага хэмжээтэй файл оруулна уу`,
-        variant: 'destructive',
-      });
+    if (!file) {
+      setError("Файл сонгогдоогүй байна");
       return;
     }
-
-    // Create preview
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setPreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
-
-    // Call parent callback
+    
+    // Validate file size
+    if (file.size > maxSize) {
+      setError(`Файлын хэмжээ хэтэрсэн байна. Дээд хэмжээ: ${maxSizeMB}MB`);
+      return;
+    }
+    
+    // Validate file type
+    if (acceptedTypes !== "*" && !file.type.match(acceptedTypes.replace(/\*/g, ".*"))) {
+      setError(`Зөвшөөрөгдөөгүй файлын төрөл. Зөвшөөрөгдсөн төрлүүд: ${acceptedTypes}`);
+      return;
+    }
+    
+    // Create preview for image files
+    if (file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      // For non-image files, use a placeholder or clear preview
+      setPreview(undefined);
+    }
+    
+    setError(null);
     onFileSelect(file);
   };
-
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files[0];
-    handleFile(file);
-  };
-
-  const handleRemove = () => {
-    setPreview(undefined);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+  
+  // Handle drag events
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    if (!disabled) {
+      setIsDragging(true);
     }
+  };
+  
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+  
+  // Handle browse button click
+  const handleBrowseClick = () => {
+    if (fileInputRef.current && !disabled) {
+      fileInputRef.current.click();
+    }
+  };
+  
+  // Clear selected file and preview
+  const handleClear = () => {
+    setPreview(undefined);
+    setError(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+    // Call onFileRemove if provided
     if (onFileRemove) {
       onFileRemove();
     }
   };
-
+  
   return (
-    <div className="w-full">
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleFileChange}
-        accept={accept}
-        className="hidden"
-        disabled={disabled}
-      />
-
-      {preview ? (
-        <div className="relative">
-          <Card className="overflow-hidden">
-            <CardContent className="p-0">
-              <img 
-                src={preview} 
-                alt="Preview" 
-                className="w-full h-auto max-h-60 object-contain"
-              />
-            </CardContent>
-          </Card>
-          <Button
-            type="button"
-            size="icon"
-            variant="destructive"
-            className="absolute -top-2 -right-2 rounded-full h-8 w-8"
-            onClick={handleRemove}
-            disabled={disabled}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-      ) : (
-        <div
-          className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors
-            ${isDragging ? 'border-primary bg-primary/10' : 'border-gray-300 hover:border-primary hover:bg-gray-50'}
-          `}
-          onClick={() => !disabled && fileInputRef.current?.click()}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-        >
-          <div className="flex flex-col items-center justify-center gap-2">
-            {accept.includes('image') ? (
-              <ImageIcon className="h-10 w-10 text-gray-400" />
-            ) : (
-              <FileImage className="h-10 w-10 text-gray-400" />
+    <div className="space-y-2">
+      <Label htmlFor="file-upload">{label}</Label>
+      
+      <div
+        className={`relative border-2 border-dashed rounded-lg p-4 transition-colors
+          ${isDragging ? "border-primary bg-primary/5" : "border-gray-200 hover:border-primary/50"}
+          ${disabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        onClick={handleBrowseClick}
+      >
+        <Input
+          id="file-upload"
+          ref={fileInputRef}
+          type="file"
+          accept={acceptedTypes}
+          onChange={handleFileChange}
+          className="hidden"
+          disabled={disabled}
+        />
+        
+        {preview ? (
+          <div className="relative">
+            <img
+              src={preview}
+              alt="Preview"
+              className="mx-auto max-h-64 rounded-md object-contain"
+            />
+            {!disabled && (
+              <Button
+                type="button"
+                variant="destructive"
+                size="icon"
+                className="absolute top-2 right-2 h-8 w-8 rounded-full"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleClear();
+                }}
+              >
+                <X className="h-4 w-4" />
+              </Button>
             )}
-            <div className="font-medium text-gray-700">{label}</div>
-            <div className="text-sm text-gray-500">
-              Чирч оруулах эсвэл дарж файл сонгоно уу
-            </div>
-            <div className="text-xs text-gray-400">
-              Файлын дээд хэмжээ: {maxSizeMB}MB
-            </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="mt-2 flex items-center gap-1"
-              disabled={disabled}
-            >
-              <Upload className="h-4 w-4" />
-              <span>Файл сонгох</span>
-            </Button>
           </div>
+        ) : (
+          <div className="text-center py-6">
+            <FileImage className="h-10 w-10 mx-auto mb-2 text-gray-400" />
+            <div className="text-sm font-medium mb-1">
+              {acceptedTypes.includes("image")
+                ? "Зураг оруулахын тулд энд дарна уу"
+                : "Файл оруулахын тулд энд дарна уу"}
+            </div>
+            <p className="text-xs text-gray-500">
+              Файлаа энд чирч оруулж эсвэл <span className="text-primary">сонгоно</span> уу
+            </p>
+            <p className="text-xs text-gray-500 mt-1">
+              Дээд хэмжээ: {maxSizeMB}MB
+            </p>
+          </div>
+        )}
+      </div>
+      
+      {error && (
+        <div className="flex items-center text-sm text-red-500 mt-1">
+          <AlertCircle className="h-4 w-4 mr-1 flex-shrink-0" />
+          <span>{error}</span>
         </div>
       )}
+      
+      <div className="flex space-x-2">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={handleBrowseClick}
+          disabled={disabled}
+          className="flex-1"
+        >
+          <FileUp className="h-4 w-4 mr-2" />
+          Файл сонгох
+        </Button>
+        {preview && (
+          <Button
+            type="button"
+            variant="destructive"
+            size="sm"
+            onClick={handleClear}
+            disabled={disabled}
+          >
+            <X className="h-4 w-4 mr-2" />
+            Устгах
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

@@ -28,6 +28,7 @@ interface OrderItemProps {
     name: string;
     quantity: number;
     price: number;
+    imageUrl?: string;
   }>;
   total: number;
   status: string;
@@ -142,12 +143,28 @@ export function OrderItem({
             <div className="mt-4 space-y-4">
               <div>
                 <h3 className="text-sm font-medium mb-2">Захиалгын мэдээлэл</h3>
-                <div className="grid grid-cols-1 gap-2">
+                <div className="grid grid-cols-1 gap-3">
                   {items.map((item, index) => (
-                    <div key={index} className="flex justify-between text-sm">
-                      <span>
-                        {item.quantity} x {item.name}
-                      </span>
+                    <div key={index} className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2">
+                        {/* Item image */}
+                        <div className="w-10 h-10 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
+                          {item.imageUrl ? (
+                            <img 
+                              src={item.imageUrl} 
+                              alt={item.name} 
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                              Зураггүй
+                            </div>
+                          )}
+                        </div>
+                        <span>
+                          {item.quantity} x {item.name}
+                        </span>
+                      </div>
                       <span className="font-medium">
                         {item.price.toLocaleString()}₮
                       </span>

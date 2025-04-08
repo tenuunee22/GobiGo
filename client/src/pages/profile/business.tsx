@@ -1,84 +1,69 @@
-import { UserProfileSettings } from "@/components/shared/user-profile-settings";
-import { BusinessDashboard } from "@/components/business/business-dashboard";
-import { LocationPicker } from "@/components/business/location-picker";
-import { FileUpload } from "@/components/shared/file-upload";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Store, ShoppingBag, Settings, MapPin, ImageIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/auth-context";
-import { updateBusinessLocation, getUserData, updateBusinessProfile, uploadFile } from "@/lib/firebase";
+import { getUserData, updateBusinessProfile, uploadFile } from "@/lib/firebase";
+import { LocationPicker } from "@/components/business/location-picker";
+import { FileUpload } from "@/components/shared/file-upload";
 import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
+import { Store, ImageIcon, MapPin, Settings } from "lucide-react";
+import { BusinessDashboard } from "@/components/business/business-dashboard";
 
 export default function BusinessProfile() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [businessLocation, setBusinessLocation] = useState<{
-    lat: number;
-    lng: number;
-    address?: string;
-  } | null>(null);
-  const [logoUrl, setLogoUrl] = useState<string | undefined>(undefined);
-  const [bannerUrl, setBannerUrl] = useState<string | undefined>(undefined);
+  const [logoImage, setLogoImage] = useState<string | undefined>(undefined);
+  const [coverImage, setCoverImage] = useState<string | undefined>(undefined);
+  const [businessName, setBusinessName] = useState("");
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("restaurant");
+  const [location, setLocation] = useState<{ lat: number; lng: number; address: string } | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   
-  // Load saved location and images when component mounts
+  // Load profile data
   useEffect(() => {
-    async function loadUserData() {
+    async function loadBusinessData() {
       if (user && user.uid) {
         try {
           const userData = await getUserData(user.uid);
           if (userData) {
-            // Load location
+            setBusinessName(userData.businessName || "");
+            setDescription(userData.description || "");
+            setCategory(userData.category || "restaurant");
+            
             if (userData.location) {
-              setBusinessLocation(userData.location);
+              setLocation(userData.location);
             }
             
-            // Load images
             if (userData.logoUrl) {
-              setLogoUrl(userData.logoUrl);
+              setLogoImage(userData.logoUrl);
             }
             
-            if (userData.bannerUrl) {
-              setBannerUrl(userData.bannerUrl);
+            if (userData.coverUrl) {
+              setCoverImage(userData.coverUrl);
             }
           }
         } catch (error) {
-          console.error("Error loading user data:", error);
+          console.error("Error loading business data:", error);
         }
       }
     }
     
-    loadUserData();
+    loadBusinessData();
   }, [user]);
-
-  // Handler for when location changes
-  const handleLocationChange = async (location: { lat: number; lng: number; address: string }) => {
-    setBusinessLocation(location);
-    
-    // If user is logged in, save location to Firestore
-    if (user && user.uid) {
-      try {
-        await updateBusinessLocation(user.uid, location);
-        
-        toast({
-          title: "Байршил хадгалагдлаа",
-          description: "Таны бизнесийн байршил амжилттай хадгалагдлаа",
-        });
-      } catch (error) {
-        console.error("Error saving location:", error);
-        toast({
-          title: "Алдаа гарлаа",
-          description: "Байршил хадгалахад алдаа гарлаа",
-          variant: "destructive"
-        });
-      }
-    }
-  };
   
-  // Handle logo upload
+  // Handle logo image upload
   const handleLogoUpload = async (file: File) => {
     if (!user || !user.uid) return;
     
@@ -86,11 +71,11 @@ export default function BusinessProfile() {
     try {
       const downloadUrl = await uploadFile(user.uid, file, 'logos');
       
-      // Update user profile in Firestore
+      // Update business profile in Firestore
       await updateBusinessProfile(user.uid, { logoUrl: downloadUrl });
       
       // Update local state
-      setLogoUrl(downloadUrl);
+      setLogoImage(downloadUrl);
       
       toast({
         title: "Лого амжилттай оруулсан",
@@ -108,26 +93,26 @@ export default function BusinessProfile() {
     }
   };
   
-  // Handle banner upload
-  const handleBannerUpload = async (file: File) => {
+  // Handle cover image upload
+  const handleCoverUpload = async (file: File) => {
     if (!user || !user.uid) return;
     
     setIsUploading(true);
     try {
-      const downloadUrl = await uploadFile(user.uid, file, 'banners');
+      const downloadUrl = await uploadFile(user.uid, file, 'covers');
       
-      // Update user profile in Firestore
-      await updateBusinessProfile(user.uid, { bannerUrl: downloadUrl });
+      // Update business profile in Firestore
+      await updateBusinessProfile(user.uid, { coverUrl: downloadUrl });
       
       // Update local state
-      setBannerUrl(downloadUrl);
+      setCoverImage(downloadUrl);
       
       toast({
-        title: "Зураг амжилттай оруулсан",
-        description: "Таны бизнесийн зураг амжилттай хадгалагдлаа",
+        title: "Ковер зураг амжилттай оруулсан",
+        description: "Таны бизнесийн үндсэн зураг амжилттай хадгалагдлаа",
       });
     } catch (error) {
-      console.error("Error uploading banner:", error);
+      console.error("Error uploading cover image:", error);
       toast({
         title: "Алдаа гарлаа",
         description: "Зураг оруулахад алдаа гарлаа",
@@ -135,6 +120,55 @@ export default function BusinessProfile() {
       });
     } finally {
       setIsUploading(false);
+    }
+  };
+  
+  // Handle business information update
+  const handleInfoUpdate = async () => {
+    if (!user || !user.uid) return;
+    
+    try {
+      await updateBusinessProfile(user.uid, {
+        businessName,
+        description,
+        category
+      });
+      
+      toast({
+        title: "Мэдээлэл шинэчлэгдлээ",
+        description: "Таны бизнесийн мэдээлэл амжилттай шинэчлэгдлээ",
+      });
+    } catch (error) {
+      console.error("Error updating business info:", error);
+      toast({
+        title: "Алдаа гарлаа",
+        description: "Мэдээлэл шинэчлэхэд алдаа гарлаа",
+        variant: "destructive"
+      });
+    }
+  };
+  
+  // Handle location update
+  const handleLocationChange = async (newLocation: { lat: number; lng: number; address: string }) => {
+    if (!user || !user.uid) return;
+    
+    try {
+      await updateBusinessProfile(user.uid, { location: newLocation });
+      
+      // Update local state
+      setLocation(newLocation);
+      
+      toast({
+        title: "Байршил шинэчлэгдлээ",
+        description: "Таны бизнесийн байршил амжилттай шинэчлэгдлээ",
+      });
+    } catch (error) {
+      console.error("Error updating location:", error);
+      toast({
+        title: "Алдаа гарлаа",
+        description: "Байршил шинэчлэхэд алдаа гарлаа",
+        variant: "destructive"
+      });
     }
   };
 
@@ -148,7 +182,7 @@ export default function BusinessProfile() {
           </TabsTrigger>
           <TabsTrigger value="images" className="flex items-center gap-2">
             <ImageIcon className="h-4 w-4" />
-            Зургууд
+            Зураг
           </TabsTrigger>
           <TabsTrigger value="location" className="flex items-center gap-2">
             <MapPin className="h-4 w-4" />
@@ -172,44 +206,44 @@ export default function BusinessProfile() {
                 <CardHeader>
                   <CardTitle>Бизнесийн лого</CardTitle>
                   <CardDescription>
-                    Таны бизнесийн лого болон бренд. Заавал талбайн хэмжээтэй квадрат зураг (1:1 харьцаатай) байх шаардлагатай.
+                    Таны бизнесийн лого. Заавал талбайн хэмжээтэй квадрат зураг (1:1 харьцаатай) байх шаардлагатай.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <FileUpload
                       onFileSelect={handleLogoUpload}
-                      previewUrl={logoUrl}
-                      label="Лого зураг оруулах (1:1 харьцаатай)"
+                      previewUrl={logoImage}
+                      label="Лого оруулах (1:1 харьцаатай)"
                       maxSizeMB={2}
                       disabled={isUploading}
                     />
                     <div className="text-xs text-gray-500 mt-2">
-                      Санамж: Дөрвөлжин хэлбэртэй, цэвэр зураг сонгох нь хамгийн үр дүнтэй.
+                      Санамж: Логоны оновчтой хэмжээ 512x512 пиксел.
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Banner upload section */}
+              {/* Cover image upload section */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Бизнесийн танилцуулга зураг</CardTitle>
+                  <CardTitle>Бизнесийн ковер зураг</CardTitle>
                   <CardDescription>
-                    Таны бизнесийн үйл ажиллагааг харуулсан зураг. Өргөн тэгш өнцөгт зураг (16:9 харьцаатай) байвал сайн.
+                    Таны бизнесийн үндсэн зураг. 16:9 харьцаатай өргөн зураг байвал сайн.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <FileUpload
-                      onFileSelect={handleBannerUpload}
-                      previewUrl={bannerUrl}
-                      label="Танилцуулга зураг оруулах"
-                      maxSizeMB={5}
+                      onFileSelect={handleCoverUpload}
+                      previewUrl={coverImage}
+                      label="Ковер зураг оруулах (16:9 харьцаатай)"
+                      maxSizeMB={3}
                       disabled={isUploading}
                     />
                     <div className="text-xs text-gray-500 mt-2">
-                      Санамж: Таны бизнесийг хамгийн сайн илэрхийлэх зураг сонгох нь зөвлөмж болно.
+                      Санамж: Ковер зургийн оновчтой хэмжээ 1280x720 пиксел.
                     </div>
                   </div>
                 </CardContent>
@@ -220,16 +254,97 @@ export default function BusinessProfile() {
         
         <TabsContent value="location">
           <div className="max-w-4xl mx-auto">
-            <LocationPicker 
-              initialLocation={businessLocation || undefined}
-              onLocationChange={handleLocationChange}
-              businessName={user?.businessName || user?.name || ''}
-            />
+            <Card>
+              <CardHeader>
+                <CardTitle>Бизнесийн байршил</CardTitle>
+                <CardDescription>
+                  Таны бизнесийн байршлыг газрын зураг дээр сонгоно уу
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <LocationPicker
+                    initialLocation={location || undefined}
+                    onLocationChange={handleLocationChange}
+                    businessName={businessName}
+                  />
+                  {location && (
+                    <div className="mt-4">
+                      <Label>Сонгогдсон хаяг</Label>
+                      <div className="p-3 bg-gray-50 rounded-md">
+                        {location.address}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-2">
+                        <span className="font-semibold">Координат:</span> {location.lat.toFixed(6)}, {location.lng.toFixed(6)}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
         
         <TabsContent value="settings">
-          <UserProfileSettings userType="business" />
+          <div className="max-w-4xl mx-auto">
+            <Card>
+              <CardHeader>
+                <CardTitle>Бизнесийн мэдээлэл</CardTitle>
+                <CardDescription>
+                  Таны бизнесийн үндсэн мэдээлэл
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="business-name">Бизнесийн нэр</Label>
+                    <Input
+                      id="business-name"
+                      value={businessName}
+                      onChange={(e) => setBusinessName(e.target.value)}
+                      placeholder="Ресторан/Дэлгүүрийн нэрээ оруулна уу"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="description">Тайлбар</Label>
+                    <Textarea
+                      id="description"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder="Бизнесийн тухай товч тайлбар"
+                      rows={4}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="category">Ангилал</Label>
+                    <Select 
+                      value={category} 
+                      onValueChange={setCategory}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Ангилал сонгох" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="restaurant">Ресторан</SelectItem>
+                        <SelectItem value="fastfood">Түргэн хоол</SelectItem>
+                        <SelectItem value="cafe">Кафе</SelectItem>
+                        <SelectItem value="bakery">Бэйкери</SelectItem>
+                        <SelectItem value="grocery">Хүнсний дэлгүүр</SelectItem>
+                        <SelectItem value="pharmacy">Эмийн сан</SelectItem>
+                        <SelectItem value="other">Бусад</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <Button onClick={handleInfoUpdate} className="mt-2">
+                    Хадгалах
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>

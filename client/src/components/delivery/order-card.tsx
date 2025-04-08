@@ -194,19 +194,36 @@ export function OrderCard({
       <CardContent className="p-0">
         <div className="p-4">
           <div className="flex justify-between items-start mb-3">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="font-medium">{restaurant.name}</span>
-                {getStatusBadge()}
+            <div className="flex gap-3">
+              {/* Restaurant Image */}
+              <div className="w-14 h-14 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
+                {restaurant.imageUrl ? (
+                  <img 
+                    src={restaurant.imageUrl} 
+                    alt={restaurant.name} 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                    Зураггүй
+                  </div>
+                )}
               </div>
-              <div className="flex items-center text-sm text-gray-600">
-                <Building className="mr-1 h-4 w-4" />
-                <span>{restaurant.distance} зайтай</span>
-              </div>
-              {/* Show business type */}
-              <div className="text-xs text-gray-500 mt-1">
-                {businessType === "grocery" ? "Дэлгүүр" : 
-                  businessType === "pharmacy" ? "Эмийн сан" : "Хоолны газар"}
+              
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="font-medium">{restaurant.name}</span>
+                  {getStatusBadge()}
+                </div>
+                <div className="flex items-center text-sm text-gray-600">
+                  <Building className="mr-1 h-4 w-4" />
+                  <span>{restaurant.distance} зайтай</span>
+                </div>
+                {/* Show business type */}
+                <div className="text-xs text-gray-500 mt-1">
+                  {businessType === "grocery" ? "Дэлгүүр" : 
+                    businessType === "pharmacy" ? "Эмийн сан" : "Хоолны газар"}
+                </div>
               </div>
             </div>
             <div className="text-right">
