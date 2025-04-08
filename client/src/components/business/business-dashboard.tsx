@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/auth-context";
-import { getBusinessOrders, getBusinessProducts, updateOrderStatus, addProduct, updateProduct, deleteProduct } from "@/lib/firebase";
+import { getBusinessOrders, getBusinessProducts, updateOrderStatus, addProduct, updateProduct, deleteProduct, logoutUser } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OrderItem } from "@/components/business/order-item";
 import { ProductForm } from "@/components/business/product-form";
 import { Button } from "@/components/ui/button";
-import { BarChart3, Book, Building2, CalendarDays, ChevronRight, GanttChartSquare, LineChart, ListOrdered, MapPin, Package, PackageCheck, Phone, Plus, Search, Settings, ShoppingBag, Ticket, TrendingUp, Trash2, Truck, Users, Wrench, RefreshCw, Clipboard } from "lucide-react";
+import { BarChart3, Book, Building2, CalendarDays, ChevronRight, GanttChartSquare, LineChart, ListOrdered, LogOut, MapPin, Package, PackageCheck, Phone, Plus, Search, Settings, ShoppingBag, Ticket, TrendingUp, Trash2, Truck, Users, Wrench, RefreshCw, Clipboard } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { DeliveryLocationTracker } from "@/components/shared/delivery-location-tracker";
@@ -18,6 +18,7 @@ import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { useLocation } from "wouter";
 
 import { 
   Select, 
@@ -115,6 +116,26 @@ export function BusinessDashboard() {
   const [productViewType, setProductViewType] = useState("grid");
   const [currentDate] = useState(new Date());
   const [deleteDialog, setDeleteDialog] = useState({ open: false, product: null as any });
+  const [, setLocation] = useLocation();
+  
+  // Handle logout and redirect to homepage
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+      toast({
+        title: "Системээс гарлаа",
+        description: "Та амжилттай системээс гарлаа",
+      });
+      // Redirect to homepage after logout
+      setLocation("/");
+    } catch (error: any) {
+      toast({
+        title: "Алдаа гарлаа",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
 
   // Get formatted date for display
   const formattedDate = new Intl.DateTimeFormat('mn-MN', {
@@ -1352,6 +1373,20 @@ export function BusinessDashboard() {
                   <Wrench className="h-5 w-5 text-amber-500" />
                   <span>Дэлгүүрийн тохиргоо</span>
                 </h2>
+                
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Button 
+                    variant="destructive" 
+                    onClick={handleLogout}
+                    className="gap-2"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Системээс гарах
+                  </Button>
+                </motion.div>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
