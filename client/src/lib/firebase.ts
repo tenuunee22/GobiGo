@@ -42,6 +42,12 @@ const firebaseConfig = {
 // Initialize Firebase
 let app;
 try {
+  if (!import.meta.env.VITE_FIREBASE_API_KEY || 
+      !import.meta.env.VITE_FIREBASE_PROJECT_ID || 
+      !import.meta.env.VITE_FIREBASE_APP_ID) {
+    throw new Error('Missing Firebase configuration. Please check your environment variables.');
+  }
+  
   app = initializeApp(firebaseConfig);
 } catch (error: any) {
   if (error.code === 'app/duplicate-app') {
@@ -52,8 +58,24 @@ try {
     throw error;
   }
 }
+
 const auth = getAuth();
 const db = getFirestore();
+
+// Enable offline data persistence if supported by browser
+try {
+  enableIndexedDbPersistence(db).catch((err) => {
+    if (err.code === 'failed-precondition') {
+      // Multiple tabs open, persistence can only be enabled in one tab at a time
+      console.warn('Firebase persistence could not be enabled: Multiple tabs open');
+    } else if (err.code === 'unimplemented') {
+      // The current browser doesn't support persistence
+      console.warn('Firebase persistence not supported by this browser');
+    }
+  });
+} catch (err) {
+  console.warn('Error enabling persistence:', err);
+}
 
 // Firebase persistence is available but we'll implement it with better multi-tab support in a future update
 
@@ -457,14 +479,76 @@ export const subscribeToDriverOrders = (
   }
 };
 
-export const updateOrderStatus = async (orderId: string, status: string, additionalData = {}) => {
+interface OrderStatusUpdateData {
+  status: string;
+  updatedAt: any;
+  driverId?: string;
+  businessId?: string;
+  businessName?: string;
+  driverName?: string;
+  availableForDrivers?: boolean;
+  statusHistory?: Array<{
+    status: string;
+    timestamp: any;
+    changedBy?: string | null;
+    previousStatus?: string | null;
+  }>;
+  estimatedDeliveryTime?: Date;
+  pickedUpTime?: Date;
+  deliveredTime?: Date;
+  completedTime?: Date;
+  [key: string]: any; // Allow any other properties
+}
+
+export const updateOrderStatus = async (orderId: string, status: string, additionalData: Record<string, any> = {}) => {
   try {
     const orderRef = doc(db, "orders", orderId);
-    await updateDoc(orderRef, {
+    
+    // First get the order to check its current data
+    const orderDoc = await getDoc(orderRef);
+    if (!orderDoc.exists()) {
+      throw new Error(`Order with ID ${orderId} not found`);
+    }
+    
+    // Get the current order data
+    const orderData = orderDoc.data();
+    
+    // Prepare the update data
+    const updateData: OrderStatusUpdateData = {
       status,
       updatedAt: serverTimestamp(),
       ...additionalData
-    });
+    };
+    
+    // For status transitions, store the history
+    if (!orderData.statusHistory) {
+      updateData.statusHistory = [{
+        status: orderData.status || 'placed',
+        timestamp: serverTimestamp(),
+        previousStatus: null
+      }];
+    } else {
+      // Clone the existing history and add the new status
+      const newHistory = [...orderData.statusHistory];
+      newHistory.push({
+        status: orderData.status,
+        timestamp: serverTimestamp(),
+        changedBy: additionalData.driverId || additionalData.businessId || null
+      });
+      updateData.statusHistory = newHistory;
+    }
+    
+    // Update the order with new status and additional data
+    await updateDoc(orderRef, updateData);
+    
+    // Return the updated order
+    return {
+      id: orderId,
+      ...orderData,
+      ...updateData,
+      // Replace serverTimestamp placeholders with actual JS Date
+      updatedAt: new Date()
+    };
   } catch (error) {
     console.error("Error updating order status:", error);
     throw error;

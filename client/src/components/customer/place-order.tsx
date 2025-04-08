@@ -58,6 +58,32 @@ export function PlaceOrder({
   const deliveryFee = 2490; // Fixed delivery fee for demonstration
   const total = subtotal + deliveryFee;
 
+  // Function to get business type
+  const [businessType, setBusinessType] = useState<string>("restaurant");
+
+  // Get business information
+  useEffect(() => {
+    const getBusinessInfo = async () => {
+      try {
+        // Replace with your actual API call to get business info
+        const response = await apiRequest("GET", `/api/businesses/${businessId}`);
+        const businessData = await response.json();
+        
+        if (businessData && businessData.businessType) {
+          setBusinessType(businessData.businessType.toLowerCase());
+        }
+      } catch (error) {
+        console.error("Error fetching business info:", error);
+        // Default to restaurant if error
+        setBusinessType("restaurant");
+      }
+    };
+    
+    if (businessId) {
+      getBusinessInfo();
+    }
+  }, [businessId]);
+
   const handleSubmitOrder = async () => {
     if (!user) {
       toast({
@@ -85,12 +111,18 @@ export function PlaceOrder({
     try {
       setLoading(true);
 
+      // Determine order status based on business type
+      // Restaurant orders go through preparation process
+      // Other business types (retail, pharmacy, etc.) go straight to driver pickup
+      const initialStatus = businessType === "restaurant" ? "placed" : "ready_for_pickup";
+      
       // Prepare order data
       const orderData = {
         order: {
           customerUid: user.uid,
           businessUid: businessId,
-          status: "placed",
+          businessType: businessType, // Store business type for order processing
+          status: initialStatus,
           totalAmount: total,
           deliveryAddress: deliveryAddress,
           deliveryNotes: deliveryNotes,
@@ -143,6 +175,15 @@ export function PlaceOrder({
         setQpayData(qpayResult);
         setPaymentStep(true);
       }
+
+      // Display status message based on business type
+      toast({
+        title: "Захиалга хийгдлээ",
+        description: businessType === "restaurant" 
+          ? "Таны захиалгыг рестораны ажилтан хүлээн авах болно" 
+          : "Таны захиалгыг хүргэгч очиж авах болно",
+      });
+
     } catch (error) {
       console.error("Error creating order:", error);
       toast({
