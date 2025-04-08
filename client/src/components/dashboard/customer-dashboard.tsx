@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RecipeRecommendationCarousel } from "@/components/customer/recipe-recommendation-carousel";
+import { InteractiveIngredients, SalesDataVisualization } from "@/components/dashboard/data-visualization";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -659,6 +660,27 @@ export function CustomerDashboard() {
         {/* Recommendation Section */}
         <div className="mb-12">
           <RecipeRecommendationCarousel />
+          
+          {/* Interactive Data Visualization Section */}
+          <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+            >
+              <InteractiveIngredients />
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <SalesDataVisualization />
+            </motion.div>
+          </div>
         </div>
 
         {/* All Restaurants Section */}
