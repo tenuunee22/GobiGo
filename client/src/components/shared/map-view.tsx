@@ -12,6 +12,7 @@ import { Loader2, MapPin } from 'lucide-react';
 const mapContainerStyle = {
   width: '100%',
   height: '150px',
+  aspectRatio: '1/1', // Make it square (cube-like)
 };
 
 // Default center - Ulaanbaatar

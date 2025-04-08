@@ -6,9 +6,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OrderItem } from "@/components/business/order-item";
 import { ProductForm } from "@/components/business/product-form";
 import { Button } from "@/components/ui/button";
-import { Plus, Search, Settings, TrendingUp, Trash2 } from "lucide-react";
+import { Phone, Plus, Search, Settings, TrendingUp, Trash2, Navigation, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DeliveryLocationTracker } from "@/components/shared/delivery-location-tracker";
 import { 
   Select, 
   SelectContent, 
@@ -366,6 +367,10 @@ export function BusinessDashboard() {
           <TabsTrigger value="earnings">Орлого</TabsTrigger>
           <TabsTrigger value="sales">Борлуулалт</TabsTrigger>
           <TabsTrigger value="settings">Тохиргоо</TabsTrigger>
+          <TabsTrigger value="delivery-tracking" className="flex items-center gap-2">
+            <Navigation className="h-4 w-4" />
+            Хүргэлт хянах
+          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="orders" className="space-y-4">
@@ -1137,6 +1142,92 @@ export function BusinessDashboard() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+        
+        <TabsContent value="delivery-tracking">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <DeliveryLocationTracker
+              origin={user?.location ? 
+                { 
+                  lat: user.locationLat ? parseFloat(user.locationLat.toString()) : 47.9184676, 
+                  lng: user.locationLng ? parseFloat(user.locationLng.toString()) : 106.917693 
+                } : 
+                { lat: 47.9184676, lng: 106.917693 }}
+              destination={{ lat: 47.9234676, lng: 106.9237016 }}
+              estimatedTime="15-20 мин"
+              deliveryPersonName="Батаа"
+            />
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <MapPin className="mr-2 h-5 w-5 text-primary" />
+                  Хүргэлтийн дэлгэрэнгүй
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Захиалгын дугаар:</span>
+                    <span className="font-medium">#AB1234</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Хэрэглэгч:</span>
+                    <span className="font-medium">Болд Очир</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Хаяг:</span>
+                    <span className="font-medium">Чингэлтэй 1-р хороо, 45-р байр</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Утас:</span>
+                    <span className="font-medium">9911-2233</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Төлбөр:</span>
+                    <span className="font-medium">45,000₮ (Карт)</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Жолооч:</span>
+                    <span className="font-medium">Батаа</span>
+                  </div>
+                  <div className="flex justify-between text-primary">
+                    <span className="font-medium">Одоогийн байршил:</span>
+                    <span className="font-medium">1.5 км зайтай</span>
+                  </div>
+                </div>
+                
+                <div className="mt-6 space-y-2">
+                  <h3 className="font-medium">Захиалгын бүтээгдэхүүнүүд:</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>2x Ангус бургер</span>
+                      <span>30,000₮</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>1x Пепси 0.5л</span>
+                      <span>3,000₮</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>1x Төмсний чипс</span>
+                      <span>7,000₮</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Хүргэлтийн төлбөр</span>
+                      <span>5,000₮</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mt-6 pt-4 border-t">
+                  <Button className="w-full" variant="default">
+                    <Phone className="mr-2 h-4 w-4" />
+                    Хэрэглэгчтэй холбогдох
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
