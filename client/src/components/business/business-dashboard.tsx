@@ -1146,27 +1146,42 @@ export function BusinessDashboard() {
         
         <TabsContent value="delivery-tracking">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <DeliveryLocationTracker
-              origin={user?.location ? 
-                { 
-                  lat: user.locationLat ? parseFloat(user.locationLat.toString()) : 47.9184676, 
-                  lng: user.locationLng ? parseFloat(user.locationLng.toString()) : 106.917693 
-                } : 
-                { lat: 47.9184676, lng: 106.917693 }}
-              destination={{ lat: 47.9234676, lng: 106.9237016 }}
-              estimatedTime="15-20 мин"
-              deliveryPersonName="Батаа"
-            />
+            <div className="slide-in-left">
+              <h3 className="mb-4 text-lg font-semibold flex items-center">
+                <Navigation className="mr-2 h-5 w-5 text-primary float" />
+                <span className="bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+                  Хүргэлтийн байршил
+                </span>
+              </h3>
+              <DeliveryLocationTracker
+                origin={user?.location ? 
+                  { 
+                    lat: user.locationLat ? parseFloat(user.locationLat.toString()) : 47.9184676, 
+                    lng: user.locationLng ? parseFloat(user.locationLng.toString()) : 106.917693 
+                  } : 
+                  { lat: 47.9184676, lng: 106.917693 }}
+                destination={{ lat: 47.9234676, lng: 106.9237016 }}
+                estimatedTime="15-20 мин"
+                deliveryPersonName="Батаа"
+              />
+            </div>
             
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <MapPin className="mr-2 h-5 w-5 text-primary" />
+            <div className="slide-in-right">
+              <h3 className="mb-4 text-lg font-semibold flex items-center">
+                <MapPin className="mr-2 h-5 w-5 text-primary pulse" />
+                <span className="bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
                   Хүргэлтийн дэлгэрэнгүй
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
+                </span>
+              </h3>
+              <Card className="dashboard-card-hover">
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center text-lg">
+                    <Phone className="mr-2 h-5 w-5 text-primary" />
+                    Хүргэлтийн мэдээлэл
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4 bounce-in">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Захиалгын дугаар:</span>
                     <span className="font-medium">#AB1234</span>
@@ -1227,6 +1242,7 @@ export function BusinessDashboard() {
                 </div>
               </CardContent>
             </Card>
+            </div>
           </div>
         </TabsContent>
       </Tabs>

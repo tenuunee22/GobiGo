@@ -162,22 +162,22 @@ export function DeliveryLocationTracker({
   }
   
   return (
-    <Card className={`${className}`}>
+    <Card className={`${className} fade-in dashboard-card-hover`}>
       <CardHeader className="pb-2">
         <div className="flex justify-between items-center">
-          <div>
+          <div className="slide-in-left">
             <CardTitle className="flex items-center">
-              <Navigation className="mr-2 h-5 w-5 text-primary" />
-              {deliveryPersonName} замд яваа
+              <Navigation className="mr-2 h-5 w-5 text-primary float" />
+              {deliveryPersonName} <span className="ml-1 text-primary">замд яваа</span>
             </CardTitle>
             <CardDescription className="flex items-center mt-1">
-              <Clock className="mr-1 h-4 w-4" /> 
-              Хүрэх хугацаа: {estimatedTime}
+              <Clock className="mr-1 h-4 w-4 pulse" /> 
+              Хүрэх хугацаа: <span className="font-medium ml-1">{estimatedTime}</span>
             </CardDescription>
           </div>
           
           {/* Progress indicator */}
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center slide-in-right">
             <span className="text-sm font-medium text-primary">
               {Math.round(progress * 100)}%
             </span>
@@ -192,7 +192,7 @@ export function DeliveryLocationTracker({
       </CardHeader>
       
       <CardContent>
-        <div className="rounded-md overflow-hidden border">
+        <div className="rounded-md overflow-hidden border shadow-md delivery-pulse">
           <GoogleMap
             mapContainerStyle={mapContainerStyle}
             center={currentPosition}
@@ -252,18 +252,37 @@ export function DeliveryLocationTracker({
           </GoogleMap>
         </div>
         
-        <div className="flex justify-between items-center mt-2 text-xs text-gray-500">
-          <div className="flex items-center">
-            <div className="w-3 h-3 rounded-full bg-green-500 mr-1"></div>
+        <div className="flex justify-between items-center mt-4 text-xs text-gray-500 bounce-in">
+          <div className="flex items-center bg-white shadow-sm rounded-full px-2 py-1 transition-all hover:bg-gray-50">
+            <div className="w-3 h-3 rounded-full bg-green-500 mr-1 pulse"></div>
             <span>Эх газар</span>
           </div>
-          <div className="flex items-center">
-            <div className="w-3 h-3 rounded-full bg-blue-500 mr-1"></div>
+          <div className="flex items-center bg-white shadow-sm rounded-full px-2 py-1 transition-all hover:bg-gray-50">
+            <div className="w-3 h-3 rounded-full bg-blue-500 mr-1 pulse"></div>
             <span>Жолооч</span>
           </div>
-          <div className="flex items-center">
-            <div className="w-3 h-3 rounded-full bg-red-500 mr-1"></div>
+          <div className="flex items-center bg-white shadow-sm rounded-full px-2 py-1 transition-all hover:bg-gray-50">
+            <div className="w-3 h-3 rounded-full bg-red-500 mr-1 pulse"></div>
             <span>Хүргэх хаяг</span>
+          </div>
+        </div>
+        
+        <div className="mt-4 grid grid-cols-2 gap-2 slide-in-left">
+          <div className="bg-blue-50 rounded-lg p-3 text-sm">
+            <h4 className="font-medium text-blue-800 mb-1">Захиалгын дугаар</h4>
+            <p className="text-blue-600">#{Math.floor(Math.random() * 10000).toString().padStart(4, '0')}</p>
+          </div>
+          <div className="bg-green-50 rounded-lg p-3 text-sm">
+            <h4 className="font-medium text-green-800 mb-1">Төлөв</h4>
+            <p className="text-green-600">Хүргэлтэнд гарсан</p>
+          </div>
+          <div className="bg-purple-50 rounded-lg p-3 text-sm">
+            <h4 className="font-medium text-purple-800 mb-1">Төлбөр</h4>
+            <p className="text-purple-600">Төлсөн</p>
+          </div>
+          <div className="bg-amber-50 rounded-lg p-3 text-sm">
+            <h4 className="font-medium text-amber-800 mb-1">Бүтээгдэхүүн</h4>
+            <p className="text-amber-600">3 төрөл</p>
           </div>
         </div>
       </CardContent>
