@@ -167,6 +167,26 @@ export function LoginForm({ onToggleForm }: LoginFormProps) {
           >
             Нэвтрэх
           </Button>
+          
+          {/* Зөвхөн хөгжүүлэлтийн зорилгоор тест нэвтрэх товчлуур */}
+          <div className="mt-2">
+            <Button 
+              type="button" 
+              variant="outline" 
+              className="w-full text-xs" 
+              onClick={() => {
+                setEmail("test@example.com");
+                setPassword("password123");
+                // setTimeout to allow state update before submit
+                setTimeout(() => {
+                  const event = { preventDefault: () => {} } as React.FormEvent;
+                  handleSubmit(event);
+                }, 100);
+              }}
+            >
+              TEST: Тест хэрэглэгчээр нэвтрэх
+            </Button>
+          </div>
         </div>
       </form>
 
