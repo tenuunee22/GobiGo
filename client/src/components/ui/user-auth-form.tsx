@@ -196,27 +196,29 @@ export function UserAuthForm({ isLogin = true, onToggleForm }: UserAuthFormProps
   }
 
   return (
-    <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gray-50">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+    <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-gray-100">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md slide-in-top">
         <div className="flex justify-center">
-          <div className="text-4xl font-bold text-primary">GobiGo</div>
+          <div className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text text-transparent bounce-in">
+            <span className="wiggle inline-block mr-2">🍔</span>GobiGo
+          </div>
         </div>
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 fade-in">
           {isLogin ? "Sign in to your account" : "Create your account"}
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
+        <p className="mt-2 text-center text-sm text-gray-600 fade-in-delayed">
           Or{" "}
           <button
             onClick={onToggleForm}
-            className="font-medium text-primary hover:text-indigo-500"
+            className="font-medium text-primary hover:text-indigo-500 hover:scale-105 transition duration-300"
           >
             {isLogin ? "create a new account" : "sign in to your existing account"}
           </button>
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md slide-in-bottom">
+        <div className="bg-white py-8 px-4 shadow-lg sm:rounded-lg sm:px-10 border border-gray-100 hover:border-indigo-200 transition-all duration-300">
           {isLogin ? (
             // Login Form
             <Form {...loginForm}>
@@ -260,13 +262,15 @@ export function UserAuthForm({ isLogin = true, onToggleForm }: UserAuthFormProps
                   )}
                 />
 
-                <div>
+                <div className="fade-in-delayed">
                   <Button
                     type="submit"
-                    className="w-full"
+                    className="w-full bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600 transition-all duration-300 hover:shadow-md hover:scale-105"
                     disabled={isLoading}
                   >
-                    Sign in
+                    <span className="flex items-center">
+                      <span className="mr-2 wiggle">🔐</span> Sign in
+                    </span>
                   </Button>
                 </div>
 
@@ -281,29 +285,29 @@ export function UserAuthForm({ isLogin = true, onToggleForm }: UserAuthFormProps
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-3 fade-in-delayed">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={handleGoogleLogin}
                     disabled={isLoading}
-                    className="w-full"
+                    className="w-full hover:bg-red-50 hover:border-red-200 hover:scale-105 transition-all duration-300"
                   >
-                    <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <svg className="w-5 h-5 mr-2 bounce-soft" fill="#DB4437" viewBox="0 0 24 24" aria-hidden="true">
                       <path d="M12.24 10.285V14.4h6.806c-.275 1.765-2.056 5.174-6.806 5.174-4.095 0-7.439-3.389-7.439-7.574s3.345-7.574 7.439-7.574c2.33 0 3.891.989 4.785 1.849l3.254-3.138C18.189 1.186 15.479 0 12.24 0c-6.635 0-12 5.365-12 12s5.365 12 12 12c6.926 0 11.52-4.869 11.52-11.726 0-.788-.085-1.39-.189-1.989H12.24z"></path>
                     </svg>
-                    Google
+                    <span className="bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent font-semibold">Google</span>
                   </Button>
                   <Button
                     type="button"
                     variant="outline"
                     disabled={isLoading}
-                    className="w-full"
+                    className="w-full hover:bg-blue-50 hover:border-blue-200 hover:scale-105 transition-all duration-300"
                   >
-                    <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                    <svg className="w-5 h-5 mr-2 jelly" fill="#4267B2" viewBox="0 0 20 20" aria-hidden="true">
                       <path fillRule="evenodd" d="M20 10c0-5.523-4.477-10-10-10S0 4.477 0 10c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V10h2.54V7.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V10h2.773l-.443 2.89h-2.33v6.988C16.343 19.128 20 14.991 20 10z" clipRule="evenodd" />
                     </svg>
-                    Facebook
+                    <span className="bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent font-semibold">Facebook</span>
                   </Button>
                 </div>
               </form>
@@ -515,10 +519,12 @@ export function UserAuthForm({ isLogin = true, onToggleForm }: UserAuthFormProps
 
                 <Button
                   type="submit"
-                  className="w-full"
+                  className="w-full bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600 transition-all duration-300 hover:shadow-md hover:scale-105 fade-in-delayed"
                   disabled={isLoading}
                 >
-                  Create Account
+                  <span className="flex items-center">
+                    <span className="mr-2 wiggle">✨</span> Create Account
+                  </span>
                 </Button>
               </form>
             </Form>

@@ -341,81 +341,94 @@ export default function RestaurantDetail() {
     <div className="bg-gray-50 min-h-screen pb-20">
       {/* Restaurant header */}
       <div 
-        className="h-48 md:h-64 bg-center bg-cover relative"
+        className="h-48 md:h-64 bg-center bg-cover relative overflow-hidden"
         style={{ backgroundImage: `url(${restaurant.coverImage})` }}
       >
-        <div className="absolute inset-0 bg-black bg-opacity-40"></div>
-        <div className="absolute top-4 left-4">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="bg-white/70 hover:bg-white"
-            onClick={() => setLocation("/")}
-          >
-            <ChevronLeft className="mr-1 h-4 w-4" />
-            Буцах
-          </Button>
+        <div className="absolute inset-0 bg-black bg-opacity-40 slide-in-top"></div>
+        <div className="absolute top-0 left-0 w-full h-full">
+          <div className="absolute top-4 left-4 slide-in-left" style={{ animationDelay: "0.2s" }}>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="bg-white/80 hover:bg-white hover:scale-105 transition-transform"
+              onClick={() => setLocation("/")}
+            >
+              <ChevronLeft className="mr-1 h-4 w-4 wiggle" />
+              Буцах
+            </Button>
+          </div>
+          <div className="absolute bottom-4 right-4 text-white bg-gradient-to-r from-blue-600/70 to-indigo-600/70 px-3 py-1 rounded-full text-sm font-medium slide-in-right" style={{ animationDelay: "0.3s" }}>
+            <span className="flex items-center">
+              <span className="mr-1 pulse">✨</span> {restaurant.category}
+            </span>
+          </div>
         </div>
       </div>
       
       <div className="max-w-5xl mx-auto -mt-16 relative z-10 px-4">
         {/* Restaurant info card */}
-        <Card className="mb-6">
+        <Card className="mb-6 shadow-lg border-0 slide-in-bottom" style={{ animationDelay: "0.1s" }}>
           <CardContent className="p-6">
             <div className="flex items-start">
               <div 
-                className="w-20 h-20 bg-center bg-cover rounded-md mr-4 flex-shrink-0"
+                className="w-20 h-20 bg-center bg-cover rounded-md mr-4 flex-shrink-0 border-2 border-blue-100 shadow-sm bounce-soft overflow-hidden"
                 style={{ backgroundImage: `url(${restaurant.logoImage})` }}
-              ></div>
+              >
+                <div className="w-full h-full hover:scale-110 transition-transform duration-700"></div>
+              </div>
               
               <div className="flex-grow">
                 <div className="flex justify-between items-start">
-                  <div>
-                    <h1 className="text-2xl font-bold mb-1">{restaurant.name}</h1>
+                  <div className="fade-in" style={{ animationDelay: "0.3s" }}>
+                    <h1 className="text-2xl font-bold mb-1 bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text text-transparent">{restaurant.name}</h1>
                     <div className="flex items-center gap-1 text-sm text-gray-600 mb-2">
                       <span>{restaurant.category}</span>
                       {restaurant.subCategory && (
                         <>
-                          <span>•</span>
-                          <span>{restaurant.subCategory}</span>
+                          <span className="text-blue-300">•</span>
+                          <span className="fade-in-delayed">{restaurant.subCategory}</span>
                         </>
                       )}
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-md">
-                    <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                    <span className="font-medium">{restaurant.rating}</span>
-                    <span className="text-sm text-gray-500">({restaurant.ratingCount})</span>
+                  <div className="flex items-center gap-1 bg-yellow-50 border border-yellow-100 px-3 py-1 rounded-full bounce-soft">
+                    <Star className="h-4 w-4 text-yellow-500 fill-current pulse" />
+                    <span className="font-medium text-yellow-700">{restaurant.rating}</span>
+                    <span className="text-sm text-yellow-500">({restaurant.ratingCount})</span>
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-3">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-3 fade-in" style={{ animationDelay: "0.4s" }}>
                   <div className="flex items-center gap-2 text-sm">
-                    <Clock className="h-4 w-4 text-gray-500" />
+                    <Clock className="h-4 w-4 text-blue-500 wiggle" />
                     <span>{restaurant.deliveryTime} мин</span>
                   </div>
                   
                   <div className="flex items-center gap-2 text-sm">
-                    <span className="text-gray-500">₮</span>
-                    <span>Хүргэлт {restaurant.deliveryFee.toLocaleString()}₮</span>
+                    <span className="text-green-500 font-bold">₮</span>
+                    <span>Хүргэлт {restaurant.deliveryFee.toLocaleString()}₮ <span className="wiggle inline-block">🚚</span></span>
                   </div>
                   
                   <div className="flex items-center gap-2 text-sm">
-                    <MapPin className="h-4 w-4 text-gray-500" />
+                    <MapPin className="h-4 w-4 text-red-500 jelly" />
                     <span>{restaurant.distance}</span>
                   </div>
                 </div>
                 
-                <div className="mt-3 text-sm text-gray-600">
-                  <p>{restaurant.address}</p>
-                  <p>Ажиллах цаг: {restaurant.businessHours}</p>
+                <div className="mt-3 text-sm text-gray-600 fade-in" style={{ animationDelay: "0.5s" }}>
+                  <p className="flex items-center gap-1">
+                    <span className="text-gray-800">📍</span> {restaurant.address}
+                  </p>
+                  <p className="flex items-center gap-1">
+                    <span className="text-gray-800">🕒</span> Ажиллах цаг: {restaurant.businessHours}
+                  </p>
                   <div className="mt-2 flex gap-3">
                     <ReviewForm businessId={id} />
                     <Button 
                       variant="outline" 
                       size="sm"
-                      className="flex items-center gap-1"
+                      className="flex items-center gap-1 hover:bg-blue-50 hover:border-blue-200 transition-all"
                       onClick={() => {
                         toast({
                           title: "Зураг солих",
@@ -423,7 +436,7 @@ export default function RestaurantDetail() {
                         });
                       }}
                     >
-                      <Camera className="h-4 w-4" />
+                      <Camera className="h-4 w-4 text-blue-500" />
                       <span>Зураг солих</span>
                     </Button>
                   </div>
@@ -476,25 +489,43 @@ export default function RestaurantDetail() {
                   {filteredProducts
                     .filter(product => product.category === category)
                     .map((product) => (
-                      <Card key={product.id} className="overflow-hidden">
+                      <Card key={product.id} className="overflow-hidden hover:shadow-md transition-all hover:border-blue-200 slide-in-right" style={{ animationDelay: `${0.1 * (filteredProducts.findIndex(p => p.id === product.id) % 5)}s` }}>
                         <CardContent className="p-0">
                           <div className="flex">
                             <div className="flex-grow p-4">
-                              <h3 className="font-medium mb-1">{product.name}</h3>
+                              <h3 className="font-medium mb-1 text-indigo-900 flex items-center">
+                                {product.name}
+                                {product.name.toLowerCase().includes('комбо') && (
+                                  <span className="ml-2 tada inline-block text-sm">🔥</span>
+                                )}
+                              </h3>
                               <p className="text-sm text-gray-600 mb-2 line-clamp-2">{product.description}</p>
                               <div className="flex justify-between items-center">
-                                <span className="font-semibold">{product.price.toLocaleString()}₮</span>
-                                <Button size="sm" onClick={() => handleAddItem(product)}>
-                                  Нэмэх
+                                <span className="font-semibold bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text text-transparent">{product.price.toLocaleString()}₮</span>
+                                <Button 
+                                  size="sm" 
+                                  onClick={() => handleAddItem(product)}
+                                  className="bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600 transition-all hover:scale-105"
+                                >
+                                  <span className="flex items-center">
+                                    <span className="mr-1 wiggle inline-block text-xs">🛒</span> Нэмэх
+                                  </span>
                                 </Button>
                               </div>
                             </div>
                             
                             {product.imageUrl && (
-                              <div 
-                                className="w-24 h-24 sm:w-32 sm:h-32 bg-center bg-cover flex-shrink-0"
-                                style={{ backgroundImage: `url(${product.imageUrl})` }}
-                              ></div>
+                              <div className="relative overflow-hidden w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0">
+                                <div 
+                                  className="w-full h-full bg-center bg-cover absolute inset-0 hover:scale-110 transition-all duration-700"
+                                  style={{ backgroundImage: `url(${product.imageUrl})` }}
+                                ></div>
+                                {product.price < 10000 && (
+                                  <div className="absolute top-0 right-0 bg-green-500 text-white text-xs px-1 py-0.5 rounded-bl rotate-12 transform jelly">
+                                    Хямд
+                                  </div>
+                                )}
+                              </div>
                             )}
                           </div>
                         </CardContent>
@@ -507,26 +538,31 @@ export default function RestaurantDetail() {
           
           {/* Right column - Order summary */}
           <div className="md:w-80">
-            <Card className="sticky top-4">
+            <Card className="sticky top-4 shadow-lg border-0 hover:shadow-xl transition-all fade-in" style={{ animationDelay: "0.6s" }}>
               <CardContent className="p-6">
-                <h2 className="text-lg font-semibold mb-3">Таны захиалга</h2>
+                <h2 className="text-xl font-bold mb-3 bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text text-transparent flex items-center">
+                  <span className="mr-2 tada inline-block">🛍️</span> Таны захиалга
+                </h2>
                 
                 {selectedItems.length === 0 ? (
                   <div className="text-center py-8 text-gray-500">
-                    <p>Таны сагс хоосон байна</p>
-                    <p className="text-sm mt-1">Бүтээгдэхүүн сонгоно уу</p>
+                    <div className="w-16 h-16 mx-auto mb-3 bounce-soft">
+                      <span className="text-4xl">🛒</span>
+                    </div>
+                    <p className="font-medium">Таны сагс хоосон байна</p>
+                    <p className="text-sm mt-1">Зүүн талаас бүтээгдэхүүн сонгоно уу</p>
                   </div>
                 ) : (
                   <>
                     <div className="space-y-3 mb-4">
-                      {selectedItems.map((item) => (
-                        <div key={item.id} className="flex justify-between">
+                      {selectedItems.map((item, index) => (
+                        <div key={item.id} className="flex justify-between items-center p-2 hover:bg-blue-50 rounded-lg transition-all slide-in-right" style={{ animationDelay: `${0.1 * index}s` }}>
                           <div>
                             <div className="flex items-center">
-                              <span className="font-medium mr-2">{item.quantity}x</span>
-                              <span>{item.name}</span>
+                              <span className="font-medium mr-2 bg-blue-100 text-blue-800 rounded-full w-5 h-5 flex items-center justify-center text-xs">{item.quantity}</span>
+                              <span className="text-indigo-900">{item.name}</span>
                             </div>
-                            <div className="text-sm text-gray-600 mt-1">
+                            <div className="text-sm text-blue-600 mt-1 font-medium">
                               {item.price.toLocaleString()}₮
                             </div>
                           </div>
@@ -535,7 +571,7 @@ export default function RestaurantDetail() {
                             <Button 
                               variant="outline" 
                               size="icon" 
-                              className="h-7 w-7 rounded-full"
+                              className="h-7 w-7 rounded-full hover:bg-red-50 hover:border-red-200 transition-all"
                               onClick={() => handleRemoveItem(item.id)}
                             >
                               -
@@ -543,7 +579,7 @@ export default function RestaurantDetail() {
                             <Button 
                               variant="outline" 
                               size="icon" 
-                              className="h-7 w-7 rounded-full"
+                              className="h-7 w-7 rounded-full hover:bg-green-50 hover:border-green-200 transition-all"
                               onClick={() => handleAddItem(item)}
                             >
                               +
@@ -555,29 +591,37 @@ export default function RestaurantDetail() {
                     
                     <Separator className="my-4" />
                     
-                    <div className="space-y-2 mb-4">
+                    <div className="space-y-2 mb-4 fade-in-delayed">
                       <div className="flex justify-between text-sm">
-                        <span>Дүн</span>
+                        <span className="text-gray-600">Дүн</span>
                         <span>{subtotal.toLocaleString()}₮</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span>Хүргэлтийн төлбөр</span>
-                        <span>{deliveryFee.toLocaleString()}₮</span>
+                        <span className="text-gray-600">Хүргэлтийн төлбөр</span>
+                        <span className="flex items-center">
+                          {deliveryFee.toLocaleString()}₮ 
+                          <span className="ml-1 wiggle inline-block text-xs">🚚</span>
+                        </span>
                       </div>
-                      <div className="flex justify-between font-semibold">
+                      <div className="flex justify-between font-semibold mt-3 pt-2 border-t">
                         <span>Нийт дүн</span>
-                        <span>{total.toLocaleString()}₮</span>
+                        <span className="text-lg bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text text-transparent">{total.toLocaleString()}₮</span>
                       </div>
                     </div>
                   </>
                 )}
                 
                 <Button 
-                  className="w-full" 
+                  className={`w-full transition-all duration-300 ${selectedItems.length === 0 ? 'bg-gray-400' : 'bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600 hover:shadow-md hover:scale-105'}`}
                   disabled={selectedItems.length === 0}
                   onClick={handleCheckout}
                 >
-                  Захиалах
+                  <span className="flex items-center">
+                    <span className={`mr-2 ${selectedItems.length > 0 ? 'wiggle' : ''} inline-block`}>
+                      {selectedItems.length > 0 ? '🚀' : '⚠️'}
+                    </span> 
+                    {selectedItems.length > 0 ? 'Захиалах' : 'Хоосон сагс'}
+                  </span>
                 </Button>
               </CardContent>
             </Card>
