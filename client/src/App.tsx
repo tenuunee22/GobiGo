@@ -67,16 +67,19 @@ function Router() {
 }
 
 function App() {
+  const [location] = useLocation();
+  const isLoginPage = location === "/login" || location === "/register";
+  
   return (
     <QueryClientProvider client={queryClient}>
       <OnboardingProvider>
         <div className="flex flex-col min-h-screen">
-          <Header />
+          {!isLoginPage && <Header />}
           <main className="flex-grow">
             <Router />
           </main>
-          <OnboardingModal />
-          <OnboardingHintButton position="bottom-right" />
+          {!isLoginPage && <OnboardingModal />}
+          {!isLoginPage && <OnboardingHintButton position="bottom-right" />}
         </div>
         <Toaster />
       </OnboardingProvider>
