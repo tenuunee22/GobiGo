@@ -1,346 +1,355 @@
-import React from "react";
-import { FoodTooltip } from "@/components/ui/food-tooltip";
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { FoodEmojiReaction, type FoodEmojiType } from "@/components/ui/food-emoji-reaction";
+import { FoodReviewCard } from "@/components/ui/food-review-card";
+import { FoodTooltip, DetailedFoodTooltip } from "@/components/ui/food-tooltip";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft } from "lucide-react";
-import { Link } from "wouter";
+import { Badge } from "@/components/ui/badge";
+import { ThumbsUp, Heart, Star, MessageCircle } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function TooltipExample() {
+  const [selectedEmoji, setSelectedEmoji] = useState<FoodEmojiType | null>(null);
+  const [selectedVariant, setSelectedVariant] = useState<"horizontal" | "grid" | "compact">("horizontal");
+  const [selectedSize, setSelectedSize] = useState<"sm" | "md" | "lg">("md");
+  
+  // Жишээ дата
+  const exampleFoodReactions: Record<FoodEmojiType, number> = {
+    "🍕": 5,
+    "🍔": 3,
+    "🍜": 0,
+    "🍣": 1,
+    "🥗": 0,
+    "😋": 7,
+    "🔥": 2,
+    "👍": 8,
+    "❤️": 4
+  };
+  
+  // Жишээ сэтгэгдэл
+  const exampleReview = {
+    id: "1",
+    foodId: "food-1",
+    userName: "Баттулга",
+    userImage: "https://i.pravatar.cc/150?img=32",
+    date: new Date().toISOString(),
+    rating: 4,
+    content: "Энэ хоол үнэхээр амттай байсан! Өмнө нь хэд хэдэн удаа захиалж байсан ч энэ удаа онцгой амттай санагдлаа. Ялангуяа ногоо нь маш шинэхэн, соус нь гайхалтай амттай байв. Та нар заавал үүнийг захиалаарай.",
+    images: [
+      "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=300&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?q=80&w=300&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1565958011703-44f9829ba187?q=80&w=300&auto=format&fit=crop"
+    ],
+    reactions: {
+      "😋": 3,
+      "👍": 5,
+      "❤️": 2
+    } as Record<FoodEmojiType, number>,
+    userReaction: "👍" as FoodEmojiType,
+    likes: 12,
+    comments: 3
+  };
+
   return (
     <div className="container py-10">
-      <div className="mb-6">
-        <Link href="/">
-          <Button variant="ghost" className="flex items-center gap-2">
-            <ArrowLeft className="h-5 w-5" /> Нүүр хуудас руу буцах
-          </Button>
-        </Link>
-      </div>
-      
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6">Хоолтой холбоотой зураг бүхий туслах товчлуурууд</h1>
-        <p className="text-gray-500 mb-8">Энэ хуудсанд <code className="bg-gray-100 p-1 rounded">FoodTooltip</code> компонентын янз бүрийн жишээнүүдийг үзүүлж байна.</p>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Энгийн жишээнүүд</h2>
+      <motion.h1 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-3xl font-bold mb-8 text-center"
+      >
+        Хоолны эможи реакц жишээ
+      </motion.h1>
+
+      <Tabs defaultValue="reactions" className="w-full">
+        <TabsList className="grid w-full grid-cols-3 mb-8">
+          <TabsTrigger value="reactions">Эможи реакц</TabsTrigger>
+          <TabsTrigger value="tooltip">Эможи огтолцуур</TabsTrigger>
+          <TabsTrigger value="review">Сэтгэгдэл</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="reactions">
+          <div className="grid gap-8 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>Туслах товчлуур</CardTitle>
-                <CardDescription>Янз бүрийн хоолны дүрстэй товчнууд.</CardDescription>
+                <CardTitle>Эможи реакцийн жагсаалт</CardTitle>
+                <CardDescription>
+                  Хоолны бүтээгдэхүүнд реакц үзүүлэх боломж
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Хэлбэр сонгох */}
+                <div>
+                  <h3 className="text-sm font-medium mb-2">Харагдах байдал:</h3>
+                  <div className="flex flex-wrap gap-2">
+                    <Button 
+                      variant={selectedVariant === "horizontal" ? "default" : "outline"} 
+                      size="sm"
+                      onClick={() => setSelectedVariant("horizontal")}
+                    >
+                      Хэвтээ
+                    </Button>
+                    <Button 
+                      variant={selectedVariant === "grid" ? "default" : "outline"} 
+                      size="sm"
+                      onClick={() => setSelectedVariant("grid")}
+                    >
+                      Хүснэгт
+                    </Button>
+                    <Button 
+                      variant={selectedVariant === "compact" ? "default" : "outline"} 
+                      size="sm"
+                      onClick={() => setSelectedVariant("compact")}
+                    >
+                      Товч
+                    </Button>
+                  </div>
+                </div>
+                
+                {/* Хэмжээ сонгох */}
+                <div>
+                  <h3 className="text-sm font-medium mb-2">Хэмжээ:</h3>
+                  <div className="flex flex-wrap gap-2">
+                    <Button 
+                      variant={selectedSize === "sm" ? "default" : "outline"} 
+                      size="sm"
+                      onClick={() => setSelectedSize("sm")}
+                    >
+                      Жижиг
+                    </Button>
+                    <Button 
+                      variant={selectedSize === "md" ? "default" : "outline"} 
+                      size="sm"
+                      onClick={() => setSelectedSize("md")}
+                    >
+                      Дунд
+                    </Button>
+                    <Button 
+                      variant={selectedSize === "lg" ? "default" : "outline"} 
+                      size="sm"
+                      onClick={() => setSelectedSize("lg")}
+                    >
+                      Том
+                    </Button>
+                  </div>
+                </div>
+                
+                {/* Үр дүн харах */}
+                <div className="border rounded-lg p-4">
+                  <h3 className="text-sm font-medium mb-4">Үр дүн:</h3>
+                  <div>
+                    <FoodEmojiReaction 
+                      foodId="example-1" 
+                      initialReactions={exampleFoodReactions}
+                      userReaction={selectedEmoji}
+                      onReaction={setSelectedEmoji}
+                      variant={selectedVariant}
+                      size={selectedSize}
+                    />
+                  </div>
+                  
+                  <div className="mt-4 text-sm text-muted-foreground">
+                    {selectedEmoji ? (
+                      <p>Сонгосон эможи: <span className="text-xl">{selectedEmoji}</span></p>
+                    ) : (
+                      <p>Эможи сонгоогүй байна</p>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Эможи реакцийн тоглоом</CardTitle>
+                <CardDescription>
+                  Хоолны эможиг авах дадлага хийх боломж
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
-                  <div className="flex flex-wrap gap-4">
-                    <div className="flex items-center gap-2">
-                      <span>Пицца</span>
-                      <FoodTooltip 
-                        content="Пицца нь Итали хоол бөгөөд дээрээ ялгаатай орцтой байдаг."
-                        illustration="pizza"
-                      />
-                    </div>
+                  <div className="border rounded-lg p-6 bg-gray-50 flex flex-col items-center">
+                    <motion.div 
+                      className="text-7xl mb-4"
+                      animate={{ scale: [1, 1.2, 1], rotate: [0, 5, -5, 0] }}
+                      transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+                    >
+                      {selectedEmoji || "🍽️"}
+                    </motion.div>
                     
-                    <div className="flex items-center gap-2">
-                      <span>Кофе</span>
-                      <FoodTooltip 
-                        content="Кофе нь кофены ургамлын үрээс бэлтгэсэн ундаа юм."
-                        illustration="coffee"
+                    <div className="text-center">
+                      <h3 className="font-medium mb-2">Та өөрийн дуртай хоолны төрлийг сонгоно уу</h3>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Эможи дээр дарж хоолны төрлөөр шүүх
+                      </p>
+                      
+                      <FoodEmojiReaction 
+                        foodId="example-2" 
+                        userReaction={selectedEmoji}
+                        onReaction={setSelectedEmoji}
+                        variant="grid"
+                        size="md"
                       />
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <span>Тахиа</span>
-                      <FoodTooltip 
-                        content="Тахианы мах нь уураг ихтэй, өөх багатай."
-                        illustration="chicken"
-                      />
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <span>Үхрийн мах</span>
-                      <FoodTooltip 
-                        content="Үхрийн мах нь төмөр ихтэй."
-                        illustration="beef"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="flex flex-wrap gap-4">
-                    <div className="flex items-center gap-2">
-                      <span>Алим</span>
-                      <FoodTooltip 
-                        content="Өдөрт нэг алим идэж байвал эмч танд хэрэггүй!"
-                        illustration="apple"
-                      />
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <span>Жигнэмэг</span>
-                      <FoodTooltip 
-                        content="Жигнэмэг нь чихэр ихтэй учир багаар иддэг байна."
-                        illustration="cookie"
-                      />
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <span>Зайрмаг</span>
-                      <FoodTooltip 
-                        content="Зайрмаг нь Монголчуудын дуртай зуны ундаа юм."
-                        illustration="icecream"
-                      />
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <span>Сэндвич</span>
-                      <FoodTooltip 
-                        content="Сэндвич нь хурдан хооллоход хялбар бөгөөд олон төрлийн байдаг."
-                        illustration="sandwich"
-                      />
+                      
+                      {selectedEmoji && (
+                        <motion.div 
+                          className="mt-6 p-3 bg-green-50 rounded-lg text-green-700 text-sm"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                        >
+                          Та {selectedEmoji} сонголоо. Танд энэ төрлийн хоол санал болгох боломжтой!
+                        </motion.div>
+                      )}
                     </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
-          
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Өөр байршил, хэмжээтэй</h2>
+        </TabsContent>
+
+        <TabsContent value="tooltip">
+          <div className="grid gap-8 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>Байршил болон хэмжээ</CardTitle>
-                <CardDescription>Ялгаатай талуудад харуулах боломжтой.</CardDescription>
+                <CardTitle>Эможи огтолцуур</CardTitle>
+                <CardDescription>
+                  Товч дараад хоолны реакц харуулах
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-6">
-                  <div className="flex items-center gap-6">
-                    <Button>
-                      Дээш
-                      <FoodTooltip 
-                        content="Энэ товч дээр дээш харуулж байна (анхдагч)."
-                        illustration="pizza"
-                        side="top"
-                      />
-                    </Button>
-                    
-                    <Button>
-                      Доош
-                      <FoodTooltip 
-                        content="Энэ товч дээр доош харуулж байна."
-                        illustration="coffee"
-                        side="bottom"
-                      />
-                    </Button>
-                    
-                    <Button>
-                      Зүүн
-                      <FoodTooltip 
-                        content="Энэ товч дээр зүүн талд харуулж байна."
-                        illustration="chicken"
-                        side="left"
-                      />
-                    </Button>
-                    
-                    <Button>
-                      Баруун
-                      <FoodTooltip 
-                        content="Энэ товч дээр баруун талд харуулж байна."
-                        illustration="beef"
-                        side="right"
-                      />
-                    </Button>
+                <div className="space-y-10">
+                  <div className="p-4 border rounded-lg flex justify-center">
+                    <FoodTooltip
+                      onEmojiSelect={setSelectedEmoji}
+                      position="bottom"
+                    >
+                      <Button variant="outline" className="gap-2">
+                        <ThumbsUp className="h-4 w-4" />
+                        <span>Үнэлгээ өгөх</span>
+                        {selectedEmoji && <span className="ml-1">{selectedEmoji}</span>}
+                      </Button>
+                    </FoodTooltip>
                   </div>
                   
-                  <div className="flex flex-col gap-4">
-                    <div>
-                      <p>Жижиг хэмжээ:</p>
-                      <FoodTooltip 
-                        content="Энэ бол жижиг хэмжээтэй туслах зөвлөгөө."
-                        illustration="apple"
-                        size="sm"
+                  <div className="p-4 border rounded-lg flex justify-center">
+                    <FoodTooltip
+                      onEmojiSelect={setSelectedEmoji}
+                      position="top"
+                    >
+                      <Button 
+                        variant="default" 
+                        size="lg" 
+                        className="rounded-full gap-2 bg-gradient-to-r from-purple-500 to-blue-500"
                       >
-                        <Button variant="outline" size="sm">Жижиг</Button>
-                      </FoodTooltip>
-                    </div>
-                    
-                    <div>
-                      <p>Дунд хэмжээ (анхдагч):</p>
-                      <FoodTooltip 
-                        content="Энэ бол дунд хэмжээтэй туслах зөвлөгөө. Энэ нь анхдагч хэмжээ юм."
-                        illustration="cookie"
-                      >
-                        <Button variant="outline">Дунд</Button>
-                      </FoodTooltip>
-                    </div>
-                    
-                    <div>
-                      <p>Том хэмжээ:</p>
-                      <FoodTooltip 
-                        content="Энэ бол том хэмжээтэй туслах зөвлөгөө. Илүү их мэдээлэл багтаах боломжтой. Жишээлбэл, урт текст бичих, зааварчилгаа өгөх, олон мөрт текст гэх мэт."
-                        illustration="sandwich"
-                        size="lg"
-                      >
-                        <Button variant="outline" size="lg">Том</Button>
-                      </FoodTooltip>
+                        <Heart className="h-5 w-5" />
+                        <span>Хоолны эможитой үнэлгээ</span>
+                        {selectedEmoji && <span className="ml-1 text-xl">{selectedEmoji}</span>}
+                      </Button>
+                    </FoodTooltip>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Дэлгэрэнгүй огтолцуур</CardTitle>
+                <CardDescription>
+                  Олон төрлийн хоолны реакц сонгох
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-10">
+                  <div className="p-4 border rounded-lg flex justify-center">
+                    <DetailedFoodTooltip
+                      onEmojiSelect={setSelectedEmoji}
+                      position="bottom"
+                    >
+                      <div className="border rounded-full px-4 py-2 flex items-center gap-2 cursor-pointer bg-gray-50 hover:bg-gray-100">
+                        <Star className="h-5 w-5 text-yellow-500" />
+                        <span>Хоолны үнэлгээ</span>
+                        {selectedEmoji && <Badge className="ml-1">{selectedEmoji}</Badge>}
+                      </div>
+                    </DetailedFoodTooltip>
+                  </div>
+                  
+                  <div className="mt-8">
+                    <h3 className="text-sm font-medium mb-4">Сонгогдсон эможи:</h3>
+                    <div className="p-8 border rounded-lg flex flex-col items-center justify-center bg-gray-50">
+                      {selectedEmoji ? (
+                        <motion.div 
+                          className="text-6xl"
+                          animate={{ scale: [1, 1.2, 1] }}
+                          transition={{ duration: 0.5 }}
+                        >
+                          {selectedEmoji}
+                        </motion.div>
+                      ) : (
+                        <p className="text-muted-foreground">Эможи сонгоогүй байна</p>
+                      )}
+                      
+                      <p className="mt-4 text-sm text-center">
+                        Дээрх огтолцуураас эможи сонгоорой
+                      </p>
                     </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
-        </div>
-        
-        <div className="mt-10">
-          <h2 className="text-xl font-semibold mb-4">Бодит хэрэглээний жишээнүүд</h2>
-          <p className="text-gray-500 mb-6">Форм болон бусад элементүүдэд ашиглах жишээ.</p>
-          
-          <Tabs defaultValue="form">
-            <TabsList className="grid grid-cols-2 w-[400px]">
-              <TabsTrigger value="form">Формын жишээ</TabsTrigger>
-              <TabsTrigger value="checkout">Төлбөрийн жишээ</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="form" className="mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Хүргэлтийн хаяг</CardTitle>
-                  <CardDescription>
-                    Хүргэлтийн хаягийн мэдээллээ оруулна уу.
-                    <FoodTooltip 
-                      content="Хүргэлтийн мэдээлэл нь таны захиалга зөв хүрэхэд чухал. Мэдээллийг бүрэн зөв оруулна уу."
-                      illustration="sandwich"
-                      side="right"
-                    />
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center">
-                      <Label htmlFor="name">Бүтэн нэр</Label>
-                      <FoodTooltip 
-                        content="Таны нэрийг хүргэлтийн ажилтан ашиглана."
-                        illustration="chicken"
-                      />
-                    </div>
-                    <Input id="name" placeholder="Болд Баатар" />
-                  </div>
+        </TabsContent>
+
+        <TabsContent value="review">
+          <div className="max-w-2xl mx-auto">
+            <Card>
+              <CardHeader>
+                <CardTitle>Хоолны сэтгэгдэл</CardTitle>
+                <CardDescription>
+                  Сэтгэгдэл үлдээж, реакц харуулах
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <FoodReviewCard 
+                  review={exampleReview}
+                  onReaction={(emoji) => {
+                    console.log("Эможи сонгосон:", emoji);
+                    setSelectedEmoji(emoji);
+                  }}
+                  onLike={() => console.log("Таалагдлаа дарсан")}
+                  onComment={() => console.log("Сэтгэгдэл дарсан")}
+                  onShare={() => console.log("Хуваалцах дарсан")}
+                />
+                
+                <div className="mt-8 p-4 border rounded-lg">
+                  <h3 className="text-sm font-medium mb-4 flex items-center gap-2">
+                    <MessageCircle className="h-4 w-4" />
+                    Сэтгэгдэл бичих
+                  </h3>
                   
-                  <div className="space-y-2">
-                    <div className="flex items-center">
-                      <Label htmlFor="phone">Утасны дугаар</Label>
-                      <FoodTooltip 
-                        content="Хүргэлтийн ажилтан тантай холбогдоход хэрэглэнэ."
-                        illustration="coffee"
-                      />
-                    </div>
-                    <Input id="phone" placeholder="9911-2233" />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <div className="flex items-center">
-                      <Label htmlFor="address">Хаяг</Label>
-                      <FoodTooltip 
-                        content={
-                          <div className="space-y-1">
-                            <p>Дараах мэдээллийг оруулна уу:</p>
-                            <ul className="list-disc pl-4">
-                              <li>Хороо, Хороолол</li>
-                              <li>Байр, орц, давхар</li>
-                              <li>Хаалганы дугаар</li>
-                            </ul>
-                          </div>
-                        }
-                        illustration="pizza"
-                        size="lg"
-                      />
-                    </div>
-                    <Textarea id="address" placeholder="Баянзүрх дүүрэг, 2-р хороо, 15-р хороолол, 45-р байр, 3-р орц, 5 давхар, 507 тоот" />
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button>Хадгалах</Button>
-                </CardFooter>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="checkout" className="mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Төлбөрийн мэдээлэл</CardTitle>
-                  <CardDescription>
-                    Төлбөр төлөх мэдээллээ оруулна уу.
-                    <FoodTooltip 
-                      content="Төлбөрийн мэдээлэл нь аюулгүй, шифрлэгдсэн байдлаар дамжуулагдана."
-                      illustration="icecream"
-                      side="right"
-                    />
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center">
-                      <Label htmlFor="card-number">Картын дугаар</Label>
-                      <FoodTooltip 
-                        content="16 оронтой картын дугаараа оруулна уу."
-                        illustration="apple"
-                      />
-                    </div>
-                    <Input id="card-number" placeholder="1234 5678 9012 3456" />
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center">
-                        <Label htmlFor="expiry">Дуусах хугацаа</Label>
-                        <FoodTooltip 
-                          content="Картын дуусах хугацааг MM/YY (сар/жил) форматаар оруулна уу."
-                          illustration="beef"
-                        />
-                      </div>
-                      <Input id="expiry" placeholder="MM/YY" />
-                    </div>
+                  <div className="flex gap-2">
+                    <FoodTooltip
+                      onEmojiSelect={setSelectedEmoji}
+                      position="top"
+                    >
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="gap-1 h-9"
+                      >
+                        <Heart className="h-4 w-4" />
+                        <span>{selectedEmoji || "Эможи"}</span>
+                      </Button>
+                    </FoodTooltip>
                     
-                    <div className="space-y-2">
-                      <div className="flex items-center">
-                        <Label htmlFor="cvv">CVV код</Label>
-                        <FoodTooltip 
-                          content="Картын ард байрлах 3 оронтой аюулгүй код."
-                          illustration="cookie"
-                        />
-                      </div>
-                      <Input id="cvv" placeholder="123" />
-                    </div>
+                    <Button variant="default" size="sm" className="h-9">Хадгалах</Button>
                   </div>
-                  
-                  <div className="space-y-2">
-                    <div className="flex items-center">
-                      <Label htmlFor="namecard">Картын эзэмшигч</Label>
-                      <FoodTooltip 
-                        content="Картан дээр бичсэн нэрийг оруулна уу."
-                        illustration="chicken"
-                      />
-                    </div>
-                    <Input id="namecard" placeholder="BOLD BAATAR" />
-                  </div>
-                </CardContent>
-                <CardFooter className="flex justify-between">
-                  <Button variant="outline">Буцах</Button>
-                  <Button>
-                    Төлбөр төлөх
-                    <FoodTooltip 
-                      content="Төлбөр амжилттай хийгдсэний дараа захиалга баталгаажина."
-                      illustration="pizza"
-                      side="right"
-                    />
-                  </Button>
-                </CardFooter>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </div>
-      </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
