@@ -502,7 +502,28 @@ export function Header() {
                           className="w-full" 
                           onClick={() => {
                             setIsCartOpen(false);
-                            setLocation("/cart");
+                            if (cartItems.length > 0) {
+                              // Create mock order object for demonstration
+                              const order = {
+                                id: Date.now().toString(),
+                                items: cartItems,
+                                totalAmount: getTotalPrice(),
+                                date: new Date(),
+                              };
+                              
+                              // Store order in localStorage for demo purposes
+                              localStorage.setItem('currentOrder', JSON.stringify(order));
+                              
+                              // Go directly to Stripe checkout for small carts
+                              if (cartItems.length <= 3) {
+                                window.location.href = "/api/stripe-static-checkout";
+                              } else {
+                                // For larger carts, go to cart page first
+                                setLocation("/cart");
+                              }
+                            } else {
+                              setLocation("/cart");
+                            }
                           }}
                         >
                           Төлбөр хийх
