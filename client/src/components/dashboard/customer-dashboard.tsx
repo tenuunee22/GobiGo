@@ -223,10 +223,11 @@ export function CustomerDashboard() {
       {/* Hero Section with Parallax */}
       <section 
         ref={heroRef}
-        className="relative bg-cover bg-center h-[700px] md:h-[800px] overflow-hidden flex items-center"
+        className="relative bg-cover bg-top h-[700px] md:h-[800px] overflow-hidden flex items-center"
         style={{
           backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url("https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2070&auto=format&fit=crop")',
-          backgroundAttachment: 'fixed'
+          backgroundAttachment: 'fixed',
+          backgroundPosition: 'top'
         }}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-50"></div>
@@ -828,7 +829,7 @@ export function CustomerDashboard() {
           <div className="flex justify-center gap-8">
             {/* Facebook */}
             <motion.a 
-              href="https://facebook.com/gobigo_delivery"
+              href="https://www.facebook.com/profile.php?id=100074258054037"
               target="_blank"
               rel="noopener noreferrer"
               className="flex flex-col items-center"
@@ -841,7 +842,7 @@ export function CustomerDashboard() {
               onClick={() => {
                 // Confirm clicking will send them to your own Facebook
                 if (window) {
-                  window.open("https://facebook.com/gobigo_delivery", "_blank");
+                  window.open("https://www.facebook.com/profile.php?id=100074258054037", "_blank");
                 }
               }}
             >
@@ -855,7 +856,7 @@ export function CustomerDashboard() {
             
             {/* Instagram */}
             <motion.a 
-              href="https://instagram.com/gobigo.official"
+              href="https://www.instagram.com/te_nuune/"
               target="_blank"
               rel="noopener noreferrer"
               className="flex flex-col items-center"
@@ -868,7 +869,7 @@ export function CustomerDashboard() {
               onClick={() => {
                 // Confirm clicking will send them to your own Instagram
                 if (window) {
-                  window.open("https://instagram.com/gobigo.official", "_blank");
+                  window.open("https://www.instagram.com/te_nuune/", "_blank");
                 }
               }}
             >
