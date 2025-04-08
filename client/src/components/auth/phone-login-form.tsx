@@ -94,7 +94,7 @@ export function PhoneLoginForm({ onToggleForm }: PhoneLoginFormProps) {
       
       toast({
         title: "Баталгаажуулах код илгээгдлээ",
-        description: "Таны утсанд баталгаажуулах код илгээлээ. Тест код: 123456",
+        description: "Хөгжүүлэлтийн тест код: 123456. Энэ кодыг баталгаажуулахад ашиглана уу.",
       });
     } catch (error: any) {
       console.error("Error sending verification code:", error);
@@ -120,8 +120,9 @@ export function PhoneLoginForm({ onToggleForm }: PhoneLoginFormProps) {
       // In the real implementation, we would verify with Firebase
       // For testing, we'll accept "123456" as the valid code
       
-      if (values.code !== "123456") {
-        throw new Error("Баталгаажуулах код буруу байна.");
+      // Баталгаажуулах код ямар ч тохиолдолд 123456 байх ёстой
+  if (values.code !== "123456") {
+        throw new Error("Баталгаажуулах код буруу байна. Зөв код: 123456");
       }
       
       // Simulate API delay
