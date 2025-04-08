@@ -19,7 +19,10 @@ import {
   LogOut, 
   Store, 
   Truck, 
-  ShoppingBag 
+  ShoppingBag,
+  Pizza,
+  Image,
+  Camera 
 } from "lucide-react";
 
 export function Header() {
@@ -41,6 +44,187 @@ export function Header() {
     return "/profile/user";
   };
   
+  // Хэрэглэгчийн төрлөөс хамаарч харуулах цэсүүд
+  const getUserTypeNav = () => {
+    const userRole = user?.role || "customer"; // Хэрэглэгчийн төрөл
+    
+    switch (userRole) {
+      case "business":
+        return (
+          <>
+            <Button 
+              variant="ghost" 
+              className="flex items-center gap-2" 
+              onClick={() => handleNavigate("/dashboard/store")}
+            >
+              <Store className="h-4 w-4" />
+              Бараа бүтээгдэхүүн
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="flex items-center gap-2" 
+              onClick={() => handleNavigate("/profile/business")}
+            >
+              <User className="h-4 w-4" />
+              Тохиргоо
+            </Button>
+          </>
+        );
+      case "delivery":
+        return (
+          <>
+            <Button 
+              variant="ghost" 
+              className="flex items-center gap-2" 
+              onClick={() => handleNavigate("/dashboard/driver")}
+            >
+              <Truck className="h-4 w-4" />
+              Хүргэлтүүд
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="flex items-center gap-2" 
+              onClick={() => handleNavigate("/profile/driver")}
+            >
+              <User className="h-4 w-4" />
+              Тохиргоо
+            </Button>
+          </>
+        );
+      default: // customer
+        return (
+          <>
+            <Button 
+              variant="ghost" 
+              className="flex items-center gap-2" 
+              onClick={() => handleNavigate("/")}
+            >
+              <ShoppingBag className="h-4 w-4" />
+              Захиалах
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="flex items-center gap-2" 
+              onClick={() => handleNavigate("/profile/user")}
+            >
+              <User className="h-4 w-4" />
+              Тохиргоо
+            </Button>
+          </>
+        );
+    }
+  };
+  
+  // Мобайл хэсэгт харуулах цэсүүд
+  const getMobileMenuItems = () => {
+    const userRole = user?.role || "customer";
+    
+    // Үндсэн цэсүүд бүх хэрэглэгчид харагдана
+    const baseMenuItems = (
+      <>
+        <div className="my-2 text-sm font-medium text-gray-500 uppercase">
+          Үндсэн цэс
+        </div>
+        <Button 
+          variant="ghost" 
+          className="w-full justify-start flex items-center gap-3" 
+          onClick={() => handleNavigate("/")}
+        >
+          <ShoppingBag className="h-5 w-5" />
+          Захиалах
+        </Button>
+      </>
+    );
+    
+    // Хэрэглэгчийн төрлөөс хамаарч харагдах нэмэлт цэсүүд
+    let roleMenuItems;
+    
+    switch (userRole) {
+      case "business":
+        roleMenuItems = (
+          <>
+            <div className="my-2 text-sm font-medium text-gray-500 uppercase mt-4">
+              Бизнесийн цэс
+            </div>
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start flex items-center gap-3" 
+              onClick={() => handleNavigate("/dashboard/store")}
+            >
+              <Store className="h-5 w-5" />
+              Бараа бүтээгдэхүүн
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start flex items-center gap-3" 
+              onClick={() => handleNavigate("/profile/business")}
+            >
+              <User className="h-5 w-5" />
+              Тохиргоо
+            </Button>
+          </>
+        );
+        break;
+      case "delivery":
+        roleMenuItems = (
+          <>
+            <div className="my-2 text-sm font-medium text-gray-500 uppercase mt-4">
+              Хүргэлтийн цэс
+            </div>
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start flex items-center gap-3" 
+              onClick={() => handleNavigate("/dashboard/driver")}
+            >
+              <Truck className="h-5 w-5" />
+              Хүргэлтүүд
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start flex items-center gap-3" 
+              onClick={() => handleNavigate("/profile/driver")}
+            >
+              <User className="h-5 w-5" />
+              Тохиргоо
+            </Button>
+          </>
+        );
+        break;
+      default: // customer
+        roleMenuItems = (
+          <>
+            <div className="my-2 text-sm font-medium text-gray-500 uppercase mt-4">
+              Хэрэглэгчийн цэс
+            </div>
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start flex items-center gap-3" 
+              onClick={() => handleNavigate("/profile/user")}
+            >
+              <User className="h-5 w-5" />
+              Тохиргоо
+            </Button>
+          </>
+        );
+    }
+    
+    return (
+      <>
+        {baseMenuItems}
+        {roleMenuItems}
+        <hr className="my-4" />
+        <Button 
+          variant="ghost" 
+          className="w-full justify-start flex items-center gap-3" 
+          onClick={() => handleNavigate("/login")}
+        >
+          <LogOut className="h-5 w-5" />
+          Гарах
+        </Button>
+      </>
+    );
+  };
+
   return (
     <header className="bg-white border-b sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -55,32 +239,7 @@ export function Header() {
           
           {/* Desktop navigation */}
           <nav className="hidden md:flex space-x-6">
-            <Button 
-              variant="ghost" 
-              className="flex items-center gap-2" 
-              onClick={() => handleNavigate("/")}
-            >
-              <ShoppingBag className="h-4 w-4" />
-              Захиалах
-            </Button>
-            
-            <Button 
-              variant="ghost" 
-              className="flex items-center gap-2" 
-              onClick={() => handleNavigate("/dashboard/store")}
-            >
-              <Store className="h-4 w-4" />
-              Бизнес эзэд
-            </Button>
-            
-            <Button 
-              variant="ghost" 
-              className="flex items-center gap-2" 
-              onClick={() => handleNavigate("/dashboard/driver")}
-            >
-              <Truck className="h-4 w-4" />
-              Хүргэлт
-            </Button>
+            {getUserTypeNav()}
           </nav>
           
           {/* User menu */}
@@ -122,70 +281,7 @@ export function Header() {
               </SheetTrigger>
               <SheetContent side="right" className="w-[80%] sm:w-[350px]">
                 <div className="mt-8 flex flex-col space-y-3">
-                  <Button 
-                    variant="ghost" 
-                    className="w-full justify-start flex items-center gap-3" 
-                    onClick={() => handleNavigate("/")}
-                  >
-                    <ShoppingBag className="h-5 w-5" />
-                    Захиалах
-                  </Button>
-                  
-                  <Button 
-                    variant="ghost" 
-                    className="w-full justify-start flex items-center gap-3" 
-                    onClick={() => handleNavigate("/dashboard/store")}
-                  >
-                    <Store className="h-5 w-5" />
-                    Бизнес эзэд
-                  </Button>
-                  
-                  <Button 
-                    variant="ghost" 
-                    className="w-full justify-start flex items-center gap-3" 
-                    onClick={() => handleNavigate("/dashboard/driver")}
-                  >
-                    <Truck className="h-5 w-5" />
-                    Хүргэлт
-                  </Button>
-                  
-                  <hr className="my-4" />
-                  
-                  <Button 
-                    variant="ghost" 
-                    className="w-full justify-start flex items-center gap-3" 
-                    onClick={() => handleNavigate("/profile/user")}
-                  >
-                    <User className="h-5 w-5" />
-                    Хэрэглэгчийн профайл
-                  </Button>
-                  
-                  <Button 
-                    variant="ghost" 
-                    className="w-full justify-start flex items-center gap-3" 
-                    onClick={() => handleNavigate("/profile/business")}
-                  >
-                    <Store className="h-5 w-5" />
-                    Бизнесийн профайл
-                  </Button>
-                  
-                  <Button 
-                    variant="ghost" 
-                    className="w-full justify-start flex items-center gap-3" 
-                    onClick={() => handleNavigate("/profile/driver")}
-                  >
-                    <Truck className="h-5 w-5" />
-                    Жолоочийн профайл
-                  </Button>
-                  
-                  <Button 
-                    variant="ghost" 
-                    className="w-full justify-start flex items-center gap-3" 
-                    onClick={() => handleNavigate("/login")}
-                  >
-                    <LogOut className="h-5 w-5" />
-                    Гарах
-                  </Button>
+                  {getMobileMenuItems()}
                 </div>
               </SheetContent>
             </Sheet>

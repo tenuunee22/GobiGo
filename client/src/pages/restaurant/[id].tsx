@@ -7,10 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, MapPin, Clock, Star, Search } from "lucide-react";
+import { ChevronLeft, MapPin, Clock, Star, Search, Camera, Image } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { PlaceOrder } from "@/components/customer/place-order";
+import { ReviewForm } from "@/components/restaurant/review-form";
 import { useLocation } from "wouter";
 
 export default function RestaurantDetail() {
@@ -332,6 +333,23 @@ export default function RestaurantDetail() {
                 <div className="mt-3 text-sm text-gray-600">
                   <p>{restaurant.address}</p>
                   <p>Ажиллах цаг: {restaurant.businessHours}</p>
+                  <div className="mt-2 flex gap-3">
+                    <ReviewForm businessId={id} />
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="flex items-center gap-1"
+                      onClick={() => {
+                        toast({
+                          title: "Зураг солих",
+                          description: "Зураг солих функц удахгүй нэмэгдэнэ"
+                        });
+                      }}
+                    >
+                      <Camera className="h-4 w-4" />
+                      <span>Зураг солих</span>
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
