@@ -20,6 +20,8 @@ import DriverProfile from "@/pages/profile/driver";
 import RestaurantDetail from "@/pages/restaurant/[id]";
 import OrderDetail from "@/pages/order/[id]";
 import Checkout from "@/pages/checkout";
+import Cart from "@/pages/cart";
+import TooltipExample from "@/pages/tooltip-example";
 
 // Customer components
 import { CustomerDashboard } from "@/components/dashboard/customer-dashboard";
@@ -96,7 +98,8 @@ function Router() {
         <Route path="/role-selection" component={RoleSelection} />
         <Route path="/orders" component={CustomerDashboard} />
         <Route path="/search" component={CustomerDashboard} />
-        <Route path="/cart" component={CustomerDashboard} />
+        <Route path="/cart" component={Cart} />
+        <Route path="/tooltip-example" component={TooltipExample} />
         <Route path="/business-orders" component={BusinessDashboard} />
         <Route path="/earnings" component={CustomerDashboard} />
         <Route path="/delivery-history" component={DeliveryDashboard} />

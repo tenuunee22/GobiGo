@@ -166,22 +166,55 @@ export default function RestaurantDetail() {
   };
   
   const handleAddItem = (item: any) => {
+    // Get existing cart items from localStorage
+    let cartItems = [];
+    try {
+      const savedCart = localStorage.getItem('cartItems');
+      cartItems = savedCart ? JSON.parse(savedCart) : [];
+    } catch (error) {
+      console.error("Error parsing cart items from localStorage", error);
+    }
+    
     // Check if item is already in the cart
-    const existingItemIndex = selectedItems.findIndex(i => i.id === item.id);
+    const existingItemIndex = cartItems.findIndex((i: any) => i.id === item.id);
+    
+    // Also update the local component state for the current page view
+    const existingLocalItemIndex = selectedItems.findIndex(i => i.id === item.id);
     
     if (existingItemIndex >= 0) {
       // Increment quantity if already in cart
-      const newItems = [...selectedItems];
-      newItems[existingItemIndex].quantity += 1;
-      setSelectedItems(newItems);
+      cartItems[existingItemIndex].quantity += 1;
+      
+      // Update local state too
+      if (existingLocalItemIndex >= 0) {
+        const newItems = [...selectedItems];
+        newItems[existingLocalItemIndex].quantity += 1;
+        setSelectedItems(newItems);
+      }
     } else {
       // Add new item with quantity 1
-      setSelectedItems([...selectedItems, { ...item, quantity: 1 }]);
+      const newItem = { ...item, quantity: 1 };
+      cartItems.push(newItem);
+      
+      // Update local state too
+      setSelectedItems([...selectedItems, newItem]);
     }
+    
+    // Save to localStorage
+    localStorage.setItem('cartItems', JSON.stringify(cartItems));
     
     toast({
       title: "Нэмэгдлээ",
       description: `${item.name} сагсанд нэмэгдлээ`,
+      action: (
+        <Button 
+          size="sm" 
+          variant="outline" 
+          onClick={() => setLocation("/cart")}
+        >
+          Сагс руу очих
+        </Button>
+      ),
     });
   };
   
@@ -249,7 +282,41 @@ export default function RestaurantDetail() {
       return;
     }
     
-    setShowOrderForm(true);
+    // Save the selected items to localStorage for the cart
+    let cartItems = [];
+    try {
+      const savedCart = localStorage.getItem('cartItems');
+      cartItems = savedCart ? JSON.parse(savedCart) : [];
+    } catch (error) {
+      console.error("Error parsing cart items from localStorage", error);
+    }
+    
+    // Update the cart with selected items, keeping track of quantities
+    selectedItems.forEach(item => {
+      const existingItemIndex = cartItems.findIndex((i: any) => i.id === item.id);
+      if (existingItemIndex >= 0) {
+        cartItems[existingItemIndex].quantity = item.quantity;
+      } else {
+        cartItems.push(item);
+      }
+    });
+    
+    localStorage.setItem('cartItems', JSON.stringify(cartItems));
+    
+    // Ask the user if they want to continue shopping or go to cart
+    toast({
+      title: "Бүтээгдэхүүн нэмэгдлээ",
+      description: "Сагсанд нэмэгдлээ. Төлбөр төлөх үү?",
+      action: (
+        <Button 
+          variant="default" 
+          size="sm"
+          onClick={() => setLocation("/cart")}
+        >
+          Тийм, төлбөр төлөх
+        </Button>
+      ),
+    });
   };
 
   if (loading) {
