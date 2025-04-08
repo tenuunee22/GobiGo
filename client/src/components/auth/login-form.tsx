@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
-import { loginUser, loginWithGoogle } from "@/lib/firebase";
+import { loginUser, loginWithGoogle, loginWithFacebook } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -86,6 +86,41 @@ export function LoginForm({ onToggleForm }: LoginFormProps) {
       toast({
         title: "Google-ээр нэвтрэх амжилтгүй болсон",
         description: error.message || "Google-ээр нэвтрэх үед алдаа гарлаа",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const handleFacebookLogin = async () => {
+    setIsLoading(true);
+    try {
+      const userCredential = await loginWithFacebook();
+      toast({
+        title: "Амжилттай нэвтэрлээ",
+        description: "Тавтай морил!",
+      });
+      
+      // Get user data from Firestore to determine role
+      const userData = await import("@/lib/firebase").then(m => m.getUserData(userCredential.uid));
+      if (userData) {
+        // Set user data in auth context
+        setUser({
+          uid: userCredential.uid,
+          email: userCredential.email,
+          displayName: userCredential.displayName,
+          ...userData
+        });
+        
+        // Redirect to home page
+        setLocation("/");
+      }
+    } catch (error: any) {
+      console.error("Facebook login error:", error);
+      toast({
+        title: "Facebook-ээр нэвтрэх амжилтгүй болсон",
+        description: error.message || "Facebook-ээр нэвтрэх үед алдаа гарлаа",
         variant: "destructive",
       });
     } finally {
@@ -182,33 +217,33 @@ export function LoginForm({ onToggleForm }: LoginFormProps) {
           </div>
         </div>
 
-        <div className="mt-6 grid grid-cols-2 gap-3">
-          <div>
-            <Button
-              variant="outline"
-              className="w-full inline-flex justify-center"
-              onClick={handleGoogleLogin}
-              disabled={isLoading}
-            >
-              <span className="sr-only">Google-ээр нэвтрэх</span>
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M12.24 10.285V14.4h6.806c-.275 1.765-2.056 5.174-6.806 5.174-4.095 0-7.439-3.389-7.439-7.574s3.345-7.574 7.439-7.574c2.33 0 3.891.989 4.785 1.849l3.254-3.138C18.189 1.186 15.479 0 12.24 0c-6.635 0-12 5.365-12 12s5.365 12 12 12c6.926 0 11.52-4.869 11.52-11.726 0-.788-.085-1.39-.189-1.989H12.24z"></path>
-              </svg>
-            </Button>
-          </div>
+        <div className="mt-6 grid grid-cols-2 gap-4">
+          <Button
+            variant="outline"
+            className="flex items-center justify-center gap-2 py-5 hover:bg-blue-50"
+            onClick={handleGoogleLogin}
+            disabled={isLoading}
+          >
+            <svg className="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path fill="#EA4335" d="M5.26620003,9.76452941 C6.19878754,6.93863203 8.85444915,4.90909091 12,4.90909091 C13.6909091,4.90909091 15.2181818,5.50909091 16.4181818,6.49090909 L19.9090909,3 C17.7818182,1.14545455 15.0545455,0 12,0 C7.27006974,0 3.1977497,2.69829785 1.23999023,6.65002441 L5.26620003,9.76452941 Z" />
+              <path fill="#34A853" d="M16.0407269,18.0125889 C14.9509167,18.7163016 13.5660892,19.0909091 12,19.0909091 C8.86648613,19.0909091 6.21911939,17.076871 5.27698177,14.2678769 L1.23746264,17.3349879 C3.19279051,21.2970142 7.26500293,24 12,24 C14.9328362,24 17.7353462,22.9573905 19.834192,20.9995801 L16.0407269,18.0125889 Z" />
+              <path fill="#4A90E2" d="M19.834192,20.9995801 C22.0291676,18.9520994 23.4545455,15.903663 23.4545455,12 C23.4545455,11.2909091 23.3454545,10.5272727 23.1818182,9.81818182 L12,9.81818182 L12,14.4545455 L18.4363636,14.4545455 C18.1187732,16.013626 17.2662994,17.2212117 16.0407269,18.0125889 L19.834192,20.9995801 Z" />
+              <path fill="#FBBC05" d="M5.27698177,14.2678769 C5.03832634,13.556323 4.90909091,12.7937589 4.90909091,12 C4.90909091,11.2182781 5.03443647,10.4668121 5.26620003,9.76452941 L1.23999023,6.65002441 C0.43658717,8.26043162 0,10.0753848 0,12 C0,13.9195484 0.444780743,15.7301709 1.23746264,17.3349879 L5.27698177,14.2678769 Z" />
+            </svg>
+            <span>Google</span>
+          </Button>
 
-          <div>
-            <Button
-              variant="outline"
-              className="w-full inline-flex justify-center"
-              disabled={isLoading}
-            >
-              <span className="sr-only">Facebook-ээр нэвтрэх</span>
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                <path fillRule="evenodd" d="M20 10c0-5.523-4.477-10-10-10S0 4.477 0 10c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V10h2.54V7.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V10h2.773l-.443 2.89h-2.33v6.988C16.343 19.128 20 14.991 20 10z" clipRule="evenodd" />
-              </svg>
-            </Button>
-          </div>
+          <Button
+            variant="outline" 
+            className="flex items-center justify-center gap-2 py-5 hover:bg-blue-50" 
+            onClick={handleFacebookLogin}
+            disabled={isLoading}
+          >
+            <svg className="w-5 h-5" fill="#1877F2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+            </svg>
+            <span>Facebook</span>
+          </Button>
         </div>
       </div>
     </div>
