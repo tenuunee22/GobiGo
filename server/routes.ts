@@ -350,6 +350,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Direct Stripe Checkout endpoint
+  app.post("/api/stripe-checkout", async (req, res) => {
+    try {
+      if (!stripe) {
+        return res.status(500).json({ 
+          message: "Payment service not available. Please check server configuration." 
+        });
+      }
+
+      const { amount, orderId, customerName, customerEmail, successUrl, cancelUrl } = req.body;
+      
+      if (!amount || amount < 1) {
+        return res.status(400).json({ message: "Valid amount is required" });
+      }
+
+      // Create a Stripe Checkout Session
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: [
+          {
+            price_data: {
+              currency: 'mnt',
+              product_data: {
+                name: `GobiGo Order #${orderId || 'New'}`,
+                description: `Food delivery from GobiGo`,
+              },
+              unit_amount: Math.round(amount * 100), // Convert to smallest currency unit
+            },
+            quantity: 1,
+          },
+        ],
+        metadata: {
+          orderId: orderId || '',
+          customerName: customerName || 'Guest',
+          customerEmail: customerEmail || ''
+        },
+        mode: 'payment',
+        success_url: successUrl || `${req.protocol}://${req.get('host')}/order/${orderId || ''}?success=true`,
+        cancel_url: cancelUrl || `${req.protocol}://${req.get('host')}/order/${orderId || ''}?canceled=true`,
+      });
+
+      // Return the URL to the client
+      res.json({
+        url: session.url,
+        sessionId: session.id
+      });
+    } catch (error: any) {
+      console.error("Error creating Stripe Checkout session:", error);
+      res.status(500).json({ 
+        message: "Error creating Stripe Checkout session", 
+        error: error.message 
+      });
+    }
+  });
+  
+  // Stripe Static Checkout Redirect
+  app.get("/api/stripe-static-checkout", (req, res) => {
+    // Redirect to the provided static Stripe checkout link
+    const staticCheckoutUrl = "https://buy.stripe.com/test_8wM15p4kW8886cw000";
+    res.redirect(staticCheckoutUrl);
+  });
+
   // Create the HTTP server
   const httpServer = createServer(app);
 

@@ -169,6 +169,12 @@ export default function OrderDetails() {
     }
   };
 
+  // Helper function to redirect to Stripe checkout
+  const redirectToStripeCheckout = () => {
+    // Redirect to our static Stripe checkout URL
+    window.location.href = "/api/stripe-static-checkout";
+  };
+
   if (loading) {
     return (
       <div className="container py-10 flex flex-col items-center justify-center min-h-[50vh]">
@@ -205,6 +211,61 @@ export default function OrderDetails() {
     );
   }
 
+  // If payment is pending and payment method is card, show stripe payment option
+  if (order.paymentStatus === "pending" && order.paymentMethod === "card") {
+    return (
+      <div className="container py-10">
+        <div className="mb-6">
+          <Link to="/">
+            <Button variant="ghost" className="flex items-center gap-2">
+              <ArrowLeft className="h-5 w-5" /> Нүүр хуудас руу буцах
+            </Button>
+          </Link>
+        </div>
+        
+        <Card className="max-w-3xl mx-auto">
+          <CardHeader>
+            <CardTitle>Төлбөр төлөх</CardTitle>
+            <CardDescription>
+              Захиалга #{order.id} - {order.totalAmount.toLocaleString()}₮
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="bg-muted/50 p-4 rounded-md">
+              <div className="space-y-2">
+                {order.items.map((item, index) => (
+                  <div key={index} className="flex justify-between">
+                    <span>{item.quantity} x {item.name}</span>
+                    <span className="font-medium">{item.price * item.quantity}₮</span>
+                  </div>
+                ))}
+                
+                <div className="pt-2 mt-2 border-t">
+                  <div className="flex justify-between">
+                    <span>Хүргэлтийн хураамж</span>
+                    <span>2490₮</span>
+                  </div>
+                  <div className="flex justify-between font-bold mt-2">
+                    <span>Нийт дүн</span>
+                    <span>{order.totalAmount}₮</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <Button 
+              className="w-full" 
+              size="lg"
+              onClick={redirectToStripeCheckout}
+            >
+              <CreditCard className="mr-2 h-5 w-5" />
+              Stripe-аар төлөх
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+  
   // If payment is pending and payment method is qpay, show qpay payment screen
   if (order.paymentStatus === "pending" && order.paymentMethod === "qpay") {
     return (
@@ -375,7 +436,18 @@ export default function OrderDetails() {
               </div>
             </CardContent>
             
-            <CardFooter>
+            <CardFooter className="flex-col space-y-3">
+              {/* Show payment button for pending payments */}
+              {order.paymentStatus === "pending" && (
+                <Button 
+                  className="w-full" 
+                  onClick={redirectToStripeCheckout}
+                >
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  Төлбөр төлөх
+                </Button>
+              )}
+              
               <Button 
                 variant="outline" 
                 className="w-full"
