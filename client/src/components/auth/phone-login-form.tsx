@@ -89,6 +89,9 @@ export function PhoneLoginForm({ onToggleForm }: PhoneLoginFormProps) {
       
       setStep("verification");
       
+      // Автоматаар 123456 кодыг оруулах
+      verificationForm.setValue("code", "123456");
+      
       toast({
         title: "Баталгаажуулах код илгээгдлээ",
         description: "Таны утсанд баталгаажуулах код илгээлээ. Тест код: 123456",
@@ -201,6 +204,18 @@ export function PhoneLoginForm({ onToggleForm }: PhoneLoginFormProps) {
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? "Илгээж байна..." : "Баталгаажуулах код авах"}
                 </Button>
+                
+                {/* Зөвхөн хөгжүүлэлтийн үед тест нэвтрэхэд хурдан арга - бүтээмжид */}
+                <div className="mt-2">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    className="w-full text-xs" 
+                    onClick={() => onSubmitPhoneNumber({ phoneNumber: "99112233" })}
+                  >
+                    TEST: 99112233-р шууд нэвтрэх
+                  </Button>
+                </div>
               </form>
             </Form>
 
@@ -243,6 +258,18 @@ export function PhoneLoginForm({ onToggleForm }: PhoneLoginFormProps) {
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? "Шалгаж байна..." : "Нэвтрэх"}
                 </Button>
+                
+                {/* Зөвхөн хөгжүүлэлтийн үед тест нэвтрэхэд хурдан арга - бүтээмжид */}
+                <div className="mt-2">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    className="w-full text-xs" 
+                    onClick={() => onSubmitVerificationCode({ code: "123456" })}
+                  >
+                    TEST: Кодыг шалгах
+                  </Button>
+                </div>
               </form>
             </Form>
 
