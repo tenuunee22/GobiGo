@@ -94,6 +94,14 @@ function Router() {
         <Route path="/order/:id" component={OrderDetail} />
         <Route path="/checkout" component={Checkout} />
         <Route path="/role-selection" component={RoleSelection} />
+        <Route path="/orders" component={CustomerDashboard} />
+        <Route path="/search" component={CustomerDashboard} />
+        <Route path="/cart" component={CustomerDashboard} />
+        <Route path="/business-orders" component={BusinessDashboard} />
+        <Route path="/earnings" component={CustomerDashboard} />
+        <Route path="/delivery-history" component={DeliveryDashboard} />
+        <Route path="/products" component={BusinessDashboard} />
+        <Route path="/settings" component={CustomerDashboard} />
         <Route component={NotFound} />
       </Switch>
     </div>

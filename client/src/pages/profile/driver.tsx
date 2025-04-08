@@ -8,6 +8,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
 import { Car, Settings, User2 } from "lucide-react";
 import { DeliveryDashboard } from "@/components/delivery/delivery-dashboard";
 
@@ -17,6 +24,10 @@ export default function DriverProfile() {
   const [profileImage, setProfileImage] = useState<string | undefined>(undefined);
   const [vehicleImage, setVehicleImage] = useState<string | undefined>(undefined);
   const [isUploading, setIsUploading] = useState(false);
+  const [name, setName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [licenseNumber, setLicenseNumber] = useState("");
+  const [vehicleType, setVehicleType] = useState("");
   
   // Load profile data
   useEffect(() => {
@@ -31,6 +42,22 @@ export default function DriverProfile() {
             
             if (userData.vehicleImage) {
               setVehicleImage(userData.vehicleImage);
+            }
+            
+            if (userData.name) {
+              setName(userData.name);
+            }
+            
+            if (userData.phoneNumber) {
+              setPhoneNumber(userData.phoneNumber);
+            }
+            
+            if (userData.licenseNumber) {
+              setLicenseNumber(userData.licenseNumber);
+            }
+            
+            if (userData.vehicleType) {
+              setVehicleType(userData.vehicleType);
             }
           }
         } catch (error) {
@@ -99,6 +126,32 @@ export default function DriverProfile() {
       });
     } finally {
       setIsUploading(false);
+    }
+  };
+  
+  // Handle profile information update
+  const handleProfileUpdate = async () => {
+    if (!user || !user.uid) return;
+    
+    try {
+      await updateBusinessProfile(user.uid, {
+        name,
+        phoneNumber,
+        licenseNumber,
+        vehicleType
+      });
+      
+      toast({
+        title: "Мэдээлэл шинэчлэгдлээ",
+        description: "Таны хувийн мэдээлэл амжилттай шинэчлэгдлээ",
+      });
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast({
+        title: "Алдаа гарлаа",
+        description: "Мэдээлэл шинэчлэхэд алдаа гарлаа",
+        variant: "destructive"
+      });
     }
   };
 
@@ -193,7 +246,8 @@ export default function DriverProfile() {
                     <Label htmlFor="name">Бүтэн нэр</Label>
                     <Input
                       id="name"
-                      value={user?.name || ""}
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
                       placeholder="Нэрээ оруулна уу"
                     />
                   </div>
@@ -202,7 +256,8 @@ export default function DriverProfile() {
                     <Label htmlFor="phone">Утасны дугаар</Label>
                     <Input
                       id="phone"
-                      value={user?.phoneNumber || ""}
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
                       placeholder="88001234"
                     />
                   </div>
@@ -211,21 +266,36 @@ export default function DriverProfile() {
                     <Label htmlFor="license">Жолооны үнэмлэхний дугаар</Label>
                     <Input
                       id="license"
-                      value={user?.licenseNumber || ""}
+                      value={licenseNumber}
+                      onChange={(e) => setLicenseNumber(e.target.value)}
                       placeholder="1234567"
                     />
                   </div>
                   
                   <div>
                     <Label htmlFor="vehicle-type">Тээврийн хэрэгслийн төрөл</Label>
-                    <Input
-                      id="vehicle-type"
-                      value={user?.vehicleType || ""}
-                      placeholder="Car/Motorcycle/Bicycle"
-                    />
+                    <Select 
+                      value={vehicleType} 
+                      onValueChange={setVehicleType}
+                    >
+                      <SelectTrigger id="vehicle-type">
+                        <SelectValue placeholder="Тээврийн хэрэгслийн төрөл сонгох" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="car">Машин</SelectItem>
+                        <SelectItem value="motorcycle">Мотоцикл</SelectItem>
+                        <SelectItem value="bicycle">Дугуй</SelectItem>
+                        <SelectItem value="scooter">Скутер</SelectItem>
+                        <SelectItem value="foot">Явган</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   
-                  <Button className="mt-2">
+                  <Button 
+                    className="mt-2"
+                    onClick={handleProfileUpdate}
+                    disabled={isUploading}
+                  >
                     Хадгалах
                   </Button>
                 </div>
