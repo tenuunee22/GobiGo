@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { PlaceOrder } from "@/components/customer/place-order";
 import { ReviewForm } from "@/components/restaurant/review-form";
+import { MapView } from "@/components/shared/map-view";
 import { useLocation } from "wouter";
 
 export default function RestaurantDetail() {
@@ -50,7 +51,12 @@ export default function RestaurantDetail() {
           address: "Сөүлийн гудамж 43, Улаанбаатар",
           businessHours: "10:00 - 22:00",
           coverImage: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?ixlib=rb-1.2.1&auto=format&fit=crop&w=1980&q=80",
-          logoImage: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80"
+          logoImage: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80",
+          location: {
+            lat: 47.9184676,
+            lng: 106.917693,
+            address: "Сөүлийн гудамж 43, Улаанбаатар"
+          }
         };
         
         setRestaurant(mockRestaurant);
@@ -359,6 +365,14 @@ export default function RestaurantDetail() {
             </div>
           </CardContent>
         </Card>
+        
+        {/* Restaurant location map */}
+        <div className="mb-6">
+          <MapView 
+            location={restaurant.location} 
+            businessName={restaurant.name}
+          />
+        </div>
         
         {/* Search and menu */}
         <div className="flex gap-6 flex-col md:flex-row">

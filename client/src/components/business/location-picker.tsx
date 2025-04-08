@@ -1,23 +1,20 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { GoogleMap, Marker, useJsApiLoader, StandaloneSearchBox } from '@react-google-maps/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, MapPin, Search } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { Loader2, Search, MapPin } from 'lucide-react';
+
+// Default center - Ulaanbaatar city center
+const defaultCenter = {
+  lat: 47.9184676,
+  lng: 106.917693,
+};
 
 const mapContainerStyle = {
   width: '100%',
   height: '400px',
 };
-
-const ulaanbaatarCenter = {
-  lat: 47.9184676,
-  lng: 106.917693,
-};
-
-const libraries: ("places")[] = ["places"];
 
 interface LocationPickerProps {
   initialLocation?: { lat: number; lng: number };
@@ -26,149 +23,119 @@ interface LocationPickerProps {
 }
 
 export function LocationPicker({ 
-  initialLocation = ulaanbaatarCenter, 
+  initialLocation = defaultCenter, 
   onLocationChange,
-  businessName = ''
+  businessName = "Таны бизнес" 
 }: LocationPickerProps) {
   const [map, setMap] = useState<google.maps.Map | null>(null);
-  const [center, setCenter] = useState(initialLocation);
-  const [marker, setMarker] = useState(initialLocation);
-  const [address, setAddress] = useState<string>('');
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [isSearching, setIsSearching] = useState(false);
-  const { toast } = useToast();
+  const [markerPosition, setMarkerPosition] = useState(initialLocation);
+  const [address, setAddress] = useState<string>("");
+  const [searchBoxRef, setSearchBoxRef] = useState<google.maps.places.SearchBox | null>(null);
+  const [searchInput, setSearchInput] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
-    libraries,
+    libraries: ["places"],
   });
 
-  useEffect(() => {
-    if (initialLocation) {
-      setCenter(initialLocation);
-      setMarker(initialLocation);
-      getAddressFromCoordinates(initialLocation);
-    }
-  }, [initialLocation]);
-
-  const onLoad = useCallback((map: google.maps.Map) => {
+  const onMapLoad = useCallback((map: google.maps.Map) => {
     setMap(map);
   }, []);
 
-  const onUnmount = useCallback(() => {
-    setMap(null);
+  const onSearchBoxLoad = useCallback((ref: google.maps.places.SearchBox) => {
+    setSearchBoxRef(ref);
   }, []);
 
-  const handleMapClick = (e: google.maps.MapMouseEvent) => {
+  // Handler for map clicks to set the marker position
+  const onMapClick = useCallback((e: google.maps.MapMouseEvent) => {
     if (e.latLng) {
-      const newLoc = { 
-        lat: e.latLng.lat(), 
-        lng: e.latLng.lng() 
+      const newPosition = {
+        lat: e.latLng.lat(),
+        lng: e.latLng.lng()
       };
-      setMarker(newLoc);
-      getAddressFromCoordinates(newLoc);
-    }
-  };
-
-  const getAddressFromCoordinates = async (location: { lat: number; lng: number }) => {
-    if (!isLoaded || loadError) return;
-
-    const geocoder = new google.maps.Geocoder();
-    
-    try {
-      const response = await geocoder.geocode({ location });
-      if (response.results[0]) {
-        setAddress(response.results[0].formatted_address);
-      } else {
-        setAddress('Хаяг олдсонгүй');
-      }
-    } catch (error) {
-      console.error('Geocoding error:', error);
-      setAddress('Хаяг олдсонгүй');
-    }
-  };
-  
-  const handleSearch = async () => {
-    if (!searchQuery.trim() || !isLoaded || loadError) return;
-    
-    setIsSearching(true);
-    const geocoder = new google.maps.Geocoder();
-    
-    try {
-      // Add city/country to bias search results to Mongolia/Ulaanbaatar
-      const regionQuery = searchQuery + (
-        searchQuery.toLowerCase().includes('улаанбаатар') || 
-        searchQuery.toLowerCase().includes('ulaanbaatar') || 
-        searchQuery.toLowerCase().includes('mongolia') || 
-        searchQuery.toLowerCase().includes('монгол') 
-          ? '' 
-          : ', Улаанбаатар, Монгол'
-      );
+      setMarkerPosition(newPosition);
       
-      const response = await geocoder.geocode({ address: regionQuery });
-      
-      if (response.results[0]) {
-        const location = response.results[0].geometry.location;
-        const newLoc = { 
-          lat: location.lat(), 
-          lng: location.lng() 
-        };
-        
-        setCenter(newLoc);
-        setMarker(newLoc);
-        setAddress(response.results[0].formatted_address);
-        
-        if (map) {
-          map.panTo(newLoc);
-          map.setZoom(16);
+      // Get address from coordinates (reverse geocoding)
+      const geocoder = new google.maps.Geocoder();
+      geocoder.geocode({ location: newPosition }, (results, status) => {
+        if (status === "OK" && results && results[0]) {
+          setAddress(results[0].formatted_address);
+        } else {
+          setAddress("Хаяг олдсонгүй");
         }
-      } else {
-        toast({
-          title: "Хаяг олдсонгүй",
-          description: "Өөр хаяг оруулж үзнэ үү",
-          variant: "destructive"
+      });
+    }
+  }, []);
+
+  // Handler for search box place changes
+  const onPlacesChanged = () => {
+    if (searchBoxRef) {
+      const places = searchBoxRef.getPlaces();
+      
+      if (places && places.length > 0) {
+        const place = places[0];
+        
+        if (place.geometry && place.geometry.location) {
+          const newPosition = {
+            lat: place.geometry.location.lat(),
+            lng: place.geometry.location.lng()
+          };
+          
+          setMarkerPosition(newPosition);
+          setAddress(place.formatted_address || "");
+          
+          // Center the map on the selected place
+          if (map) {
+            map.panTo(newPosition);
+            map.setZoom(16);
+          }
+        }
+      }
+    }
+  };
+
+  // Save the selected location
+  const handleSaveLocation = () => {
+    setLoading(true);
+    
+    // Wait to simulate API call
+    setTimeout(() => {
+      onLocationChange({
+        ...markerPosition,
+        address: address
+      });
+      
+      setLoading(false);
+    }, 500);
+  };
+
+  // Update marker when initialLocation changes (e.g. when component receives new props)
+  useEffect(() => {
+    if (initialLocation) {
+      setMarkerPosition(initialLocation);
+      
+      // Get address for initial location
+      if (isLoaded) {
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ location: initialLocation }, (results, status) => {
+          if (status === "OK" && results && results[0]) {
+            setAddress(results[0].formatted_address);
+          }
         });
       }
-    } catch (error) {
-      console.error('Geocoding error:', error);
-      toast({
-        title: "Алдаа гарлаа",
-        description: "Хайлт хийх үед алдаа гарлаа",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSearching(false);
     }
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleSearch();
-    }
-  };
-
-  const handleSaveLocation = () => {
-    onLocationChange({ 
-      ...marker, 
-      address
-    });
-    
-    toast({
-      title: "Байршил хадгалагдлаа",
-      description: "Таны бизнесийн байршил амжилттай хадгалагдлаа",
-    });
-  };
+  }, [initialLocation, isLoaded]);
 
   if (loadError) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Алдаа гарлаа</CardTitle>
-          <CardDescription>Google Maps ачаалахад алдаа гарлаа</CardDescription>
+          <CardTitle>Газрын зураг ачаалахад алдаа гарлаа</CardTitle>
+          <CardDescription>Google Maps-тэй холбогдоход асуудал гарлаа</CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-red-500">Газрын зургийг ачаалахад алдаа гарлаа. Та хуудсаа шинэчлэх буюу дараа дахин оролдоно уу.</p>
+          <p className="text-red-500">Та дараа дахин оролдоно уу.</p>
         </CardContent>
       </Card>
     );
@@ -182,97 +149,72 @@ export function LocationPicker({
           <CardDescription>Түр хүлээнэ үү</CardDescription>
         </CardHeader>
         <CardContent className="flex justify-center">
-          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className="w-full">
+    <Card>
       <CardHeader>
         <CardTitle className="flex items-center">
           <MapPin className="mr-2 h-5 w-5" />
-          {businessName ? `${businessName} - Байршил` : 'Бизнесийн байршил'}
+          {businessName} - Байршил сонгох
         </CardTitle>
         <CardDescription>
-          Бизнесийнхээ байршлыг газрын зураг дээр сонгоно уу
+          Зурган дээр дарж байршил сонгох эсвэл хайх талбарт хаяг оруулна уу
         </CardDescription>
       </CardHeader>
-      
       <CardContent className="space-y-4">
-        <div className="flex space-x-2">
-          <div className="flex-grow">
-            <Input
-              type="text"
-              placeholder="Хаяг хайх (жиш: Сүхбаатарын талбай, Улаанбаатар)"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyPress={handleKeyPress}
-            />
-          </div>
-          <Button 
-            type="button" 
-            onClick={handleSearch}
-            disabled={isSearching}
+        <div className="relative mb-4">
+          <StandaloneSearchBox
+            onLoad={onSearchBoxLoad}
+            onPlacesChanged={onPlacesChanged}
           >
-            {isSearching ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            ) : (
-              <Search className="h-4 w-4 mr-2" />
-            )}
-            Хайх
-          </Button>
+            <div className="relative">
+              <Input
+                type="text"
+                placeholder="Байршил хайх..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="pr-10"
+              />
+              <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+            </div>
+          </StandaloneSearchBox>
         </div>
-        
-        <div className="rounded-md overflow-hidden border">
+
+        <div className="rounded-md overflow-hidden border h-80">
           <GoogleMap
             mapContainerStyle={mapContainerStyle}
-            center={center}
+            center={markerPosition}
             zoom={15}
-            onLoad={onLoad}
-            onUnmount={onUnmount}
-            onClick={handleMapClick}
-            options={{
-              fullscreenControl: false,
-              mapTypeControl: false,
-              streetViewControl: false,
-            }}
+            onLoad={onMapLoad}
+            onClick={onMapClick}
           >
-            <Marker 
-              position={marker} 
-              draggable
-              onDragEnd={(e) => {
-                if (e.latLng) {
-                  const newLoc = { 
-                    lat: e.latLng.lat(), 
-                    lng: e.latLng.lng() 
-                  };
-                  setMarker(newLoc);
-                  getAddressFromCoordinates(newLoc);
-                }
-              }}
-            />
+            <Marker position={markerPosition} />
           </GoogleMap>
         </div>
-        
-        <div className="pt-2">
-          <Label htmlFor="address">Сонгосон хаяг:</Label>
-          <div 
-            id="address" 
-            className="mt-1 p-2 border rounded-md bg-gray-50 min-h-10"
-          >
-            {address || "Газрын зураг дээр байршил сонгоно уу"}
-          </div>
+
+        <div>
+          <p className="text-sm font-medium">Сонгосон хаяг:</p>
+          <p className="text-sm mt-1">{address || "Хаяг сонгоогүй байна"}</p>
         </div>
       </CardContent>
-      
-      <CardFooter className="flex justify-end space-x-2">
-        <Button 
-          onClick={handleSaveLocation} 
-          disabled={!address}
+      <CardFooter className="flex justify-between">
+        <Button
+          onClick={handleSaveLocation}
+          disabled={!address || loading}
+          className="w-full"
         >
-          Байршил хадгалах
+          {loading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Хадгалж байна...
+            </>
+          ) : (
+            "Байршил хадгалах"
+          )}
         </Button>
       </CardFooter>
     </Card>
