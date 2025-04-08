@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { logoutUser } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { SearchBar } from "./search-bar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -363,69 +364,20 @@ export function Header() {
           
           {/* User Menu and Actions */}
           <div className="flex items-center gap-4">
-            {/* Search Dialog */}
-            <Dialog open={isSearchOpen} onOpenChange={setIsSearchOpen}>
-              <DialogTrigger asChild>
-                <Button variant="ghost" size="icon" onClick={() => setIsSearchOpen(true)}>
-                  <Search className="h-5 w-5" />
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Хайх</DialogTitle>
-                </DialogHeader>
-                <div className="flex items-center space-x-2 mt-2">
-                  <div className="grid flex-1 gap-2">
-                    <Input
-                      placeholder="Ресторан, хоол, газрын нэр, etc."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleSearch();
-                      }}
-                    />
-                  </div>
-                  <Button type="submit" size="sm" className="px-3" onClick={handleSearch}>
-                    <span className="sr-only">Хайх</span>
-                    <Search className="h-4 w-4" />
-                  </Button>
-                </div>
-                
-                {searchResults.length > 0 && (
-                  <div className="mt-4 max-h-72 overflow-y-auto">
-                    <div className="space-y-2">
-                      {searchResults.map((result) => (
-                        <div 
-                          key={result.id} 
-                          className="flex items-center gap-3 p-2 rounded-md hover:bg-accent cursor-pointer transition-colors"
-                          onClick={() => {
-                            setIsSearchOpen(false);
-                            setSearchQuery("");
-                            setSearchResults([]);
-                            setLocation(result.type === 'restaurant' ? `/restaurant/${result.id}` : `/product/${result.id}`);
-                          }}
-                        >
-                          {result.imageUrl && (
-                            <img 
-                              src={result.imageUrl} 
-                              alt={result.name} 
-                              className="w-12 h-12 rounded-md object-cover"
-                            />
-                          )}
-                          <div>
-                            <div className="font-medium">{result.name}</div>
-                            <div className="text-sm text-gray-500">{result.description}</div>
-                            <Badge variant="outline" className="mt-1">
-                              {result.type === 'restaurant' ? 'Ресторан' : 'Хоол'}
-                            </Badge>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </DialogContent>
-            </Dialog>
+            {/* Search Bar */}
+            <div className="hidden md:block w-64">
+              <SearchBar 
+                placeholder="Рестораны нэр, хоол, хүргэлт хайх..." 
+                expandOnMobile={false}
+              />
+            </div>
+            
+            {/* Mobile Search Button */}
+            <div className="md:hidden">
+              <SearchBar 
+                expandOnMobile={true}
+              />
+            </div>
             
             {/* Cart Popover */}
             {user && user.role === 'customer' && (
@@ -593,14 +545,7 @@ export function Header() {
                   </DrawerHeader>
                   <div className="px-4 py-2 space-y-2">
                     <div className="mb-4">
-                      <Input
-                        placeholder="Хайх..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') handleSearch();
-                        }}
-                      />
+                      <SearchBar placeholder="Рестораны нэр, хоол, хүргэлт хайх..." expandOnMobile={false} />
                     </div>
                     <NavigationMenu className="flex flex-col w-full">
                       <NavigationMenuList className="flex flex-col w-full gap-1">
