@@ -1,52 +1,69 @@
-import { useAuth } from "@/contexts/auth-context";
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Bell, Lock, User, Map, CreditCard, ShieldCheck, Check, Plus, Trash2, Key } from "lucide-react";
-import { motion } from "framer-motion";
-import { Link, useLocation } from "wouter";
+import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
+import { Link } from "wouter";
+import { useAuth } from "@/contexts/auth-context";
+import { Bell, Check, CreditCard, Key, Lock, Map, Plus, Shield, ShieldCheck, Trash2, User } from "lucide-react";
 
 export default function Settings() {
   const { user } = useAuth();
-  const [cardList, setCardList] = useState([
-    {
-      id: "1",
-      type: "visa",
-      number: "**** **** **** 4242",
-      expiry: "12/24",
-      isDefault: true
-    }
-  ]);
+  
+  // Mock data for payment methods
+  const cardList = [
+    { id: "1", type: "visa", number: "•••• •••• •••• 4242", expiry: "12/24", isDefault: true },
+    { id: "2", type: "mastercard", number: "•••• •••• •••• 8840", expiry: "06/25", isDefault: false },
+  ];
 
   return (
-    <div className="mobile-container mx-auto py-6 md:py-10">
+    <div className="container mx-auto px-4 py-6 md:py-10 max-w-5xl">
       <motion.h1 
+        className="text-2xl md:text-3xl font-bold mb-6 md:mb-8 flex items-center gap-2"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-2xl md:text-3xl font-bold mb-4 md:mb-8 flex items-center gap-2"
+        transition={{ duration: 0.5 }}
       >
-        <span className="bg-gradient-to-r from-primary to-indigo-500 p-2 rounded-lg text-white">
-          <User className="h-5 w-5 md:h-6 md:w-6" />
+        <span className="bg-gradient-to-r from-indigo-600 to-blue-600 p-2 rounded-lg text-white">
+          <User className="h-6 w-6" />
         </span>
         Хэрэглэгчийн тохиргоо
       </motion.h1>
 
-      <Tabs defaultValue="profile" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-5 md:mb-8">
-          <TabsTrigger value="profile" className="text-xs md:text-sm flex flex-col sm:flex-row items-center gap-1 sm:gap-2 h-14 sm:h-10">
-            <User className="h-4 w-4" /> 
-            <span className="mt-1 sm:mt-0">Профайл</span>
+      <Tabs defaultValue="profile" className="w-full fade-in">
+        <TabsList className="grid w-full grid-cols-3 mb-5 md:mb-8 bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-100 p-1 rounded-xl shadow-sm">
+          <TabsTrigger 
+            value="profile" 
+            className="text-xs md:text-sm flex flex-col sm:flex-row items-center gap-1 sm:gap-2 h-14 sm:h-10 data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-blue-600 data-[state=active]:text-white rounded-lg transition-all"
+          >
+            <span className="flex items-center gap-1">
+              <span className="jelly"><User className="h-4 w-4" /></span>
+              <span className="mt-1 sm:mt-0">Профайл</span>
+              <span className="text-xs pulse ml-1">👤</span>
+            </span>
           </TabsTrigger>
-          <TabsTrigger value="payment" className="text-xs md:text-sm flex flex-col sm:flex-row items-center gap-1 sm:gap-2 h-14 sm:h-10">
-            <CreditCard className="h-4 w-4" /> 
-            <span className="mt-1 sm:mt-0">Төлбөр</span>
+          <TabsTrigger 
+            value="payment" 
+            className="text-xs md:text-sm flex flex-col sm:flex-row items-center gap-1 sm:gap-2 h-14 sm:h-10 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white rounded-lg transition-all"
+          >
+            <span className="flex items-center gap-1">
+              <span className="bounce-soft"><CreditCard className="h-4 w-4" /></span>
+              <span className="mt-1 sm:mt-0">Төлбөр</span>
+              <span className="text-xs tada ml-1">💳</span>
+            </span>
           </TabsTrigger>
-          <TabsTrigger value="privacy" className="text-xs md:text-sm flex flex-col sm:flex-row items-center gap-1 sm:gap-2 h-14 sm:h-10">
-            <Lock className="h-4 w-4" /> 
-            <span className="mt-1 sm:mt-0">Нууцлал</span>
+          <TabsTrigger 
+            value="privacy" 
+            className="text-xs md:text-sm flex flex-col sm:flex-row items-center gap-1 sm:gap-2 h-14 sm:h-10 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-violet-600 data-[state=active]:text-white rounded-lg transition-all"
+          >
+            <span className="flex items-center gap-1">
+              <span className="wiggle"><Lock className="h-4 w-4" /></span>
+              <span className="mt-1 sm:mt-0">Нууцлал</span>
+              <span className="text-xs jelly ml-1">🔒</span>
+            </span>
           </TabsTrigger>
         </TabsList>
 
@@ -186,8 +203,6 @@ export default function Settings() {
           </div>
         </TabsContent>
 
-
-
         <TabsContent value="payment">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -297,24 +312,22 @@ export default function Settings() {
                   <div className="flex flex-col sm:flex-row gap-3">
                     <div className="flex-none">
                       <div className="bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-lg p-2 md:p-3 w-12 h-12 md:w-14 md:h-14 flex items-center justify-center">
-                        <svg className="h-6 w-6 md:h-8 md:w-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M4 12H20M12 4V20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
+                        <span className="font-bold text-xl md:text-2xl">Q</span>
                       </div>
                     </div>
-                    <div className="flex-grow">
-                      <div className="font-medium text-base">QPay нэмэх</div>
-                      <div className="text-xs md:text-sm text-muted-foreground">Монголын үндэсний QR төлбөрийн систем ашиглах</div>
-                    </div>
-                    <div className="flex items-center">
-                      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                        <Link href="/profile/user">
-                          <Button variant="outline" size="sm" className="text-green-600 border-green-200 hover:bg-green-50">
-                            <Plus className="h-4 w-4 md:mr-2" />
-                            <span className="hidden md:inline">Холбох</span>
+                    <div className="flex-1">
+                      <h3 className="font-medium text-sm md:text-base">QPay дансаар төлөх</h3>
+                      <p className="text-gray-500 text-xs md:text-sm mt-0.5">
+                        Монгол дотоодын бүх банкны картаар шууд төлөх
+                      </p>
+                      <div className="mt-2 flex items-center gap-2">
+                        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                          <Button size="sm" className="h-8 rounded-full bg-gradient-to-r from-green-600 to-teal-600 text-xs">
+                            <span className="mr-1">+</span> QPay холбох
                           </Button>
-                        </Link>
-                      </motion.div>
+                        </motion.div>
+                        <span className="text-xs text-gray-500">Шуурхай төлөлт</span>
+                      </div>
                     </div>
                   </div>
                 </motion.div>
@@ -324,166 +337,249 @@ export default function Settings() {
         </TabsContent>
 
         <TabsContent value="privacy">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-          >
-            <Card>
-              <CardHeader className="p-4 md:p-6">
-                <CardTitle className="flex items-center gap-2 text-base md:text-lg">
-                  <ShieldCheck className="h-5 w-5 text-primary" /> Нууцлал ба аюулгүй байдал
-                </CardTitle>
-                <CardDescription className="text-xs md:text-sm">
-                  Аккаунтын нууцлал ба хандалтын тохиргоо
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-5 p-4 md:p-6 pt-0">
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.1 }}
-                  className="mobile-payment-card rounded-lg border hover:border-primary/50 transition-all duration-300 hover:shadow-md bg-gray-50"
-                >
-                  {/* Том дэлгэцэнд харагдах - хэвтээ */}
-                  <div className="hidden sm:flex sm:justify-between sm:items-center">
-                    <div className="flex items-center space-x-4">
-                      <div className="bg-gradient-to-r from-indigo-500 to-blue-500 p-3 rounded-lg text-white">
-                        <Lock className="h-6 w-6" />
-                      </div>
-                      <div>
-                        <p className="font-medium">Нууц үг солих</p>
-                        <p className="text-sm text-muted-foreground">Аккаунтын нууц үгээ шинэчлэх</p>
-                      </div>
+          <div className="grid gap-6 lg:grid-cols-2">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.4 }}
+            >
+              <Card className="overflow-hidden border-purple-100 hover:shadow-md transition-all duration-300">
+                <CardHeader className="p-4 md:p-6 bg-gradient-to-r from-purple-50 to-violet-50">
+                  <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                    <span className="bg-gradient-to-r from-purple-600 to-violet-600 text-white p-1.5 rounded-md wiggle">
+                      <Lock className="h-4 w-4" />
+                    </span>
+                    <span className="bg-gradient-to-r from-purple-700 to-violet-700 text-transparent bg-clip-text">
+                      Хандалтын тохиргоо
+                    </span>
+                    <span className="text-xs tada ml-1">🔐</span>
+                  </CardTitle>
+                  <CardDescription className="text-xs md:text-sm">
+                    Нууц үг болон бусад аюулгүй байдлын тохиргоо
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-4 md:p-6 pt-4 space-y-4 fade-in-delayed">
+                  <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-purple-100 hover:border-purple-200 transition-colors shadow-sm">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="twoFactor" className="text-sm font-medium flex items-center">
+                        <span className="text-xs bounce-soft mr-1.5">🔑</span>
+                        Хоёр үе шаттай баталгаажуулалт
+                      </Label>
+                      <p className="text-xs text-muted-foreground">Нэмэлт аюулгүй байдлын хамгаалалт идэвхжүүлэх</p>
                     </div>
-                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                      <Link href="/profile/user">
-                        <Button variant="outline" size="sm" className="px-4 flex items-center gap-2">
-                          Солих <Key className="h-4 w-4 ml-1" />
-                        </Button>
-                      </Link>
-                    </motion.div>
+                    <Switch id="twoFactor" className="ml-3 data-[state=checked]:bg-purple-600" />
                   </div>
-                  
-                  {/* Утасны хэмжээнд харагдах - босоо */}
-                  <div className="sm:hidden">
+
+                  <div className="bg-white rounded-md overflow-hidden p-3 shadow-sm border border-purple-100 hover:border-purple-200 transition-colors">
                     <div className="flex items-start gap-3">
-                      <div className="bg-gradient-to-r from-indigo-500 to-blue-500 p-2 rounded-lg text-white">
+                      <div className="bg-gradient-to-r from-indigo-500 to-blue-500 p-2 rounded-lg text-white jelly">
                         <Lock className="h-5 w-5" />
                       </div>
                       <div className="flex-1">
-                        <p className="font-medium text-sm">Нууц үг солих</p>
+                        <p className="font-medium text-sm flex items-center">
+                          <span>Нууц үг солих</span>
+                          <span className="text-xs pulse ml-1">🔄</span>
+                        </p>
                         <p className="text-xs text-muted-foreground">Аккаунтын нууц үгээ шинэчлэх</p>
                       </div>
                       <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                         <Link href="/profile/user">
-                          <Button variant="outline" size="sm" className="px-3 h-8 text-xs">
-                            Солих
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="px-3 h-8 text-xs hover:bg-purple-50 hover:text-purple-700 border-purple-200"
+                          >
+                            <span className="flex items-center gap-1">
+                              <span>Солих</span>
+                              <Key className="h-3 w-3 wiggle" />
+                            </span>
                           </Button>
                         </Link>
                       </motion.div>
                     </div>
                   </div>
-                </motion.div>
-                
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="mobile-payment-card rounded-lg border hover:border-primary/50 transition-all duration-300 hover:shadow-md bg-gray-50"
-                >
-                  {/* Том дэлгэцэнд харагдах - хэвтээ */}
-                  <div className="hidden sm:flex sm:justify-between sm:items-center">
-                    <div className="flex items-center space-x-4">
-                      <div className="bg-gradient-to-r from-red-500 to-orange-500 p-3 rounded-lg text-white">
-                        <Bell className="h-6 w-6" />
-                      </div>
-                      <div>
-                        <p className="font-medium">Хандалтын түүх</p>
-                        <p className="text-sm text-muted-foreground">Сүүлийн үеийн нэвтрэлтийн мэдээлэл</p>
-                      </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.4, delay: 0.1 }}
+            >
+              <Card className="overflow-hidden border-blue-100 hover:shadow-md transition-all duration-300">
+                <CardHeader className="p-4 md:p-6 bg-gradient-to-r from-blue-50 to-indigo-50">
+                  <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                    <span className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-1.5 rounded-md jelly">
+                      <Bell className="h-4 w-4" />
+                    </span>
+                    <span className="bg-gradient-to-r from-blue-700 to-indigo-700 text-transparent bg-clip-text">
+                      Мэдэгдлийн тохиргоо
+                    </span>
+                    <span className="text-xs bounce-soft ml-1">🔔</span>
+                  </CardTitle>
+                  <CardDescription className="text-xs md:text-sm">
+                    Мэдэгдэл хүлээн авах тохиргоо
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-4 md:p-6 pt-4 space-y-4 fade-in-delayed">
+                  <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-blue-100 hover:border-blue-200 transition-colors shadow-sm">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="orderNotifications" className="text-sm font-medium flex items-center">
+                        <span className="text-xs tada mr-1.5">📦</span>
+                        Захиалгын мэдэгдэл
+                      </Label>
+                      <p className="text-xs text-muted-foreground">Захиалга, хүргэлтийн төлөв өөрчлөгдөхөд мэдэгдэл авах</p>
                     </div>
-                    <div className="flex flex-col gap-1 text-right">
-                      <div className="text-xs text-gray-500">Сүүлд нэвтэрсэн:</div>
-                      <div className="text-sm font-medium">Өнөөдөр, 08:12</div>
-                      <div className="text-xs text-gray-500">Улаанбаатар IP: 202.9.40.XX</div>
+                    <Switch id="orderNotifications" defaultChecked className="ml-3 data-[state=checked]:bg-blue-600" />
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-blue-100 hover:border-blue-200 transition-colors shadow-sm">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="marketingNotifications" className="text-sm font-medium flex items-center">
+                        <span className="text-xs wiggle mr-1.5">🎁</span>
+                        Урамшууллын мэдэгдэл
+                      </Label>
+                      <p className="text-xs text-muted-foreground">Хямдрал, урамшууллын талаарх мэдэгдэл авах</p>
+                    </div>
+                    <Switch id="marketingNotifications" className="ml-3 data-[state=checked]:bg-blue-600" />
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-blue-100 hover:border-blue-200 transition-colors shadow-sm">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="securityNotifications" className="text-sm font-medium flex items-center">
+                        <span className="text-xs pulse mr-1.5">🔒</span>
+                        Аюулгүй байдлын мэдэгдэл
+                      </Label>
+                      <p className="text-xs text-muted-foreground">Шинэ нэвтрэлт, бусад аюулгүй байдлын мэдэгдэл авах</p>
+                    </div>
+                    <Switch id="securityNotifications" defaultChecked className="ml-3 data-[state=checked]:bg-blue-600" />
+                  </div>
+                </CardContent>
+                <CardFooter className="p-4 md:p-6 pt-0 flex justify-end">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="text-xs hover:bg-red-50 hover:text-red-700 border-red-100 transition-all duration-300"
+                  >
+                    <span className="flex items-center">
+                      <span>Бүх мэдэгдэл унтраах</span>
+                      <span className="ml-1 text-xs jelly">🔕</span>
+                    </span>
+                  </Button>
+                </CardFooter>
+              </Card>
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+              className="lg:col-span-2"
+            >
+              <Card className="overflow-hidden border-teal-100 hover:shadow-md transition-all duration-300">
+                <CardHeader className="p-4 md:p-6 bg-gradient-to-r from-teal-50 to-green-50">
+                  <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                    <span className="bg-gradient-to-r from-teal-600 to-green-600 text-white p-1.5 rounded-md bounce-soft">
+                      <ShieldCheck className="h-4 w-4" />
+                    </span>
+                    <span className="bg-gradient-to-r from-teal-700 to-green-700 text-transparent bg-clip-text">
+                      Хувийн мэдээллийн тохиргоо
+                    </span>
+                    <span className="text-xs tada ml-1">🛡️</span>
+                  </CardTitle>
+                  <CardDescription className="text-xs md:text-sm">
+                    Таны мэдээллийн хадгалалт, хуваалцалтын тохиргоо
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-4 md:p-6 pt-4 space-y-4 fade-in-delayed">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-white rounded-lg border border-teal-100 hover:border-teal-200 transition-colors shadow-sm">
+                    <div className="space-y-0.5 mb-2 sm:mb-0">
+                      <Label className="text-sm font-medium flex items-center">
+                        <span className="text-xs jelly mr-1.5">📍</span>
+                        Байршлын мэдээлэл
+                      </Label>
+                      <p className="text-xs text-muted-foreground">Таны байршлын мэдээллийг хэрхэн ашиглах тохиргоо</p>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="text-xs hover:bg-teal-50 hover:text-teal-700 border-teal-200 transition-all duration-300"
+                    >
+                      <span className="flex items-center">
+                        <span>Тохируулах</span>
+                        <span className="ml-1 text-xs wiggle">⚙️</span>
+                      </span>
+                    </Button>
+                  </div>
+                  
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-white rounded-lg border border-teal-100 hover:border-teal-200 transition-colors shadow-sm">
+                    <div className="space-y-0.5 mb-2 sm:mb-0">
+                      <Label htmlFor="cookiePolicy" className="text-sm font-medium flex items-center">
+                        <span className="text-xs bounce-soft mr-1.5">🍪</span>
+                        Cookie-н тохиргоо
+                      </Label>
+                      <p className="text-xs text-muted-foreground">Cookie ашиглалтын тохиргоог удирдах</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="text-xs hover:bg-green-50 hover:text-green-700 border-green-200 transition-all duration-300"
+                      >
+                        <span className="flex items-center">
+                          <span>Cookie зөвшөөрөх</span>
+                          <span className="ml-1 text-xs pulse">✅</span>
+                        </span>
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="text-xs hover:bg-red-50 hover:text-red-700 border-red-200 transition-all duration-300"
+                      >
+                        <span className="flex items-center">
+                          <span>Cookie хаах</span>
+                          <span className="ml-1 text-xs tada">❌</span>
+                        </span>
+                      </Button>
                     </div>
                   </div>
                   
-                  {/* Утасны хэмжээнд харагдах - босоо */}
-                  <div className="sm:hidden">
-                    <div className="flex flex-col gap-3">
-                      <div className="flex items-start gap-3">
-                        <div className="bg-gradient-to-r from-red-500 to-orange-500 p-2 rounded-lg text-white">
-                          <Bell className="h-5 w-5" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="font-medium text-sm">Хандалтын түүх</p>
-                          <p className="text-xs text-muted-foreground">Сүүлийн үеийн нэвтрэлтийн мэдээлэл</p>
-                        </div>
-                      </div>
-                      <div className="ml-10 bg-gray-100 p-2 rounded-md">
-                        <div className="text-xs font-medium">Өнөөдөр, 08:12</div>
-                        <div className="text-xs text-gray-500">Улаанбаатар IP: 202.9.40.XX</div>
-                      </div>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-white rounded-lg border border-teal-100 hover:border-teal-200 transition-colors shadow-sm">
+                    <div className="space-y-0.5 mb-2 sm:mb-0">
+                      <Label className="text-sm font-medium flex items-center">
+                        <span className="text-xs wiggle mr-1.5">📂</span>
+                        Миний өгөгдөл
+                      </Label>
+                      <p className="text-xs text-muted-foreground">Таны бүх мэдээллийг харах, татаж авах</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="text-xs hover:bg-blue-50 hover:text-blue-700 border-blue-200 transition-all duration-300"
+                      >
+                        <span className="flex items-center">
+                          <span>Өгөгдөл татах</span>
+                          <span className="ml-1 text-xs bounce-soft">📥</span>
+                        </span>
+                      </Button>
+                      <Button 
+                        variant="destructive" 
+                        size="sm" 
+                        className="text-xs transition-all duration-300 bg-gradient-to-r from-red-500 to-rose-600"
+                      >
+                        <span className="flex items-center">
+                          <span>Бүгдийг устгах</span>
+                          <span className="ml-1 text-xs jelly">🗑️</span>
+                        </span>
+                      </Button>
                     </div>
                   </div>
-                </motion.div>
-                
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="mobile-payment-card rounded-lg border hover:border-primary/50 transition-all duration-300 hover:shadow-md bg-gray-50"
-                >
-                  {/* Том дэлгэцэнд харагдах - хэвтээ */}
-                  <div className="hidden sm:flex sm:justify-between sm:items-center">
-                    <div className="flex items-center space-x-4">
-                      <div className="bg-gradient-to-r from-green-500 to-teal-500 p-3 rounded-lg text-white">
-                        <ShieldCheck className="h-6 w-6" />
-                      </div>
-                      <div>
-                        <p className="font-medium">Гар утасны баталгаажуулалт</p>
-                        <p className="text-sm text-muted-foreground">Нэмэлт аюулгүй байдал</p>
-                      </div>
-                    </div>
-                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                      <Button variant="outline" size="sm" className="px-4">Идэвхжүүлэх</Button>
-                    </motion.div>
-                  </div>
-                  
-                  {/* Утасны хэмжээнд харагдах - босоо */}
-                  <div className="sm:hidden">
-                    <div className="flex items-start gap-3">
-                      <div className="bg-gradient-to-r from-green-500 to-teal-500 p-2 rounded-lg text-white">
-                        <ShieldCheck className="h-5 w-5" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-medium text-sm">Гар утасны баталгаажуулалт</p>
-                        <p className="text-xs text-muted-foreground">Нэмэлт аюулгүй байдал</p>
-                      </div>
-                      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                        <Button variant="outline" size="sm" className="px-3 h-8 text-xs">
-                          Идэвхжүүлэх
-                        </Button>
-                      </motion.div>
-                    </div>
-                  </div>
-                </motion.div>
-                
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4 }}
-                  className="mt-2 px-1"
-                >
-                  <p className="text-xs text-gray-500">
-                    Та өөрийн хувийн мэдээллийг хамгаалахын тулд шаардлагатай тохиолдолд утасны баталгаажуулалтыг идэвхжүүлэхийг зөвлөж байна.
-                  </p>
-                </motion.div>
-              </CardContent>
-            </Card>
-          </motion.div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
