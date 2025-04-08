@@ -359,15 +359,29 @@ export function BusinessDashboard() {
       <div className="mb-6">
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-bold">Захиалга болон бүтээгдэхүүн</h2>
-          <div className="relative">
-            <Input
-              type="text"
-              placeholder="Хайх..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-60"
-            />
-            <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+          <div className="flex gap-4 items-center">
+            <Button 
+              onClick={() => {
+                // Switch to delivery tracking tab
+                const deliveryTab = document.querySelector('[value="delivery-tracking"]') as HTMLElement;
+                if (deliveryTab) deliveryTab.click();
+              }}
+              className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white flex items-center gap-2 shadow-md"
+            >
+              <Navigation className="h-4 w-4 wobble" />
+              <span>Хүргэлт хянах</span>
+              <span className="text-xs bg-red-500 text-white rounded-full h-5 w-5 flex items-center justify-center animate-pulse">3</span>
+            </Button>
+            <div className="relative">
+              <Input
+                type="text"
+                placeholder="Хайх..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-60"
+              />
+              <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+            </div>
           </div>
         </div>
       </div>
