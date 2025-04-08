@@ -5,6 +5,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { useAuth } from "@/contexts/auth-context";
 import { useEffect } from "react";
 import { Header } from "@/components/shared/header";
+import { OnboardingProvider } from "@/components/onboarding/onboarding-context";
+import OnboardingModal from "@/components/onboarding/OnboardingModal";
+import OnboardingHintButton from "@/components/onboarding/OnboardingHintButton";
 
 // Pages
 import NotFound from "@/pages/not-found";
@@ -66,13 +69,17 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="flex flex-col min-h-screen">
-        <Header />
-        <main className="flex-grow">
-          <Router />
-        </main>
-      </div>
-      <Toaster />
+      <OnboardingProvider>
+        <div className="flex flex-col min-h-screen">
+          <Header />
+          <main className="flex-grow">
+            <Router />
+          </main>
+          <OnboardingModal />
+          <OnboardingHintButton position="bottom-right" />
+        </div>
+        <Toaster />
+      </OnboardingProvider>
     </QueryClientProvider>
   );
 }
