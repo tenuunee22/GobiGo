@@ -261,14 +261,23 @@ export const getCustomerOrders = async (customerId: string) => {
     const ordersRef = collection(db, "orders");
     const q = query(
       ordersRef, 
-      where("customerId", "==", customerId),
-      orderBy("createdAt", "desc")
+      where("customerId", "==", customerId)
+      // orderBy removed temporarily due to index issues
+      // We need to create a composite index for this query
     );
     const querySnapshot = await getDocs(q);
     
+    // Sort in memory instead 
     const orders: any[] = [];
     querySnapshot.forEach((doc) => {
       orders.push({ id: doc.id, ...doc.data() });
+    });
+    
+    // Manual sorting by createdAt in descending order
+    orders.sort((a, b) => {
+      const dateA = a.createdAt?.toMillis?.() || 0;
+      const dateB = b.createdAt?.toMillis?.() || 0;
+      return dateB - dateA;
     });
     
     return orders;
