@@ -206,20 +206,30 @@ export default function BusinessProfile() {
                 <CardHeader>
                   <CardTitle>Бизнесийн лого</CardTitle>
                   <CardDescription>
-                    Таны бизнесийн лого. Заавал талбайн хэмжээтэй квадрат зураг (1:1 харьцаатай) байх шаардлагатай.
+                    Таны бизнесийн лого. Админ хэрэглэгч л зургийг өөрчлөх эрхтэй.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <FileUpload
-                      onFileSelect={handleLogoUpload}
-                      previewUrl={logoImage}
-                      label="Лого оруулах (1:1 харьцаатай)"
-                      maxSizeMB={2}
-                      disabled={isUploading}
-                    />
+                    {logoImage ? (
+                      <div className="border rounded-lg p-4 flex justify-center items-center bg-gray-50">
+                        <img 
+                          src={logoImage} 
+                          alt="Бизнесийн лого" 
+                          className="max-h-48 max-w-full rounded-md object-contain"
+                        />
+                      </div>
+                    ) : (
+                      <div className="border rounded-lg p-10 flex justify-center items-center bg-gray-50">
+                        <div className="text-center text-gray-500">
+                          <Store className="h-16 w-16 mx-auto mb-2 opacity-30" />
+                          <p>Лого оруулаагүй байна</p>
+                          <p className="text-xs mt-1">Админ хэрэглэгчтэй холбогдоно уу</p>
+                        </div>
+                      </div>
+                    )}
                     <div className="text-xs text-gray-500 mt-2">
-                      Санамж: Логоны оновчтой хэмжээ 512x512 пиксел.
+                      Санамж: Танд зураг оруулах эрх байхгүй байна.
                     </div>
                   </div>
                 </CardContent>
@@ -230,20 +240,30 @@ export default function BusinessProfile() {
                 <CardHeader>
                   <CardTitle>Бизнесийн ковер зураг</CardTitle>
                   <CardDescription>
-                    Таны бизнесийн үндсэн зураг. 16:9 харьцаатай өргөн зураг байвал сайн.
+                    Таны бизнесийн үндсэн зураг. Админ хэрэглэгч л зургийг өөрчлөх эрхтэй.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <FileUpload
-                      onFileSelect={handleCoverUpload}
-                      previewUrl={coverImage}
-                      label="Ковер зураг оруулах (16:9 харьцаатай)"
-                      maxSizeMB={3}
-                      disabled={isUploading}
-                    />
+                    {coverImage ? (
+                      <div className="border rounded-lg p-4 flex justify-center items-center bg-gray-50">
+                        <img 
+                          src={coverImage} 
+                          alt="Бизнесийн ковер зураг" 
+                          className="max-h-64 max-w-full rounded-md object-contain"
+                        />
+                      </div>
+                    ) : (
+                      <div className="border rounded-lg p-10 flex justify-center items-center bg-gray-50">
+                        <div className="text-center text-gray-500">
+                          <ImageIcon className="h-16 w-16 mx-auto mb-2 opacity-30" />
+                          <p>Ковер зураг оруулаагүй байна</p>
+                          <p className="text-xs mt-1">Админ хэрэглэгчтэй холбогдоно уу</p>
+                        </div>
+                      </div>
+                    )}
                     <div className="text-xs text-gray-500 mt-2">
-                      Санамж: Ковер зургийн оновчтой хэмжээ 1280x720 пиксел.
+                      Санамж: Танд зураг оруулах эрх байхгүй байна.
                     </div>
                   </div>
                 </CardContent>

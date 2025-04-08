@@ -362,6 +362,7 @@ export function BusinessDashboard() {
         <TabsList className="mb-4">
           <TabsTrigger value="orders">Захиалгууд</TabsTrigger>
           <TabsTrigger value="products">Бүтээгдэхүүн</TabsTrigger>
+          <TabsTrigger value="earnings">Орлого</TabsTrigger>
           <TabsTrigger value="settings">Тохиргоо</TabsTrigger>
         </TabsList>
         
@@ -467,6 +468,160 @@ export function BusinessDashboard() {
               </Button>
             </div>
           )}
+        </TabsContent>
+        
+        <TabsContent value="earnings">
+          <Card>
+            <CardHeader>
+              <CardTitle>Орлогын мэдээлэл</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="mb-8">
+                <h3 className="text-lg font-semibold mb-4">Орлогын хураангуй</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium text-muted-foreground">
+                        Өнөөдрийн орлого
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">
+                        {stats.recentSales[stats.recentSales.length - 1]?.revenue.toLocaleString()}₮
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {stats.recentSales[stats.recentSales.length - 1]?.orders || 0} захиалга
+                      </p>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium text-muted-foreground">
+                        Өнгөрсөн 7 хоногийн орлого
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">
+                        {stats.recentSales.reduce((sum, day) => sum + day.revenue, 0).toLocaleString()}₮
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {stats.recentSales.reduce((sum, day) => sum + day.orders, 0)} захиалга
+                      </p>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium text-muted-foreground">
+                        Нийт орлого
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">
+                        {stats.earnings.toLocaleString()}₮
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {stats.ordersCount} захиалга
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Сүүлийн 7 хоногийн орлого</h3>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart
+                      data={stats.recentSales}
+                      margin={{
+                        top: 5,
+                        right: 30,
+                        left: 20,
+                        bottom: 5,
+                      }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="date" />
+                      <YAxis />
+                      <Tooltip />
+                      <Line 
+                        type="monotone" 
+                        dataKey="revenue" 
+                        name="Борлуулалт (₮)" 
+                        stroke="#8884d8" 
+                        activeDot={{ r: 8 }} 
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="orders" 
+                        name="Захиалгын тоо" 
+                        stroke="#82ca9d" 
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+              
+              <div className="mt-8">
+                <h3 className="text-lg font-semibold mb-4">Орлогын жагсаалт</h3>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Огноо
+                        </th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Захиалгын дугаар
+                        </th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Хэрэглэгч
+                        </th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Төлбөр
+                        </th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Төлөв
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {sortedOrders.filter(order => order.status === "completed").slice(0, 10).map((order) => (
+                        <tr key={order.id}>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {new Date(order.createdAt || new Date()).toLocaleDateString()}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            #{order.id.substring(0, 6)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {order.customerName || "Хэрэглэгч"}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
+                            {order.totalAmount ? order.totalAmount.toLocaleString() : 0}₮
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                              Гүйцэтгэсэн
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                      {sortedOrders.filter(order => order.status === "completed").length === 0 && (
+                        <tr>
+                          <td colSpan={5} className="px-6 py-4 text-center text-sm text-gray-500">
+                            Одоогоор гүйцэтгэсэн захиалга байхгүй байна
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
         
         <TabsContent value="settings">
