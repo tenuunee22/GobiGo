@@ -21,9 +21,8 @@ import { sendPhoneVerificationCode, verifyPhoneCode } from "@/lib/firebase";
 const phoneSchema = z.object({
   phoneNumber: z
     .string()
-    .min(10, { message: "Утасны дугаар хэт богино байна." })
-    .max(14, { message: "Утасны дугаар хэт урт байна." })
-    .regex(/^\+?[0-9]+$/, { message: "Зөвхөн тоо оруулна уу." }),
+    .length(8, { message: "Утасны дугаар 8 оронтой байх ёстой." })
+    .regex(/^[0-9]+$/, { message: "Зөвхөн тоо оруулна уу." }),
 });
 
 const verificationSchema = z.object({
@@ -62,28 +61,14 @@ export function PhoneLoginForm({ onToggleForm }: PhoneLoginFormProps) {
     },
   });
 
-  // Format the phone number to include +976 if needed
+  // Format the phone number to always include +976
   const formatPhoneNumber = (phoneNumber: string) => {
     // Remove any non-digit characters
     let digitsOnly = phoneNumber.replace(/\D/g, "");
     
-    // If it doesn't start with country code, add Mongolia country code
-    if (!digitsOnly.startsWith("976")) {
-      // If it's 8 digits, it's likely a Mongolian number without the leading 0
-      if (digitsOnly.length === 8) {
-        return `+976${digitsOnly}`;
-      }
-      // If it has a leading 0, remove it and add country code
-      if (digitsOnly.startsWith("0")) {
-        return `+976${digitsOnly.substring(1)}`;
-      }
-    } else {
-      // If it already has the country code but missing the +
-      return `+${digitsOnly}`;
-    }
-    
-    // If none of the above, add + if missing
-    return phoneNumber.startsWith("+") ? phoneNumber : `+${phoneNumber}`;
+    // Now we're always expecting only the 8 digits 
+    // of the Mongolian phone number without country code
+    return `+976${digitsOnly}`;
   };
 
   const onSubmitPhoneNumber = async (values: z.infer<typeof phoneSchema>) => {
@@ -170,11 +155,23 @@ export function PhoneLoginForm({ onToggleForm }: PhoneLoginFormProps) {
                     <FormItem>
                       <FormLabel>Утасны дугаар</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="Таны утасны дугаар (99112233 эсвэл +97699112233)"
-                          {...field}
-                          disabled={loading}
-                        />
+                        <div className="flex">
+                          <div className="bg-gray-100 flex items-center px-3 border border-r-0 rounded-l-md border-input">
+                            +976
+                          </div>
+                          <Input
+                            className="rounded-l-none"
+                            placeholder="99112233"
+                            {...field}
+                            disabled={loading}
+                            onChange={(e) => {
+                              // Only allow digits
+                              const value = e.target.value.replace(/\D/g, '');
+                              field.onChange(value);
+                            }}
+                            maxLength={8}
+                          />
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
