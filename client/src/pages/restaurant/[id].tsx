@@ -227,6 +227,10 @@ export default function RestaurantDetail() {
         description: "Захиалга өгөхийн тулд эхлээд нэвтэрнэ үү",
         variant: "destructive"
       });
+      // Redirect to login page after showing toast
+      setTimeout(() => {
+        setLocation("/login");
+      }, 1500);
       return;
     }
     

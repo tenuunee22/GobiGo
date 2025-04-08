@@ -1,11 +1,15 @@
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
-import { LoaderCircle, CheckCircle, AlertCircle, ArrowLeft } from "lucide-react";
+import { LoaderCircle, CheckCircle, AlertCircle, ArrowLeft, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useStripe, Elements, PaymentElement, useElements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
+import { QPayPayment } from "@/components/customer/qpay-payment";
+import { useAuth } from "@/contexts/auth-context";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 // Make sure to call loadStripe outside of a component's render
 if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
@@ -142,6 +146,14 @@ export default function Checkout() {
     );
   }
 
+  // Get total amount from the URL query parameters
+  const params = new URLSearchParams(searchParams);
+  const amount = parseInt(params.get("amount") || "0", 10);
+
+  // If orderId is a string, it's safe to use it directly
+  const orderIdStr = orderId as string;
+  const paymentIntentId = "pi_" + Math.random().toString(36).substring(2, 15);
+
   return (
     <div className="container max-w-3xl py-10">
       <Card>
@@ -152,21 +164,66 @@ export default function Checkout() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Elements 
-            stripe={stripePromise} 
-            options={{ 
-              clientSecret,
-              appearance: {
-                theme: 'stripe',
-                variables: {
-                  colorPrimary: '#4f46e5',
-                }
-              },
-              locale: 'en' // Unfortunately Stripe doesn't support Mongolian yet
-            }}
-          >
-            <CheckoutForm clientSecret={clientSecret} orderId={orderId} />
-          </Elements>
+          <Tabs defaultValue="card" className="mb-6">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="card" className="flex items-center gap-2">
+                <CreditCard className="h-4 w-4" />
+                Карт
+              </TabsTrigger>
+              <TabsTrigger value="qpay" className="flex items-center gap-2">
+                <img src="https://qpay.mn/q-mark.png" alt="QPay" className="h-4 w-4" />
+                QPay
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="card" className="mt-4">
+              <Elements 
+                stripe={stripePromise} 
+                options={{ 
+                  clientSecret,
+                  appearance: {
+                    theme: 'stripe',
+                    variables: {
+                      colorPrimary: '#9d7b4d',
+                    }
+                  },
+                  locale: 'en' // Unfortunately Stripe doesn't support Mongolian yet
+                }}
+              >
+                <CheckoutForm clientSecret={clientSecret} orderId={orderIdStr} />
+              </Elements>
+            </TabsContent>
+            
+            <TabsContent value="qpay" className="mt-4">
+              <div className="space-y-6">
+                <div className="bg-muted/50 p-4 rounded-md mb-4">
+                  <div className="flex justify-between mb-2">
+                    <span className="text-sm text-muted-foreground">Захиалгын дугаар</span>
+                    <span className="font-medium">{orderIdStr}</span>
+                  </div>
+                  <Separator className="my-2" />
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">Төлөх дүн</span>
+                    <span className="font-bold text-lg">{amount.toLocaleString()}₮</span>
+                  </div>
+                </div>
+                
+                <QPayPayment 
+                  orderId={orderIdStr} 
+                  paymentIntentId={paymentIntentId}
+                  amount={amount} 
+                />
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full mt-2"
+                  onClick={() => setLocation("/")}
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" /> Буцах
+                </Button>
+              </div>
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
     </div>

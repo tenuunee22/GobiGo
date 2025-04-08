@@ -1,10 +1,17 @@
-import { useState, useEffect } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useLocation } from "wouter";
-import { LoaderCircle, CheckCircle, AlertCircle, Smartphone } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle,
+  DialogDescription,
+  DialogFooter
+} from "@/components/ui/dialog";
+import { Copy, CheckCircle } from "lucide-react";
 
 interface QPayPaymentProps {
   orderId: string;
@@ -18,220 +25,237 @@ export function QPayPayment({
   amount 
 }: QPayPaymentProps) {
   const { toast } = useToast();
-  const [, setLocation] = useLocation();
-  const [loading, setLoading] = useState(true);
-  const [checking, setChecking] = useState(false);
-  const [qrCode, setQrCode] = useState<string | null>(null);
-  const [invoiceId, setInvoiceId] = useState<string | null>(null);
-  const [deepLinks, setDeepLinks] = useState<{qPay?: string, eBarimt?: string} | null>(null);
-  const [paymentStatus, setPaymentStatus] = useState<"pending" | "completed" | "failed">("pending");
-  const [counter, setCounter] = useState(30); // 30 seconds countdown for auto-refresh
-
-  // Load QPay data on mount
-  useEffect(() => {
-    const fetchQPayData = async () => {
-      try {
-        setLoading(true);
-        
-        // In a real implementation, we would have the payment data from the order creation step
-        // For this demo, we'll generate a new QPay payment 
-        const qpayResponse = await apiRequest("POST", "/api/create-qpay-payment", {
-          amount,
-          orderId,
-          customerName: "Хэрэглэгч", // In a real app, this would be the user's name
-          customerPhone: "" // In a real app, this would be the user's phone number
-        });
-        
-        const qpayData = await qpayResponse.json();
-        
-        if (qpayData.success) {
-          setQrCode(qpayData.qrCodeUrl);
-          setInvoiceId(qpayData.qpayInvoiceId);
-          setDeepLinks(qpayData.deepLink);
-        } else {
-          toast({
-            title: "Алдаа гарлаа",
-            description: "QPay төлбөрийн мэдээлэл авах үед алдаа гарлаа",
-            variant: "destructive"
-          });
-        }
-      } catch (error) {
-        console.error("Error fetching QPay data:", error);
-        toast({
-          title: "Алдаа гарлаа",
-          description: "QPay төлбөрийн мэдээлэл авах үед алдаа гарлаа",
-          variant: "destructive"
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardName, setCardName] = useState("");
+  const [expiryDate, setExpiryDate] = useState("");
+  const [cvv, setCvv] = useState("");
+  const [isSuccess, setIsSuccess] = useState(false);
+  
+  // In a real app, this would be an invoice number from the payment provider
+  const qpayInvoiceNo = `INV-${Math.floor(Math.random() * 10000000)}`;
+  
+  const handleOpenQPay = () => {
+    setIsDialogOpen(true);
+  };
+  
+  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, "");
+    let formattedValue = "";
     
-    fetchQPayData();
-  }, [amount, orderId, toast]);
-
-  // Start countdown for auto-refresh
-  useEffect(() => {
-    if (paymentStatus === "pending" && !loading) {
-      const timer = setInterval(() => {
-        setCounter((prev) => {
-          if (prev <= 1) {
-            clearInterval(timer);
-            handleCheckStatus();
-            return 30; // Reset timer
-          }
-          return prev - 1;
-        });
-      }, 1000);
-      
-      return () => clearInterval(timer);
+    for (let i = 0; i < value.length; i++) {
+      if (i > 0 && i % 4 === 0) {
+        formattedValue += " ";
+      }
+      formattedValue += value[i];
     }
-  }, [paymentStatus, loading]);
-
-  // Check payment status
-  const handleCheckStatus = async () => {
-    if (checking) return;
     
-    try {
-      setChecking(true);
-      
-      // In a real app, this would check a real payment
-      const response = await apiRequest("GET", `/api/check-payment/${paymentIntentId}`);
-      const data = await response.json();
-      
-      // For demo, randomly decide if payment was successful
-      // In a real app, we would check the actual payment status
-      const isSuccessful = Math.random() > 0.5; // 50% chance of success
-      
-      if (isSuccessful) {
-        setPaymentStatus("completed");
-        toast({
-          title: "Төлбөр амжилттай",
-          description: "Таны төлбөр амжилттай хийгдлээ",
-        });
-        
-        // Give a moment to see the success message, then redirect
-        setTimeout(() => {
-          setLocation(`/order/${orderId}`);
-        }, 2000);
-      } else {
-        // Continue checking
-        setCounter(30); // Reset timer
+    setCardNumber(formattedValue.substring(0, 19)); // xxxx xxxx xxxx xxxx format
+  };
+  
+  const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, "");
+    let formattedValue = "";
+    
+    if (value.length > 0) {
+      formattedValue = value.substring(0, 2);
+      if (value.length > 2) {
+        formattedValue += "/" + value.substring(2, 4);
       }
-    } catch (error) {
-      console.error("Error checking payment status:", error);
+    }
+    
+    setExpiryDate(formattedValue);
+  };
+  
+  const handleCvvChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, "");
+    setCvv(value.substring(0, 3));
+  };
+  
+  const handleCopyInvoice = () => {
+    navigator.clipboard.writeText(qpayInvoiceNo);
+    toast({
+      title: "Хуулагдлаа",
+      description: "Нэхэмжлэлийн дугаар хуулагдлаа"
+    });
+  };
+  
+  const handleSubmitCard = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validation
+    if (cardNumber.replace(/\s/g, "").length !== 16) {
       toast({
-        title: "Алдаа гарлаа",
-        description: "Төлбөрийн төлөв шалгах үед алдаа гарлаа",
+        title: "Алдаа",
+        description: "Карт дугаар буруу байна",
         variant: "destructive"
       });
-    } finally {
-      setChecking(false);
+      return;
     }
-  };
-
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[300px]">
-        <LoaderCircle className="w-12 h-12 animate-spin text-primary mb-4" />
-        <p className="text-lg font-medium">QPay төлбөрийн мэдээлэл ачааллаж байна...</p>
-      </div>
-    );
-  }
-
-  if (paymentStatus === "completed") {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[300px]">
-        <CheckCircle className="w-16 h-16 text-green-500 mb-4" />
-        <h2 className="text-2xl font-bold mb-2">Төлбөр амжилттай</h2>
-        <p className="text-gray-600 mb-6">Таны захиалга баталгаажлаа</p>
-        <Button onClick={() => setLocation(`/order/${orderId}`)}>
-          Захиалга харах
-        </Button>
-      </div>
-    );
-  }
-
-  if (paymentStatus === "failed") {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[300px]">
-        <AlertCircle className="w-16 h-16 text-red-500 mb-4" />
-        <h2 className="text-2xl font-bold mb-2">Төлбөр амжилтгүй</h2>
-        <p className="text-gray-600 mb-6">Төлбөр хийх явцад алдаа гарлаа</p>
-        <div className="flex gap-4">
-          <Button variant="outline" onClick={() => setLocation("/")}>
-            Буцах
-          </Button>
-          <Button onClick={() => window.location.reload()}>
-            Дахин оролдох
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <Card className="w-full max-w-lg mx-auto">
-      <CardHeader>
-        <CardTitle>QPay төлбөр</CardTitle>
-        <CardDescription>
-          Захиалгын дугаар: {orderId}<br />
-          Нийт дүн: {amount.toLocaleString()}₮
-        </CardDescription>
-      </CardHeader>
+    
+    if (!cardName) {
+      toast({
+        title: "Алдаа",
+        description: "Картын эзэмшигчийн нэр оруулна уу",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (expiryDate.length !== 5) {
+      toast({
+        title: "Алдаа",
+        description: "Хүчинтэй хугацаа буруу байна",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (cvv.length !== 3) {
+      toast({
+        title: "Алдаа",
+        description: "CVV буруу байна",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // In a real app, this would send the card details to a payment processor
+    setTimeout(() => {
+      setIsSuccess(true);
       
-      <CardContent>
-        <div className="flex flex-col items-center space-y-6">
-          {qrCode && (
-            <div className="text-center p-2 border rounded-lg">
-              <p className="text-sm text-gray-500 mb-2">QR кодыг QPay аппаар уншуулж төлнө үү</p>
-              <img src={qrCode} alt="QPay QR code" className="mx-auto" width="200" height="200" />
-              <p className="mt-2 text-xs text-gray-400">
-                Invoice ID: {invoiceId}
+      // Reset form after 3 seconds and close dialog
+      setTimeout(() => {
+        setIsSuccess(false);
+        setIsDialogOpen(false);
+        setCardNumber("");
+        setCardName("");
+        setExpiryDate("");
+        setCvv("");
+        
+        toast({
+          title: "Төлбөр амжилттай",
+          description: "Таны захиалгыг хүлээн авлаа"
+        });
+      }, 3000);
+    }, 1500);
+  };
+  
+  return (
+    <>
+      <Button onClick={handleOpenQPay} className="w-full">
+        QPay-ээр төлөх
+      </Button>
+      
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>QPay төлбөр</DialogTitle>
+            <DialogDescription>
+              Захиалгын дугаар: {orderId}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {isSuccess ? (
+            <div className="py-10 text-center">
+              <div className="flex justify-center mb-4">
+                <CheckCircle className="h-16 w-16 text-green-500" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Төлбөр амжилттай</h3>
+              <p className="text-gray-500">
+                Таны төлбөр амжилттай хийгдлээ. Захиалгыг боловсруулж байна.
               </p>
             </div>
-          )}
-          
-          <div className="w-full">
-            <div className="flex justify-between items-center mb-4">
-              <p>Автоматаар {counter} секундын дараа шалгана</p>
-              <Button 
-                size="sm" 
-                onClick={handleCheckStatus} 
-                disabled={checking}
-              >
-                {checking ? (
-                  <>
-                    <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
-                    Шалгаж байна
-                  </>
-                ) : "Шалгах"}
-              </Button>
-            </div>
-
-            {deepLinks && (
-              <div className="flex flex-col space-y-3 mt-4">
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={() => window.open(deepLinks.qPay, "_blank")}
-                >
-                  <Smartphone className="mr-2 h-4 w-4" /> QPay аппыг нээх
-                </Button>
-                {deepLinks.eBarimt && (
+          ) : (
+            <>
+              <div className="mb-6">
+                <div className="flex justify-between items-center mb-4 bg-muted/50 p-3 rounded-md">
+                  <div>
+                    <div className="text-sm text-muted-foreground">Нэхэмжлэл #</div>
+                    <div className="font-mono">{qpayInvoiceNo}</div>
+                  </div>
                   <Button 
                     variant="outline" 
-                    className="w-full"
-                    onClick={() => window.open(deepLinks.eBarimt, "_blank")}
+                    size="icon" 
+                    onClick={handleCopyInvoice}
                   >
-                    Э-Баримт авах
+                    <Copy className="h-4 w-4" />
                   </Button>
-                )}
+                </div>
+                
+                <div className="bg-muted/50 p-3 rounded-md">
+                  <div className="text-sm text-muted-foreground">Төлөх дүн</div>
+                  <div className="text-xl font-bold">{amount.toLocaleString()}₮</div>
+                </div>
               </div>
-            )}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+              
+              <form onSubmit={handleSubmitCard}>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">
+                      Картын дугаар
+                    </label>
+                    <Input
+                      placeholder="0000 0000 0000 0000"
+                      value={cardNumber}
+                      onChange={handleCardNumberChange}
+                      className="font-mono"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">
+                      Картын эзэмшигч
+                    </label>
+                    <Input
+                      placeholder="ОВОГ НЭР"
+                      value={cardName}
+                      onChange={(e) => setCardName(e.target.value.toUpperCase())}
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium mb-1 block">
+                        Хүчинтэй хугацаа
+                      </label>
+                      <Input
+                        placeholder="MM/YY"
+                        value={expiryDate}
+                        onChange={handleExpiryChange}
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium mb-1 block">
+                        CVV
+                      </label>
+                      <Input
+                        placeholder="123"
+                        value={cvv}
+                        onChange={handleCvvChange}
+                        type="password"
+                        className="font-mono"
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <DialogFooter className="mt-6">
+                  <Button 
+                    type="button" 
+                    variant="outline"
+                    onClick={() => setIsDialogOpen(false)}
+                  >
+                    Цуцлах
+                  </Button>
+                  <Button type="submit">Төлөх</Button>
+                </DialogFooter>
+              </form>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

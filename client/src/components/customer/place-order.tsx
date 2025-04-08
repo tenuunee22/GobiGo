@@ -65,6 +65,11 @@ export function PlaceOrder({
         description: "Та эхлээд бүртгэлдээ нэвтэрнэ үү",
         variant: "destructive"
       });
+      // Redirect to login page after showing toast
+      setTimeout(() => {
+        onClose();
+        setLocation("/login");
+      }, 1500);
       return;
     }
     
