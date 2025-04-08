@@ -9,6 +9,7 @@ import { Header } from "@/components/shared/header-fixed";
 import { OnboardingProvider } from "@/components/onboarding/onboarding-context";
 import OnboardingModal from "@/components/onboarding/OnboardingModal";
 import OnboardingHintButton from "@/components/onboarding/OnboardingHintButton";
+import { BouncingLoader } from "@/components/ui/bouncing-loader";
 
 // Pages
 import NotFound from "@/pages/not-found";
@@ -24,6 +25,7 @@ import Checkout from "@/pages/checkout";
 import Cart from "@/pages/cart";
 import TooltipExample from "@/pages/tooltip-example";
 import Settings from "@/pages/settings";
+import LoadingDemo from "@/pages/loading-demo";
 
 // Customer components
 import { CustomerDashboard } from "@/components/dashboard/customer-dashboard";
@@ -64,7 +66,15 @@ function Router() {
   }, [user, loading, location, setLocation]);
 
   if (loading) {
-    return <div className="flex items-center justify-center h-screen">Ачааллаж байна...</div>;
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <BouncingLoader 
+          text="Ачааллаж байна..." 
+          size="lg" 
+          showBackground={true}
+        />
+      </div>
+    );
   }
 
   // Determine which dashboard to show based on user role
@@ -107,6 +117,7 @@ function Router() {
         <Route path="/delivery-history" component={DeliveryDashboard} />
         <Route path="/products" component={BusinessDashboard} />
         <Route path="/settings" component={Settings} />
+        <Route path="/loading-demo" component={LoadingDemo} />
         <Route component={NotFound} />
       </Switch>
     </div>

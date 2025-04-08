@@ -10,6 +10,8 @@ import { QPayPayment } from "@/components/customer/qpay-payment";
 import { useAuth } from "@/contexts/auth-context";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { DeliveryChat } from "@/components/shared/delivery-chat";
+import { DeliveryAnimation } from "@/components/ui/delivery-animation";
 
 // Make sure to call loadStripe outside of a component's render
 if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
@@ -24,6 +26,8 @@ function CheckoutForm({ clientSecret, orderId }: { clientSecret: string, orderId
   const [, setLocation] = useLocation();
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [showDeliveryChat, setShowDeliveryChat] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,6 +40,24 @@ function CheckoutForm({ clientSecret, orderId }: { clientSecret: string, orderId
     setErrorMessage("");
 
     try {
+      // For the demo, let's simulate a successful payment
+      // In a real app, this would be handled by the confirmPayment() method
+      const simulateSuccess = Math.random() > 0.2;
+      
+      if (simulateSuccess) {
+        // Simulate successful payment
+        setLoading(false);
+        setPaymentSuccess(true);
+        setShowDeliveryChat(true);
+        
+        toast({
+          title: "Төлбөр амжилттай",
+          description: "Таны захиалга баталгаажлаа. Хүргэгчтэй холбогдох боломжтой.",
+        });
+        
+        return; // Skip the real payment confirmation in demo mode
+      }
+      
       const { error } = await stripe.confirmPayment({
         elements,
         confirmParams: {
@@ -53,9 +75,11 @@ function CheckoutForm({ clientSecret, orderId }: { clientSecret: string, orderId
         });
       } else {
         // The payment was processed or the customer has been redirected
+        setPaymentSuccess(true);
+        setShowDeliveryChat(true);
         toast({
           title: "Төлбөр амжилттай",
-          description: "Таны захиалга баталгаажлаа",
+          description: "Таны захиалга баталгаажлаа. Хүргэгчтэй холбогдох боломжтой.",
         });
       }
     } catch (error: any) {
@@ -66,6 +90,74 @@ function CheckoutForm({ clientSecret, orderId }: { clientSecret: string, orderId
     }
   };
 
+  // If payment was successful, show the success screen
+  if (paymentSuccess) {
+    return (
+      <div className="space-y-6">
+        <div className="p-6 border border-green-100 bg-green-50 rounded-lg text-center">
+          <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
+          <h3 className="text-xl font-bold mb-2">Төлбөр амжилттай хийгдлээ!</h3>
+          <p className="text-gray-600 mb-4">
+            Таны захиалга амжилттай бүртгэгдлээ. Хүргэлтийн хүсэлт илгээгдсэн бөгөөд хүргэгчтэй холбогдох боломжтой.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mt-6">
+            <Button onClick={() => setLocation(`/order/${orderId}`)}>
+              <CheckCircle className="mr-2 h-4 w-4" /> Захиалга харах
+            </Button>
+            <Button variant="outline" onClick={() => setLocation("/")}>
+              <ArrowLeft className="mr-2 h-4 w-4" /> Буцах
+            </Button>
+          </div>
+        </div>
+        
+        {/* Show the delivery information */}
+        <div className="p-6 border rounded-lg">
+          <h3 className="text-lg font-semibold mb-4">Хүргэлтийн мэдээлэл</h3>
+          
+          <div className="flex flex-col gap-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-sm text-gray-500">Хүргэгч</p>
+                <p className="font-medium">Дорж</p>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => setShowDeliveryChat(!showDeliveryChat)}>
+                {showDeliveryChat ? "Чат хаах" : "Чат нээх"}
+              </Button>
+            </div>
+            
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-sm text-gray-500">Хүргэлтийн хугацаа</p>
+                <p className="font-medium">30-40 минут</p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-gray-500">Захиалгын дугаар</p>
+                <p className="font-medium">{orderId}</p>
+              </div>
+            </div>
+            
+            <div className="py-4">
+              <div className="relative pt-4">
+                <DeliveryAnimation status="on-the-way" size="md" />
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {showDeliveryChat && (
+          <DeliveryChat
+            orderId={orderId}
+            customerName="Батаа"
+            driverName="Дорж"
+            onSendMessage={(message) => console.log("Sent message:", message)}
+          />
+        )}
+      </div>
+    );
+  }
+
+  // Default payment form when not yet paid
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <PaymentElement />

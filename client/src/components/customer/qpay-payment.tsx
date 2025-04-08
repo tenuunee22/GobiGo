@@ -12,6 +12,8 @@ import {
   DialogFooter
 } from "@/components/ui/dialog";
 import { Copy, CheckCircle } from "lucide-react";
+import { DeliveryChat } from "@/components/shared/delivery-chat";
+import { DeliveryAnimation } from "@/components/ui/delivery-animation";
 
 interface QPayPaymentProps {
   orderId: string;
@@ -31,6 +33,8 @@ export function QPayPayment({
   const [expiryDate, setExpiryDate] = useState("");
   const [cvv, setCvv] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
+  const [showDeliveryChat, setShowDeliveryChat] = useState(false);
+  const [showPaymentSuccess, setShowPaymentSuccess] = useState(false);
   
   // In a real app, this would be an invoice number from the payment provider
   const qpayInvoiceNo = `INV-${Math.floor(Math.random() * 10000000)}`;
@@ -133,14 +137,77 @@ export function QPayPayment({
         setExpiryDate("");
         setCvv("");
         
+        // Show payment success and delivery chat UI
+        setShowPaymentSuccess(true);
+        setShowDeliveryChat(true);
+        
         toast({
           title: "Төлбөр амжилттай",
-          description: "Таны захиалгыг хүлээн авлаа"
+          description: "Таны захиалгыг хүлээн авлаа. Хүргэгчтэй холбогдох боломжтой."
         });
       }, 3000);
     }, 1500);
   };
   
+  // If payment is successfully completed, show delivery status and chat
+  if (showPaymentSuccess) {
+    return (
+      <div className="space-y-6">
+        <div className="p-6 border border-green-100 bg-green-50 rounded-lg text-center">
+          <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
+          <h3 className="text-xl font-bold mb-2">Төлбөр амжилттай хийгдлээ!</h3>
+          <p className="text-gray-600 mb-4">
+            Таны захиалга амжилттай бүртгэгдлээ. Хүргэлтийн хүсэлт илгээгдсэн бөгөөд хүргэгчтэй холбогдох боломжтой.
+          </p>
+        </div>
+        
+        {/* Show the delivery information */}
+        <div className="p-6 border rounded-lg">
+          <h3 className="text-lg font-semibold mb-4">Хүргэлтийн мэдээлэл</h3>
+          
+          <div className="flex flex-col gap-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-sm text-gray-500">Хүргэгч</p>
+                <p className="font-medium">Дорж</p>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => setShowDeliveryChat(!showDeliveryChat)}>
+                {showDeliveryChat ? "Чат хаах" : "Чат нээх"}
+              </Button>
+            </div>
+            
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-sm text-gray-500">Хүргэлтийн хугацаа</p>
+                <p className="font-medium">30-40 минут</p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-gray-500">Захиалгын дугаар</p>
+                <p className="font-medium">{orderId}</p>
+              </div>
+            </div>
+            
+            <div className="py-4">
+              <div className="relative pt-4">
+                <DeliveryAnimation status="on-the-way" size="md" />
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {showDeliveryChat && (
+          <DeliveryChat
+            orderId={orderId}
+            customerName="Батаа"
+            driverName="Дорж"
+            onSendMessage={(message) => console.log("Sent message:", message)}
+          />
+        )}
+      </div>
+    );
+  }
+
+  // Default QPay button and payment form
   return (
     <>
       <Button onClick={handleOpenQPay} className="w-full">
