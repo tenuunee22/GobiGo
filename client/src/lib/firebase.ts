@@ -42,12 +42,6 @@ const firebaseConfig = {
 // Initialize Firebase
 let app;
 try {
-  if (!import.meta.env.VITE_FIREBASE_API_KEY || 
-      !import.meta.env.VITE_FIREBASE_PROJECT_ID || 
-      !import.meta.env.VITE_FIREBASE_APP_ID) {
-    throw new Error('Missing Firebase configuration. Please check your environment variables.');
-  }
-  
   app = initializeApp(firebaseConfig);
 } catch (error: any) {
   if (error.code === 'app/duplicate-app') {
@@ -58,64 +52,10 @@ try {
     throw error;
   }
 }
-
 const auth = getAuth();
 const db = getFirestore();
 
-// Полностью отключаем persistence для избежания ошибок с indexedDB
-console.info('Firebase persistence is disabled to avoid indexedDB errors');
-
-// Функция для безопасного выполнения Firebase-запросов
-const safeFirebaseOp = async <T>(
-  operation: () => Promise<T>,
-  fallbackValue: T,
-  errorMessage = "Firebase operation failed"
-): Promise<T> => {
-  try {
-    return await operation();
-  } catch (error: any) {
-    console.error(errorMessage, error);
-    
-    // Если проблема с авторизацией или инициализацией Firebase
-    if (error?.code === 'failed-precondition' || 
-        error?.code?.includes('auth') || 
-        error?.name === 'FirebaseError') {
-      console.warn('Firebase error handled safely:', error.code || error.message);
-    }
-    
-    return fallbackValue;
-  }
-};
-
-// Utility function to handle Firebase errors with better user feedback
-export const handleFirebaseError = (error: any, fallbackMessage = "Хүсэлт гүйцэтгэхэд алдаа гарлаа") => {
-  console.error("Firebase error:", error);
-  
-  // Map common Firebase error codes to user-friendly messages
-  const errorMessages: {[key: string]: string} = {
-    'auth/user-not-found': 'Имэйл хаяг эсвэл нууц үг буруу байна',
-    'auth/wrong-password': 'Имэйл хаяг эсвэл нууц үг буруу байна',
-    'auth/email-already-in-use': 'Энэ имэйл хаяг бүртгэлтэй байна',
-    'auth/weak-password': 'Нууц үг хэтэрхий богино байна. 6-с дээш тэмдэгт оруулна уу.',
-    'auth/invalid-email': 'Имэйл хаяг буруу байна',
-    'auth/user-disabled': 'Энэ хэрэглэгчийн эрх хаагдсан байна',
-    'auth/requires-recent-login': 'Энэ үйлдлийг гүйцэтгэхийн тулд дахин нэвтэрнэ үү',
-    'auth/network-request-failed': 'Сүлжээний алдаа гарлаа. Интернэт холболтоо шалгана уу.',
-    'permission-denied': 'Таны эрх хүрэхгүй байна',
-    'failed-precondition': 'Үйлдлийг одоо гүйцэтгэх боломжгүй байна',
-    'not-found': 'Хайсан өгөгдөл олдсонгүй'
-  };
-  
-  // Extract the error code and find appropriate message
-  const errorCode = error?.code || '';
-  const userMessage = errorMessages[errorCode] || fallbackMessage;
-  
-  return {
-    code: errorCode,
-    message: userMessage,
-    originalError: error
-  };
-}
+// Firebase persistence is available but we'll implement it with better multi-tab support in a future update
 
 const googleProvider = new GoogleAuthProvider();
 
@@ -317,7 +257,7 @@ export const createOrder = async (orderData: any) => {
 };
 
 export const getCustomerOrders = async (customerId: string) => {
-  return safeFirebaseOp(async () => {
+  try {
     const ordersRef = collection(db, "orders");
     const q = query(
       ordersRef, 
@@ -332,7 +272,10 @@ export const getCustomerOrders = async (customerId: string) => {
     });
     
     return orders;
-  }, [], "Error getting customer orders");
+  } catch (error) {
+    console.error("Error getting customer orders:", error);
+    throw error;
+  }
 };
 
 // Subscribe to real-time customer order updates
@@ -356,14 +299,10 @@ export const subscribeToCustomerOrders = (
       callback(orders);
     }, (error) => {
       console.error("Error in customer orders snapshot listener:", error);
-      // Return empty array on error to prevent app crashes
-      callback([]);
     });
   } catch (error) {
     console.error("Error setting up customer orders subscription:", error);
-    // Return empty array on error to prevent app crashes
-    callback([]);
-    return () => {}; // Return no-op unsubscribe function
+    throw error;
   }
 };
 
@@ -518,76 +457,14 @@ export const subscribeToDriverOrders = (
   }
 };
 
-interface OrderStatusUpdateData {
-  status: string;
-  updatedAt: any;
-  driverId?: string;
-  businessId?: string;
-  businessName?: string;
-  driverName?: string;
-  availableForDrivers?: boolean;
-  statusHistory?: Array<{
-    status: string;
-    timestamp: any;
-    changedBy?: string | null;
-    previousStatus?: string | null;
-  }>;
-  estimatedDeliveryTime?: Date;
-  pickedUpTime?: Date;
-  deliveredTime?: Date;
-  completedTime?: Date;
-  [key: string]: any; // Allow any other properties
-}
-
-export const updateOrderStatus = async (orderId: string, status: string, additionalData: Record<string, any> = {}) => {
+export const updateOrderStatus = async (orderId: string, status: string, additionalData = {}) => {
   try {
     const orderRef = doc(db, "orders", orderId);
-    
-    // First get the order to check its current data
-    const orderDoc = await getDoc(orderRef);
-    if (!orderDoc.exists()) {
-      throw new Error(`Order with ID ${orderId} not found`);
-    }
-    
-    // Get the current order data
-    const orderData = orderDoc.data();
-    
-    // Prepare the update data
-    const updateData: OrderStatusUpdateData = {
+    await updateDoc(orderRef, {
       status,
       updatedAt: serverTimestamp(),
       ...additionalData
-    };
-    
-    // For status transitions, store the history
-    if (!orderData.statusHistory) {
-      updateData.statusHistory = [{
-        status: orderData.status || 'placed',
-        timestamp: serverTimestamp(),
-        previousStatus: null
-      }];
-    } else {
-      // Clone the existing history and add the new status
-      const newHistory = [...orderData.statusHistory];
-      newHistory.push({
-        status: orderData.status,
-        timestamp: serverTimestamp(),
-        changedBy: additionalData.driverId || additionalData.businessId || null
-      });
-      updateData.statusHistory = newHistory;
-    }
-    
-    // Update the order with new status and additional data
-    await updateDoc(orderRef, updateData);
-    
-    // Return the updated order
-    return {
-      id: orderId,
-      ...orderData,
-      ...updateData,
-      // Replace serverTimestamp placeholders with actual JS Date
-      updatedAt: new Date()
-    };
+    });
   } catch (error) {
     console.error("Error updating order status:", error);
     throw error;

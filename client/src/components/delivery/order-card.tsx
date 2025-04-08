@@ -46,22 +46,10 @@ export function OrderCard({
   const getStatusBadge = () => {
     if (isAvailable) return <Badge variant="secondary">Боломжтой</Badge>;
     
-    let variant: "default" | "secondary" | "outline" | "destructive" = "default";
+    let variant: "default" | "secondary" | "outline" = "default";
     let label = "";
     
     switch (status) {
-      case "preparing":
-        variant = "destructive";
-        label = "Бэлтгэж байна";
-        break;
-      case "ready_for_pickup":
-        variant = "secondary";
-        label = "Авахад бэлэн";
-        break;
-      case "ready_for_delivery":
-        variant = "secondary";
-        label = "Хүргэхэд бэлэн";
-        break;
       case "ready":
         variant = "secondary";
         label = "Бэлэн болсон";
@@ -96,32 +84,7 @@ export function OrderCard({
     }
     
     switch (status) {
-      case "preparing":
-        // Only for retail/pharmacy orders where the driver prepares the order
-        return (
-          <Button onClick={onStatusChange} className="w-full">
-            <CheckCircle className="mr-2 h-4 w-4" />
-            Бэлтгэж дууссан
-          </Button>
-        );
-      case "ready_for_delivery":
-        // After preparing retail/pharmacy orders
-        return (
-          <Button onClick={onStatusChange} className="w-full">
-            <Navigation className="mr-2 h-4 w-4" />
-            Хүргэлтэнд гарах
-          </Button>
-        );
-      case "ready_for_pickup":
-        // When the order is ready for the driver to pick up (from API)
-        return (
-          <Button onClick={onStatusChange} className="w-full">
-            <Navigation className="mr-2 h-4 w-4" />
-            Захиалга авах
-          </Button>
-        );
       case "ready":
-        // When the order is ready at the restaurant
         return (
           <Button onClick={onStatusChange} className="w-full">
             <Navigation className="mr-2 h-4 w-4" />

@@ -242,85 +242,67 @@ export function Header() {
           
           {/* Desktop navigation */}
           <nav className="hidden md:flex space-x-6">
-            {user ? getUserTypeNav() : 
-              <Button 
-                variant="ghost" 
-                className="flex items-center gap-2 text-white hover:bg-white/20" 
-                onClick={() => handleNavigate("/")}
-              >
-                <ShoppingBag className="h-4 w-4" />
-                Захиалах
-              </Button>
-            }
+            {getUserTypeNav()}
           </nav>
           
-          {/* User menu or Login button for desktop */}
+          {/* User menu */}
           <div className="hidden md:flex items-center">
-            {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="rounded-full text-white hover:bg-white/20">
-                    <User className="h-5 w-5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  {user?.role === "customer" ? (
-                    <>
-                      <DropdownMenuItem onClick={() => handleNavigate("/profile/user")}>
-                        <User className="mr-2 h-4 w-4" />
-                        <span>Хувийн мэдээлэл</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleNavigate("/order/history")}>
-                        <ClipboardList className="mr-2 h-4 w-4" />
-                        <span>Өмнөх захиалгууд</span>
-                      </DropdownMenuItem>
-                    </>
-                  ) : user?.role === "business" ? (
-                    <>
-                      <DropdownMenuItem onClick={() => handleNavigate("/profile/business")}>
-                        <User className="mr-2 h-4 w-4" />
-                        <span>Бизнесийн мэдээлэл</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleNavigate("/dashboard/store")}>
-                        <ShoppingBag className="mr-2 h-4 w-4" />
-                        <span>Барааны жагсаалт</span>
-                      </DropdownMenuItem>
-                    </>
-                  ) : (
-                    <>
-                      <DropdownMenuItem onClick={() => handleNavigate("/profile/driver")}>
-                        <User className="mr-2 h-4 w-4" />
-                        <span>Хувийн мэдээлэл</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleNavigate("/dashboard/driver")}>
-                        <Truck className="mr-2 h-4 w-4" />
-                        <span>Хүргэлтүүд</span>
-                      </DropdownMenuItem>
-                    </>
-                  )}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => {
-                    // Reset onboarding to see again
-                    localStorage.removeItem('onboardingComplete');
-                    window.location.reload();
-                  }}>
-                    <HelpCircle className="mr-2 h-4 w-4" />
-                    <span>Танилцуулга харах</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleNavigate("/login")}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Гарах</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Button 
-                onClick={() => handleNavigate("/login")}
-                className="bg-white text-primary hover:bg-white/90"
-              >
-                Нэвтрэх
-              </Button>
-            )}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="rounded-full text-white hover:bg-white/20">
+                  <User className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {user?.role === "customer" || !user ? (
+                  <>
+                    <DropdownMenuItem onClick={() => handleNavigate("/profile/user")}>
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Хувийн мэдээлэл</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleNavigate("/order/history")}>
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Өмнөх захиалгууд</span>
+                    </DropdownMenuItem>
+                  </>
+                ) : user?.role === "business" ? (
+                  <>
+                    <DropdownMenuItem onClick={() => handleNavigate("/profile/business")}>
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Бизнесийн мэдээлэл</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleNavigate("/dashboard/store")}>
+                      <ShoppingBag className="mr-2 h-4 w-4" />
+                      <span>Барааны жагсаалт</span>
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  <>
+                    <DropdownMenuItem onClick={() => handleNavigate("/profile/driver")}>
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Хувийн мэдээлэл</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleNavigate("/dashboard/driver")}>
+                      <Truck className="mr-2 h-4 w-4" />
+                      <span>Хүргэлтүүд</span>
+                    </DropdownMenuItem>
+                  </>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => {
+                  // Reset onboarding to see again
+                  localStorage.removeItem('onboardingComplete');
+                  window.location.reload();
+                }}>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Танилцуулга харах</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleNavigate("/login")}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Гарах</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
           
           {/* Mobile menu button */}
@@ -333,29 +315,7 @@ export function Header() {
               </SheetTrigger>
               <SheetContent side="right" className="w-[80%] sm:w-[350px]">
                 <div className="mt-8 flex flex-col space-y-3">
-                  {user ? getMobileMenuItems() : (
-                    <>
-                      <div className="my-2 text-sm font-medium text-gray-500 uppercase">
-                        Үндсэн цэс
-                      </div>
-                      <Button 
-                        variant="ghost" 
-                        className="w-full justify-start flex items-center gap-3" 
-                        onClick={() => handleNavigate("/")}
-                      >
-                        <ShoppingBag className="h-5 w-5" />
-                        Захиалах
-                      </Button>
-                      <hr className="my-4" />
-                      <Button 
-                        variant="default"
-                        className="w-full justify-center" 
-                        onClick={() => handleNavigate("/login")}
-                      >
-                        Нэвтрэх
-                      </Button>
-                    </>
-                  )}
+                  {getMobileMenuItems()}
                 </div>
               </SheetContent>
             </Sheet>

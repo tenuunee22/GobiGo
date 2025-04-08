@@ -120,83 +120,36 @@ export function DeliveryDashboard() {
       if (!order) return;
       
       let newStatus: string;
-      let toastMessage: string;
-      let additionalData: any = {
-        driverId: user?.uid,
-        driverName: user?.displayName || "Хүргэгч"
-      };
       
-      const businessType = order.businessType || "restaurant";
-      const isRetailOrPharmacy = ["retail", "pharmacy", "shop", "store", "дэлгүүр", "эмийн сан"].some(
-        type => businessType.toLowerCase().includes(type)
-      );
-      
-      // Determine next status based on current status and business type
+      // Determine next status based on current status
       switch (order.status) {
         case "ready":
           newStatus = "on-the-way";
-          toastMessage = "Хүргэлтэнд гарсан";
-          additionalData.estimatedDeliveryTime = new Date(Date.now() + 30 * 60 * 1000); // 30min from now
-          break;
-        case "ready_for_pickup":
-          newStatus = "on-the-way";
-          toastMessage = "Захиалга авч, хүргэлтэнд гарсан";
-          additionalData.pickedUpTime = new Date();
-          additionalData.estimatedDeliveryTime = new Date(Date.now() + 30 * 60 * 1000); // 30min from now
-          break;
-        case "preparing":
-          // Only happens when driver is preparing retail/pharmacy orders
-          newStatus = "ready_for_delivery";
-          toastMessage = "Бараа бүтээгдэхүүн бэлэн болсон";
-          break;
-        case "ready_for_delivery":
-          newStatus = "on-the-way";
-          toastMessage = "Хүргэлтэнд гарсан";
-          additionalData.estimatedDeliveryTime = new Date(Date.now() + 30 * 60 * 1000); // 30min from now
           break;
         case "on-the-way":
           newStatus = "delivered";
-          toastMessage = "Хүргэгдсэн";
-          additionalData.deliveredTime = new Date();
           break;
         case "delivered":
           newStatus = "completed";
-          toastMessage = "Гүйцэтгэсэн";
-          additionalData.completedTime = new Date();
           break;
         default:
-          // Fall back to standard flow
-          newStatus = isRetailOrPharmacy ? "preparing" : "on-the-way";
-          toastMessage = isRetailOrPharmacy ? "Бэлтгэж байна" : "Хүргэлтэнд гарсан";
+          newStatus = "on-the-way";
       }
       
       // Update order status
-      const updatedOrder = await updateOrderStatus(orderId, newStatus, additionalData);
+      await updateOrderStatus(orderId, newStatus, user?.uid);
       
       // Update local state
       const updateOrderInList = (list: any[]) => 
-        list.map(o => o.id === orderId ? { ...o, status: newStatus, ...additionalData } : o);
+        list.map(o => o.id === orderId ? { ...o, status: newStatus } : o);
       
       setAllOrders(prev => updateOrderInList(prev));
       setMyOrders(prev => updateOrderInList(prev));
       
       toast({
         title: "Захиалгын төлөв шинэчлэгдлээ",
-        description: `Захиалга ${toastMessage} төлөвт оруулав`,
+        description: `Захиалга ${getStatusText(newStatus)} төлөвт оруулав`,
       });
-      
-      // Provide follow-up toast for retail/pharmacy order flow
-      if (isRetailOrPharmacy && newStatus === "ready_for_delivery") {
-        toast({
-          title: "Бэлтгэл дууссан",
-          description: "Та одоо захиалгыг хүргэх боломжтой",
-        });
-      } else if (newStatus === "delivered") {
-        toast({
-          title: "Хүргэлт амжилттай",
-          description: "Захиалга хүргэгдсэн, төлбөр бүрэн хийгдсэн эсэхийг шалгана уу",
-        });
-      }
     } catch (error) {
       console.error("Error updating order status:", error);
       toast({
@@ -222,38 +175,20 @@ export function DeliveryDashboard() {
 
   const handleAcceptOrder = async (orderId: string) => {
     try {
-      // Find the order
-      const order = allOrders.find(o => o.id === orderId);
-      if (!order) return;
-      
-      // Check if we need to prepare this order (for retail/pharmacy)
-      // or just pick it up (for restaurant)
-      const businessType = order.businessType || "restaurant";
-      let newStatus = "on-the-way";
-      let toastMessage = "Та энэ захиалгыг хүргэх болно";
-      
-      // For retail/pharmacy, driver needs to prepare the order first
-      if (businessType.toLowerCase() !== "restaurant") {
-        newStatus = "preparing";
-        toastMessage = "Та энэ захиалгын бараа бүтээгдэхүүнийг бэлтгэж, хүргэх болно";
-      }
-      
       // Update order status and assign driver
-      await updateOrderStatus(orderId, newStatus, {
-        driverId: user?.uid, 
-        driverName: user?.displayName || "Хүргэгч"
-      });
+      await updateOrderStatus(orderId, "on-the-way", user?.uid);
       
       // Move order from available to my orders
+      const order = allOrders.find(o => o.id === orderId);
       if (order) {
-        const updatedOrder = { ...order, status: newStatus, driverId: user?.uid };
+        const updatedOrder = { ...order, status: "on-the-way", driverId: user?.uid };
         setMyOrders(prev => [...prev, updatedOrder]);
         setAllOrders(prev => prev.filter(o => o.id !== orderId));
       }
       
       toast({
         title: "Захиалга хүлээн авлаа",
-        description: toastMessage,
+        description: "Та энэ захиалгыг хүргэх болно",
       });
     } catch (error) {
       console.error("Error accepting order:", error);

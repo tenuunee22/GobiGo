@@ -131,29 +131,8 @@ export function BusinessDashboard() {
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
     try {
-      // Find the order to update
-      const order = orders.find(o => o.id === orderId);
-      if (!order) {
-        console.error("Order not found:", orderId);
-        return;
-      }
-      
-      // Get the business type
-      const businessType = user?.businessType || "restaurant";
-      
-      // Additional data to include in the update
-      const additionalData: Record<string, any> = {
-        businessId: user?.uid,
-        businessName: user?.businessName || user?.name || "Бизнес"
-      };
-      
-      // For restaurant orders, when ready status is set, make the order available for drivers
-      if (businessType.toLowerCase() === "restaurant" && newStatus === "ready") {
-        additionalData.availableForDrivers = true;
-      }
-      
       // Update order status
-      await updateOrderStatus(orderId, newStatus, additionalData);
+      await updateOrderStatus(orderId, newStatus);
       
       // Update local state
       setOrders(prev => 
@@ -164,16 +143,8 @@ export function BusinessDashboard() {
       
       toast({
         title: "Захиалгын төлөв шинэчлэгдлээ",
-        description: `Захиалга #${orderId.substring(0, 6)} ${getStatusText(newStatus)} төлөвт оруулав`,
+        description: `Захиалга #${orderId} ${getStatusText(newStatus)} төлөвт оруулав`,
       });
-      
-      // Show additional information based on business type
-      if (businessType.toLowerCase() === "restaurant" && newStatus === "ready") {
-        toast({
-          title: "Хүргэлтийн жолооч хайж байна",
-          description: "Таны захиалга хүргэлтийн жолоочид санал болголоо",
-        });
-      }
     } catch (error) {
       console.error("Error updating order status:", error);
       toast({
@@ -422,35 +393,13 @@ export function BusinessDashboard() {
                 address={order.deliveryAddress || ""}
                 requestedTime={order.requestedTime || "Аль болох хурдан"}
                 onStatusChange={() => {
-                  // Determine next status based on current status and business type
-                  const businessType = user?.businessType || "restaurant";
-                  const isRetailOrPharmacy = ["retail", "pharmacy", "shop", "store", "дэлгүүр", "эмийн сан"].some(
-                    type => businessType.toLowerCase().includes(type)
-                  );
-                  
+                  // Determine next status based on current status
                   let nextStatus = "preparing";
-                  
-                  if (order.status === "placed") {
-                    nextStatus = "preparing";
-                  } else if (order.status === "preparing") {
-                    nextStatus = isRetailOrPharmacy ? "ready_for_pickup" : "ready";
-                  } else if (order.status === "ready_for_pickup") {
-                    // Can't change from this state - driver needs to pick up
-                    nextStatus = "ready_for_pickup";
-                    
-                    toast({
-                      title: "Хүргэгчийг хүлээж байна",
-                      description: "Энэ захиалгыг хүргэгч авах шаардлагатай"
-                    });
-                    
-                    return; // Don't proceed with status change
-                  } else if (order.status === "ready") {
-                    nextStatus = "on-the-way";
-                  } else if (order.status === "on-the-way") {
-                    nextStatus = "delivered";
-                  } else if (order.status === "delivered") {
-                    nextStatus = "completed";
-                  }
+                  if (order.status === "placed") nextStatus = "preparing";
+                  else if (order.status === "preparing") nextStatus = "ready";
+                  else if (order.status === "ready") nextStatus = "on-the-way";
+                  else if (order.status === "on-the-way") nextStatus = "delivered";
+                  else if (order.status === "delivered") nextStatus = "completed";
                   
                   handleStatusChange(order.id, nextStatus);
                 }}

@@ -50,7 +50,7 @@ export function OrderItem({
   const [open, setOpen] = useState(false);
   
   const getStatusBadge = () => {
-    let variant: "default" | "secondary" | "outline" | "destructive" = "default";
+    let variant: "default" | "secondary" | "outline" = "default";
     let label = "";
     
     switch (status) {
@@ -61,14 +61,6 @@ export function OrderItem({
       case "preparing":
         variant = "secondary";
         label = "Бэлтгэж байна";
-        break;
-      case "ready_for_pickup":
-        variant = "secondary";
-        label = "Авахад бэлэн";
-        break;
-      case "ready_for_delivery":
-        variant = "secondary";
-        label = "Хүргэхэд бэлэн";
         break;
       case "ready":
         variant = "default";
@@ -87,7 +79,7 @@ export function OrderItem({
         label = "Дууссан";
         break;
       case "cancelled":
-        variant = "destructive";
+        variant = "outline";
         label = "Цуцлагдсан";
         break;
       default:
@@ -104,10 +96,6 @@ export function OrderItem({
         return "Бэлдэж эхлэх";
       case "preparing":
         return "Бэлэн болсон";
-      case "ready_for_pickup":
-        return "Хүргэгч ирэхийг хүлээж байна";
-      case "ready_for_delivery":
-        return "Хүргэлтэнд гаргах";
       case "ready":
         return "Хүргэлтэнд гаргах";
       case "on-the-way":
