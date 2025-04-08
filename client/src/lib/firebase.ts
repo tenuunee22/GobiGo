@@ -62,31 +62,30 @@ try {
 const auth = getAuth();
 const db = getFirestore();
 
-// Disable offline data persistence for better multi-tab support
-// This resolves the "failed-precondition" errors in development
-const disablePersistence = true;
-let persistenceEnabled = false;
+// Полностью отключаем persistence для избежания ошибок с indexedDB
+console.info('Firebase persistence is disabled to avoid indexedDB errors');
 
-if (!disablePersistence) {
+// Функция для безопасного выполнения Firebase-запросов
+const safeFirebaseOp = async <T>(
+  operation: () => Promise<T>,
+  fallbackValue: T,
+  errorMessage = "Firebase operation failed"
+): Promise<T> => {
   try {
-    enableIndexedDbPersistence(db).then(() => {
-      persistenceEnabled = true;
-      console.log("Firebase persistence enabled successfully");
-    }).catch((err) => {
-      if (err.code === 'failed-precondition') {
-        // Multiple tabs open, persistence can only be enabled in one tab at a time
-        console.warn('Firebase persistence could not be enabled: Multiple tabs open');
-      } else if (err.code === 'unimplemented') {
-        // The current browser doesn't support persistence
-        console.warn('Firebase persistence not supported by this browser');
-      }
-    });
-  } catch (err) {
-    console.warn('Error enabling persistence:', err);
+    return await operation();
+  } catch (error: any) {
+    console.error(errorMessage, error);
+    
+    // Если проблема с авторизацией или инициализацией Firebase
+    if (error?.code === 'failed-precondition' || 
+        error?.code?.includes('auth') || 
+        error?.name === 'FirebaseError') {
+      console.warn('Firebase error handled safely:', error.code || error.message);
+    }
+    
+    return fallbackValue;
   }
-} else {
-  console.info('Firebase persistence explicitly disabled for multi-tab support');
-}
+};
 
 // Utility function to handle Firebase errors with better user feedback
 export const handleFirebaseError = (error: any, fallbackMessage = "Хүсэлт гүйцэтгэхэд алдаа гарлаа") => {
@@ -318,7 +317,7 @@ export const createOrder = async (orderData: any) => {
 };
 
 export const getCustomerOrders = async (customerId: string) => {
-  try {
+  return safeFirebaseOp(async () => {
     const ordersRef = collection(db, "orders");
     const q = query(
       ordersRef, 
@@ -333,10 +332,7 @@ export const getCustomerOrders = async (customerId: string) => {
     });
     
     return orders;
-  } catch (error) {
-    console.error("Error getting customer orders:", error);
-    throw error;
-  }
+  }, [], "Error getting customer orders");
 };
 
 // Subscribe to real-time customer order updates
@@ -360,10 +356,14 @@ export const subscribeToCustomerOrders = (
       callback(orders);
     }, (error) => {
       console.error("Error in customer orders snapshot listener:", error);
+      // Return empty array on error to prevent app crashes
+      callback([]);
     });
   } catch (error) {
     console.error("Error setting up customer orders subscription:", error);
-    throw error;
+    // Return empty array on error to prevent app crashes
+    callback([]);
+    return () => {}; // Return no-op unsubscribe function
   }
 };
 
