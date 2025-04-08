@@ -353,6 +353,19 @@ export function BusinessDashboard() {
               </LineChart>
             </ResponsiveContainer>
           </div>
+          <div className="flex justify-end mt-4">
+            <Button 
+              variant="outline" 
+              className="bg-gradient-to-r from-indigo-50 to-blue-50 border-blue-200 hover:bg-blue-100 transition-all hover:scale-105"
+              onClick={() => window.location.href = '/dashboard/business/analytics'}
+            >
+              <span className="flex items-center text-blue-700">
+                <TrendingUp className="mr-2 h-4 w-4" />
+                <span className="mr-1">Орцны шинжилгээ харах</span>
+                <span className="ml-1 bounce-soft inline-block">👨‍🍳</span>
+              </span>
+            </Button>
+          </div>
         </CardContent>
       </Card>
       
@@ -406,10 +419,15 @@ export function BusinessDashboard() {
             </span>
             <span className="absolute -top-1 -right-1 text-xs text-green-500 pulse">↑</span>
           </TabsTrigger>
-          <TabsTrigger value="sales">
+          <TabsTrigger 
+            value="sales" 
+            onClick={() => window.location.href = '/dashboard/business/analytics'}
+            className="relative overflow-hidden bg-gradient-to-r from-blue-50 to-indigo-50 border-b-2 border-blue-300"
+          >
             <span className="flex items-center gap-1">
-              <span className="text-blue-500 bounce-slow">📊</span>
-              Борлуулалт
+              <span className="text-blue-500 bounce-soft">📊</span>
+              <span className="text-indigo-700">Орцны шинжилгээ</span>
+              <span className="ml-1 text-xs text-green-600 tada">Шинэ!</span>
             </span>
           </TabsTrigger>
           <TabsTrigger value="settings">

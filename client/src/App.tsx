@@ -26,6 +26,7 @@ import Cart from "@/pages/cart";
 import TooltipExample from "@/pages/tooltip-example";
 import Settings from "@/pages/settings";
 import LoadingDemo from "@/pages/loading-demo";
+import BusinessAnalytics from "@/pages/dashboard/business/analytics";
 
 // Customer components
 import { CustomerDashboard } from "@/components/dashboard/customer-dashboard";
@@ -128,6 +129,7 @@ function Router() {
         <Route path="/earnings" component={CustomerDashboard} />
         <Route path="/delivery-history" component={DeliveryDashboard} />
         <ProtectedBusinessRoute path="/products" component={BusinessDashboard} />
+        <ProtectedBusinessRoute path="/dashboard/business/analytics" component={BusinessAnalytics} />
         <Route path="/settings" component={Settings} />
         <Route path="/loading-demo" component={LoadingDemo} />
         <Route component={NotFound} />
