@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/auth-context";
-import { getBusinessOrders, getBusinessProducts, updateOrderStatus } from "@/lib/firebase";
+import { getBusinessOrders, getBusinessProducts, updateOrderStatus, addProduct, updateProduct, deleteProduct } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OrderItem } from "@/components/business/order-item";
 import { ProductForm } from "@/components/business/product-form";
 import { Button } from "@/components/ui/button";
-import { Plus, Search, Settings, TrendingUp } from "lucide-react";
+import { Plus, Search, Settings, TrendingUp, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -161,34 +161,65 @@ export function BusinessDashboard() {
   };
 
   const handleProductSave = async (productData: any) => {
-    // In a real app, this would update the database
-    // For now, just update the local state
-    
-    if (selectedProduct) {
-      // Update existing product
-      setProducts(prev => 
-        prev.map(p => 
-          p.id === selectedProduct.id ? { ...p, ...productData } : p
-        )
-      );
+    try {
+      if (selectedProduct) {
+        // Update existing product
+        const updatedProduct = await updateProduct(selectedProduct.id, productData);
+        
+        // Update local state
+        setProducts(prev => 
+          prev.map(p => 
+            p.id === selectedProduct.id ? { ...p, ...updatedProduct } : p
+          )
+        );
+        
+        toast({
+          title: "Бүтээгдэхүүн шинэчлэгдлээ",
+          description: `${productData.name} амжилттай шинэчлэгдлээ`,
+        });
+      } else {
+        // Add new product
+        const newProduct = await addProduct(user?.uid || "", productData);
+        
+        // Update local state
+        setProducts(prev => [...prev, newProduct]);
+        
+        toast({
+          title: "Бүтээгдэхүүн нэмэгдлээ",
+          description: `${productData.name} амжилттай нэмэгдлээ`,
+        });
+      }
+      
+      setShowProductForm(false);
+    } catch (error) {
+      console.error("Error saving product:", error);
       toast({
-        title: "Бүтээгдэхүүн шинэчлэгдлээ",
-        description: `${productData.name} амжилттай шинэчлэгдлээ`,
-      });
-    } else {
-      // Add new product
-      setProducts(prev => [...prev, { 
-        id: `temp-${Date.now()}`, 
-        businessUid: user?.uid, 
-        ...productData 
-      }]);
-      toast({
-        title: "Бүтээгдэхүүн нэмэгдлээ",
-        description: `${productData.name} амжилттай нэмэгдлээ`,
+        title: "Алдаа гарлаа",
+        description: "Бүтээгдэхүүн хадгалахад алдаа гарлаа. Дахин оролдоно уу.",
+        variant: "destructive"
       });
     }
-    
-    setShowProductForm(false);
+  };
+  
+  const handleDeleteProduct = async (productId: string) => {
+    try {
+      await deleteProduct(productId);
+      
+      // Update local state
+      setProducts(prev => prev.filter(p => p.id !== productId));
+      
+      toast({
+        title: "Бүтээгдэхүүн устгагдлаа",
+        description: "Бүтээгдэхүүн амжилттай устгагдлаа",
+      });
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      toast({
+        title: "Алдаа гарлаа",
+        description: "Бүтээгдэхүүн устгахад алдаа гарлаа. Дахин оролдоно уу.",
+        variant: "destructive"
+      });
+    }
   };
 
   const filteredOrders = orders.filter(order => {
@@ -409,9 +440,14 @@ export function BusinessDashboard() {
                     <p className="text-sm text-gray-600 mb-2">{product.description}</p>
                     <div className="flex justify-between items-center">
                       <span className="font-medium">{product.price.toLocaleString()}₮</span>
-                      <Button size="sm" onClick={() => handleEditProduct(product)}>
-                        <Settings className="mr-2 h-4 w-4" /> Засах
-                      </Button>
+                      <div className="flex space-x-2">
+                        <Button size="sm" onClick={() => handleEditProduct(product)}>
+                          <Settings className="mr-2 h-4 w-4" /> Засах
+                        </Button>
+                        <Button size="sm" variant="destructive" onClick={() => handleDeleteProduct(product.id)}>
+                          <Trash2 className="mr-2 h-4 w-4" /> Устгах
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

@@ -20,6 +20,7 @@ import {
   where, 
   getDocs,
   updateDoc,
+  deleteDoc,
   serverTimestamp
 } from "firebase/firestore";
 
@@ -147,9 +148,35 @@ export const addProduct = async (businessId: string, productData: any) => {
       ...productData,
       createdAt: serverTimestamp()
     });
-    return newProduct.id;
+    return { id: newProduct.id, ...productData };
   } catch (error) {
     console.error("Error adding product:", error);
+    throw error;
+  }
+};
+
+export const updateProduct = async (productId: string, productData: any) => {
+  try {
+    const productRef = doc(db, "products", productId);
+    await updateDoc(productRef, {
+      ...productData,
+      updatedAt: serverTimestamp()
+    });
+    
+    return { id: productId, ...productData };
+  } catch (error) {
+    console.error("Error updating product:", error);
+    throw error;
+  }
+};
+
+export const deleteProduct = async (productId: string) => {
+  try {
+    const productRef = doc(db, "products", productId);
+    await deleteDoc(productRef);
+    return true;
+  } catch (error) {
+    console.error("Error deleting product:", error);
     throw error;
   }
 };
