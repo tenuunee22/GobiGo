@@ -380,9 +380,10 @@ export function BusinessDashboard() {
           <TabsTrigger value="earnings">Орлого</TabsTrigger>
           <TabsTrigger value="sales">Борлуулалт</TabsTrigger>
           <TabsTrigger value="settings">Тохиргоо</TabsTrigger>
-          <TabsTrigger value="delivery-tracking" className="flex items-center gap-2">
-            <Navigation className="h-4 w-4" />
-            Хүргэлт хянах
+          <TabsTrigger value="delivery-tracking" className="flex items-center gap-2 bg-gradient-to-r from-blue-100 to-indigo-100 hover:from-blue-200 hover:to-indigo-200 relative overflow-hidden">
+            <Navigation className="h-4 w-4 text-blue-600 wiggle" />
+            <span className="font-medium text-blue-700">Хүргэлт хянах</span>
+            <span className="absolute right-2 top-1 text-xs text-red-500 pulse">🚚</span>
           </TabsTrigger>
         </TabsList>
         
@@ -842,32 +843,48 @@ export function BusinessDashboard() {
         </TabsContent>
         
         <TabsContent value="sales">
-          <Card>
-            <CardHeader>
-              <CardTitle>Бараа бүтээгдэхүүний борлуулалт</CardTitle>
+          <Card className="border-t-4 border-indigo-500 hover:shadow-lg transition-all duration-300">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center">
+                <span className="mr-3 text-indigo-500 tada text-xl">📊</span>
+                <span className="bg-gradient-to-r from-indigo-500 to-purple-600 text-transparent bg-clip-text">Бараа бүтээгдэхүүний борлуулалт</span>
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-4">Борлуулалтын тойм</h3>
+              <div className="mb-6 slide-in-left">
+                <h3 className="text-lg font-semibold mb-4 flex items-center">
+                  <span className="mr-2 text-indigo-600 wiggle">📈</span>
+                  Борлуулалтын тойм
+                </h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="text-sm font-medium text-gray-500 mb-1">Нийт борлуулсан бүтээгдэхүүн</h4>
-                    <div className="text-2xl font-bold">
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-5 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
+                    <h4 className="text-sm font-medium text-gray-600 mb-1 flex items-center">
+                      <span className="mr-2 text-blue-500 bounce-soft">🛒</span>
+                      Нийт борлуулсан бүтээгдэхүүн
+                    </h4>
+                    <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-transparent bg-clip-text">
                       {sortedOrders.reduce((sum, order) => {
                         return sum + (order.items || []).reduce((itemSum, item) => itemSum + (item.quantity || 0), 0);
                       }, 0)}
                     </div>
                   </div>
                   
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="text-sm font-medium text-gray-500 mb-1">Бүтээгдэхүүний төрөл</h4>
-                    <div className="text-2xl font-bold">{filteredProducts.length}</div>
+                  <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-5 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
+                    <h4 className="text-sm font-medium text-gray-600 mb-1 flex items-center">
+                      <span className="mr-2 text-purple-500 jelly">🍽️</span>
+                      Бүтээгдэхүүний төрөл
+                    </h4>
+                    <div className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 text-transparent bg-clip-text">
+                      {filteredProducts.length}
+                    </div>
                   </div>
                   
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="text-sm font-medium text-gray-500 mb-1">Дундаж үнэ</h4>
-                    <div className="text-2xl font-bold">
+                  <div className="bg-gradient-to-r from-amber-50 to-orange-50 p-5 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
+                    <h4 className="text-sm font-medium text-gray-600 mb-1 flex items-center">
+                      <span className="mr-2 text-amber-500 wobble">💲</span>
+                      Дундаж үнэ</h4>
+                    <div className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 text-transparent bg-clip-text">
                       {filteredProducts.length ? 
                         Math.round(filteredProducts.reduce((sum, product) => sum + (product.price || 0), 0) / filteredProducts.length).toLocaleString() : 0}₮
                     </div>
@@ -989,8 +1006,118 @@ export function BusinessDashboard() {
                   </table>
                 </div>
                 
+                <div className="mt-8 mb-10">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center">
+                    <span className="mr-2 text-indigo-600 jelly">🔍</span>
+                    Бүтээгдэхүүн хөрөнгийн дүн шинжилгээ
+                  </h3>
+                  
+                  <div className="bg-gradient-to-r from-indigo-50 to-blue-50 p-6 rounded-lg shadow-sm">
+                    <h4 className="text-base font-medium mb-4 flex items-center">
+                      <span className="mr-2 text-indigo-600 pulse">🍳</span>
+                      Хамгийн их зарагдсан орц материал
+                    </h4>
+                    
+                    <div className="flex flex-wrap justify-center gap-3 mb-6">
+                      {/* Онгоц хэлбэртэй визуализаци */}
+                      <div className="relative h-60 w-full">
+                        {/* Онгоцын их бие */}
+                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4/5 h-1 bg-indigo-300 rounded"></div>
+                        
+                        {/* Орц бүрээр тойргууд үүсгэх */}
+                        {['Гурил', 'Өндөг', 'Сүү', 'Мах', 'Төмс', 'Гоймон', 'Хиам', 'Байцаа', 'Лууван', 'Сонгино'].map((ingredient, index) => {
+                          const size = 75 - (index * 5); // Их зарагдалттай нь том хэмжээтэй
+                          const left = 10 + (index * 8.5) + '%';
+                          const delay = index * 0.2;
+                          const icons = ['🍞', '🥚', '🥛', '🥩', '🥔', '🍜', '🌭', '🥬', '🥕', '🧅'];
+                          
+                          return (
+                            <div 
+                              key={ingredient}
+                              className="absolute bounce-ingredient rounded-full flex items-center justify-center shadow-md"
+                              style={{
+                                width: `${size}px`,
+                                height: `${size}px`, 
+                                left,
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                backgroundColor: `hsla(${220 + index * 15}, 85%, 85%, 0.9)`,
+                                border: `2px solid hsla(${220 + index * 15}, 85%, 75%, 1)`,
+                                animationDelay: `${delay}s`,
+                                zIndex: 10 - index, // Эрэмбээр давхарлах
+                              }}
+                            >
+                              <div className="flex flex-col items-center">
+                                <span className="text-xl mb-1 wiggle" style={{ animationDelay: `${delay + 0.5}s` }}>{icons[index % icons.length]}</span>
+                                <span className="text-xs font-medium text-indigo-900">{ingredient}</span>
+                                <span className="text-xs font-bold text-indigo-800">{Math.round(100 - (index * 8))}%</span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <Card className="bg-white hover:shadow-md transition-all">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm font-medium flex items-center">
+                            <span className="mr-2 text-red-500 tada">🔴</span>
+                            Хамгийн их дутагдалтай орц
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-lg font-medium">Сонгино</div>
+                          <div className="text-sm text-gray-500">Нөөц: 15%</div>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card className="bg-white hover:shadow-md transition-all">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm font-medium flex items-center">
+                            <span className="mr-2 text-green-500 pulse">🟢</span>
+                            Хамгийн их нөөцтэй орц
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-lg font-medium">Гурил</div>
+                          <div className="text-sm text-gray-500">Нөөц: 87%</div>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card className="bg-white hover:shadow-md transition-all">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm font-medium flex items-center">
+                            <span className="mr-2 text-amber-500 wiggle">⚠️</span>
+                            Дууссан орц
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-lg font-medium">Үхрийн мах</div>
+                          <div className="text-sm text-gray-500">Шаардлагатай: 5 кг</div>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card className="bg-white hover:shadow-md transition-all">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm font-medium flex items-center">
+                            <span className="mr-2 text-blue-500 jelly">📊</span>
+                            Зарцуулалтын өсөлт
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-lg font-medium">+23%</div>
+                          <div className="text-sm text-gray-500">Өнгөрсөн 7 хоног</div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </div>
+                </div>
+                
                 <div className="mt-8">
-                  <h3 className="text-lg font-semibold mb-4">Сүүлийн захиалгууд</h3>
+                  <h3 className="text-lg font-semibold mb-4 flex items-center">
+                    <span className="mr-2 text-indigo-600 float">📝</span>
+                    Сүүлийн захиалгууд</h3>
                   <div className="bg-white border rounded-lg overflow-hidden">
                     <table className="min-w-full divide-y divide-gray-200">
                       <thead className="bg-gray-50">

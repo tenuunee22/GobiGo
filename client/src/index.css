@@ -329,3 +329,27 @@
   50% { transform: translateY(-10px); }
   100% { transform: translateY(0); }
 }
+
+/* Add bounce-ingredient animation for the data visualization */
+.bounce-ingredient {
+  animation: bounce-ingredient 2s ease-in-out infinite alternate;
+  transform-origin: center bottom;
+}
+
+@keyframes bounce-ingredient {
+  0%, 20% {
+    transform: translateY(-50%) scale(1);
+  }
+  40% {
+    transform: translateY(-50%) scale(1.05);
+  }
+  60% {
+    transform: translateY(-55%) scale(0.95);
+  }
+  80% {
+    transform: translateY(-45%) scale(1.02);
+  }
+  100% {
+    transform: translateY(-50%) scale(1);
+  }
+}
