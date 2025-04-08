@@ -365,7 +365,7 @@ export function Header() {
                 </PopoverTrigger>
                 <PopoverContent className="w-80 p-0" align="end">
                   <div className="p-4 border-b border-border">
-                    <div className="font-medium">Миний сагс</div>
+                    <div className="font-medium">Миний захиалгууд</div>
                     <div className="text-sm text-gray-500">{cartItems.length} бүтээгдэхүүн</div>
                   </div>
                   
@@ -442,7 +442,7 @@ export function Header() {
                   ) : (
                     <div className="p-8 text-center">
                       <ShoppingBag className="h-12 w-12 mx-auto text-gray-300 mb-3" />
-                      <div className="text-gray-500">Таны сагс хоосон байна</div>
+                      <div className="text-gray-500">Таны захиалга хоосон байна</div>
                       <Button 
                         variant="outline" 
                         className="mt-4"

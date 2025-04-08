@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/auth-context";
 import { getBusinessOrders, getBusinessProducts, updateOrderStatus, addProduct, updateProduct, deleteProduct } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
@@ -6,10 +7,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OrderItem } from "@/components/business/order-item";
 import { ProductForm } from "@/components/business/product-form";
 import { Button } from "@/components/ui/button";
-import { Phone, Plus, Search, Settings, TrendingUp, Trash2, Navigation, MapPin } from "lucide-react";
+import { BarChart3, Book, Building2, CalendarDays, ChevronRight, GanttChartSquare, LineChart, ListOrdered, Package, PackageCheck, Phone, Plus, Search, Settings, ShoppingBag, Ticket, TrendingUp, Trash2, Truck, Users, Wrench, RefreshCw, Clipboard } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { DeliveryLocationTracker } from "@/components/shared/delivery-location-tracker";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Separator } from "@/components/ui/separator";
+import { Progress } from "@/components/ui/progress";
+
 import { 
   Select, 
   SelectContent, 
@@ -17,21 +24,80 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
+
 import {
-  LineChart,
+  AreaChart,
+  Area,
+  LineChart as RechartsLineChart,
   Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  Legend
 } from "recharts";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Link } from "wouter";
+
+// Fake data for visualization
+const salesData = [
+  { name: 'Даваа', sales: 120000, orders: 14 },
+  { name: 'Мягмар', sales: 98000, orders: 12 },
+  { name: 'Лхагва', sales: 156000, orders: 19 },
+  { name: 'Пүрэв', sales: 137000, orders: 16 },
+  { name: 'Баасан', sales: 185000, orders: 22 },
+  { name: 'Бямба', sales: 210000, orders: 25 },
+  { name: 'Ням', sales: 164000, orders: 20 },
+];
+
+const categoryData = [
+  { name: 'Хоол', value: 42 },
+  { name: 'Ундаа', value: 28 },
+  { name: 'Амттан', value: 18 },
+  { name: 'Бусад', value: 12 },
+];
+
+const timeData = [
+  { time: '8:00', orders: 2 },
+  { time: '10:00', orders: 5 },
+  { time: '12:00', orders: 15 },
+  { time: '14:00', orders: 12 },
+  { time: '16:00', orders: 8 },
+  { time: '18:00', orders: 13 },
+  { time: '20:00', orders: 10 },
+  { time: '22:00', orders: 3 },
+];
+
+const topProducts = [
+  { name: 'Төмсний зутан', sales: 76, amount: 684000, growth: 12 },
+  { name: 'Бүхэлдээ шарсан тахиа', sales: 62, amount: 868000, growth: 8 },
+  { name: 'Итали пицца', sales: 55, amount: 825000, growth: -3 },
+  { name: 'Кола 0.5л', sales: 52, amount: 234000, growth: 5 },
+  { name: 'Имбирний цай', sales: 48, amount: 192000, growth: 22 },
+];
+
+const COLORS = ['#3b82f6', '#6366f1', '#8b5cf6', '#a855f7'];
 
 export function BusinessDashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [orders, setOrders] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
   const [stats, setStats] = useState<any>({
     earnings: 0,
     ordersCount: 0,
@@ -42,6 +108,19 @@ export function BusinessDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showProductForm, setShowProductForm] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
+  const [currentTab, setCurrentTab] = useState("overview");
+  const [activePeriod, setActivePeriod] = useState("week");
+  const [productViewType, setProductViewType] = useState("grid");
+  const [currentDate] = useState(new Date());
+  const [deleteDialog, setDeleteDialog] = useState({ open: false, product: null as any });
+
+  // Get formatted date for display
+  const formattedDate = new Intl.DateTimeFormat('mn-MN', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }).format(currentDate);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -49,60 +128,26 @@ export function BusinessDashboard() {
 
       try {
         setLoading(true);
+        const ordersData = await getBusinessOrders(user.uid);
+        const productsData = await getBusinessProducts(user.uid);
         
-        // Fetch orders for this business
-        const fetchedOrders = await getBusinessOrders(user.uid);
-        setOrders(fetchedOrders);
+        // Sort orders by time (newest first)
+        const sortedOrders = ordersData.sort((a: any, b: any) => 
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
         
-        // Fetch products for this business
-        const fetchedProducts = await getBusinessProducts(user.uid);
-        setProducts(fetchedProducts);
+        setOrders(sortedOrders);
+        setProducts(productsData);
+        setFilteredProducts(productsData);
         
-        // Calculate statistics
-        let totalEarnings = 0;
-        const last7days = Array(7).fill(0).map((_, i) => {
-          const date = new Date();
-          date.setDate(date.getDate() - (6 - i));
-          return { date, earnings: 0, orders: 0 };
-        });
-        
-        fetchedOrders.forEach(order => {
-          // Calculate total earnings
-          totalEarnings += order.totalAmount || 0;
-          
-          // Calculate daily stats for last 7 days
-          const orderDate = new Date(order.createdAt || new Date());
-          for (let i = 0; i < 7; i++) {
-            const statsDate = last7days[i].date;
-            if (
-              orderDate.getDate() === statsDate.getDate() &&
-              orderDate.getMonth() === statsDate.getMonth() &&
-              orderDate.getFullYear() === statsDate.getFullYear()
-            ) {
-              last7days[i].earnings += order.totalAmount || 0;
-              last7days[i].orders += 1;
-              break;
-            }
-          }
-        });
-        
-        // Format the statistics for display
-        setStats({
-          earnings: totalEarnings,
-          ordersCount: fetchedOrders.length,
-          avgOrder: fetchedOrders.length ? totalEarnings / fetchedOrders.length : 0,
-          recentSales: last7days.map(day => ({
-            date: `${day.date.getMonth() + 1}/${day.date.getDate()}`,
-            revenue: day.earnings,
-            orders: day.orders
-          }))
-        });
-      } catch (error) {
+        // Calculate stats
+        calculateStats(sortedOrders);
+      } catch (error: any) {
         console.error("Error fetching business data:", error);
         toast({
-          title: "Өгөгдөл ачааллахад алдаа гарлаа",
-          description: "Дахин оролдоно уу",
-          variant: "destructive"
+          title: "Мэдээлэл авахад алдаа гарлаа",
+          description: error.message,
+          variant: "destructive",
         });
       } finally {
         setLoading(false);
@@ -110,1388 +155,1427 @@ export function BusinessDashboard() {
     };
 
     fetchData();
-  }, [user, toast]);
+  }, [user?.uid, toast]);
+
+  useEffect(() => {
+    // Filter products based on search query
+    const filtered = products.filter(product => 
+      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.category?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredProducts(filtered);
+  }, [searchQuery, products]);
+
+  const calculateStats = (ordersData: any[]) => {
+    // Calculate total earnings
+    const totalEarnings = ordersData.reduce((sum, order) => sum + (order.total || 0), 0);
+    
+    // Calculate avg order value
+    const avgOrderValue = ordersData.length > 0 ? totalEarnings / ordersData.length : 0;
+    
+    // Create daily sales data for the past week
+    const dailySales = Array(7).fill(0).map((_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dayStr = date.toISOString().split('T')[0];
+      
+      const dayOrders = ordersData.filter(order => {
+        const orderDate = new Date(order.createdAt).toISOString().split('T')[0];
+        return orderDate === dayStr;
+      });
+      
+      const daySales = dayOrders.reduce((sum, order) => sum + (order.total || 0), 0);
+      
+      return {
+        date: dayStr,
+        sales: daySales,
+        orders: dayOrders.length
+      };
+    }).reverse();
+    
+    setStats({
+      earnings: totalEarnings,
+      ordersCount: ordersData.length,
+      avgOrder: avgOrderValue,
+      recentSales: dailySales
+    });
+  };
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
     try {
-      // Update order status
       await updateOrderStatus(orderId, newStatus);
       
       // Update local state
-      setOrders(prev => 
-        prev.map(order => 
+      setOrders(prevOrders => 
+        prevOrders.map(order => 
           order.id === orderId ? { ...order, status: newStatus } : order
         )
       );
       
       toast({
-        title: "Захиалгын төлөв шинэчлэгдлээ",
-        description: `Захиалга #${orderId} ${getStatusText(newStatus)} төлөвт оруулав`,
+        title: "Төлөв шинэчлэгдлээ",
+        description: `Захиалгын төлөв ${newStatus} болж өөрчлөгдлөө`,
+        variant: "default",
       });
-    } catch (error) {
-      console.error("Error updating order status:", error);
+    } catch (error: any) {
       toast({
         title: "Төлөв шинэчлэхэд алдаа гарлаа",
-        description: "Дахин оролдоно уу",
-        variant: "destructive"
+        description: error.message,
+        variant: "destructive",
       });
     }
   };
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case "placed": return "Хүлээн авсан";
-      case "preparing": return "Бэлтгэж байна";
-      case "ready": return "Бэлэн болсон";
-      case "on-the-way": return "Хүргэлтэнд гарсан";
-      case "delivered": return "Хүргэгдсэн";
-      case "completed": return "Гүйцэтгэсэн";
-      case "cancelled": return "Цуцлагдсан";
-      default: return status;
-    }
-  };
-
-  const handleAddProduct = () => {
-    setSelectedProduct(null);
-    setShowProductForm(true);
-  };
-
-  const handleEditProduct = (product: any) => {
-    setSelectedProduct(product);
-    setShowProductForm(true);
-  };
-
-  const handleProductSave = async (productData: any) => {
+  const handleAddProduct = async (productData: any) => {
     try {
-      if (selectedProduct) {
-        // Update existing product
-        const updatedProduct = await updateProduct(selectedProduct.id, productData);
-        
-        // Update local state
-        setProducts(prev => 
-          prev.map(p => 
-            p.id === selectedProduct.id ? { ...p, ...updatedProduct } : p
-          )
-        );
-        
-        toast({
-          title: "Бүтээгдэхүүн шинэчлэгдлээ",
-          description: `${productData.name} амжилттай шинэчлэгдлээ`,
-        });
-      } else {
-        // Add new product
-        const newProduct = await addProduct(user?.uid || "", productData);
-        
-        // Update local state
-        setProducts(prev => [...prev, newProduct]);
-        
-        toast({
-          title: "Бүтээгдэхүүн нэмэгдлээ",
-          description: `${productData.name} амжилттай нэмэгдлээ`,
-        });
-      }
+      if (!user?.uid) throw new Error("User not authenticated");
+      
+      await addProduct(user.uid, productData);
+      const updatedProducts = await getBusinessProducts(user.uid);
+      setProducts(updatedProducts);
+      setFilteredProducts(updatedProducts);
       
       setShowProductForm(false);
-    } catch (error) {
-      console.error("Error saving product:", error);
+      setSelectedProduct(null);
+      
       toast({
-        title: "Алдаа гарлаа",
-        description: "Бүтээгдэхүүн хадгалахад алдаа гарлаа. Дахин оролдоно уу.",
-        variant: "destructive"
+        title: "Бүтээгдэхүүн нэмэгдлээ",
+        description: "Бүтээгдэхүүн амжилттай нэмэгдлээ",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Бүтээгдэхүүн нэмэхэд алдаа гарлаа",
+        description: error.message,
+        variant: "destructive",
       });
     }
   };
-  
+
+  const handleUpdateProduct = async (productData: any) => {
+    try {
+      if (!selectedProduct?.id) throw new Error("Product ID not found");
+      
+      await updateProduct(selectedProduct.id, productData);
+      const updatedProducts = await getBusinessProducts(user!.uid);
+      setProducts(updatedProducts);
+      setFilteredProducts(updatedProducts);
+      
+      setShowProductForm(false);
+      setSelectedProduct(null);
+      
+      toast({
+        title: "Бүтээгдэхүүн шинэчлэгдлээ",
+        description: "Бүтээгдэхүүний мэдээлэл амжилттай шинэчлэгдлээ",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Бүтээгдэхүүн шинэчлэхэд алдаа гарлаа",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleDeleteProduct = async (productId: string) => {
     try {
       await deleteProduct(productId);
-      
-      // Update local state
-      setProducts(prev => prev.filter(p => p.id !== productId));
+      const updatedProducts = await getBusinessProducts(user!.uid);
+      setProducts(updatedProducts);
+      setFilteredProducts(updatedProducts);
       
       toast({
         title: "Бүтээгдэхүүн устгагдлаа",
         description: "Бүтээгдэхүүн амжилттай устгагдлаа",
       });
-    } catch (error) {
-      console.error("Error deleting product:", error);
+    } catch (error: any) {
       toast({
-        title: "Алдаа гарлаа",
-        description: "Бүтээгдэхүүн устгахад алдаа гарлаа. Дахин оролдоно уу.",
-        variant: "destructive"
+        title: "Бүтээгдэхүүн устгахад алдаа гарлаа",
+        description: error.message,
+        variant: "destructive",
       });
+    } finally {
+      setDeleteDialog({ open: false, product: null });
     }
   };
 
-  const filteredOrders = orders.filter(order => {
-    if (!searchQuery) return true;
-    
-    const searchLower = searchQuery.toLowerCase();
+  const handleOpenDeleteDialog = (product: any) => {
+    setDeleteDialog({ open: true, product });
+  };
+
+  const handleSaveProduct = (productData: any) => {
+    if (selectedProduct) {
+      handleUpdateProduct(productData);
+    } else {
+      handleAddProduct(productData);
+    }
+  };
+
+  // Count orders by status
+  const pendingOrders = orders.filter(order => order.status === "pending").length;
+  const processingOrders = orders.filter(order => order.status === "processing").length;
+  const deliveredOrders = orders.filter(order => order.status === "delivered").length;
+
+  if (loading) {
     return (
-      order.id?.toString().includes(searchLower) ||
-      order.customerName?.toLowerCase().includes(searchLower) ||
-      order.status?.toLowerCase().includes(searchLower) ||
-      order.address?.toLowerCase().includes(searchLower)
-    );
-  });
-
-  const filteredProducts = products.filter(product => {
-    if (!searchQuery) return true;
-    
-    const searchLower = searchQuery.toLowerCase();
-    return (
-      product.name?.toLowerCase().includes(searchLower) ||
-      product.description?.toLowerCase().includes(searchLower) ||
-      product.category?.toLowerCase().includes(searchLower)
-    );
-  });
-
-  // Sort orders by creation date (newest first)
-  const sortedOrders = [...filteredOrders].sort((a, b) => {
-    return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
-  });
-
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6 slide-in-left flex items-center">
-        <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text">Бизнес удирдлага</span>
-        <span className="ml-3 tada text-xl">🏪</span>
-      </h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 bounce-in">
-        <Card className="hover:shadow-lg transition-all duration-300 dashboard-card-hover overflow-hidden border-t-4 border-blue-500">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
-              <span className="mr-2 text-blue-500 wiggle">💰</span>
-              Нийт борлуулалт
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-transparent bg-clip-text">
-              {stats.earnings.toLocaleString()}₮
-            </div>
-            <p className="text-xs text-muted-foreground flex items-center">
-              <span className="text-green-500 mr-1">↑</span>
-              <span className="text-green-500 font-medium">+20.1%</span> өнгөрсөн сараас
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card className="hover:shadow-lg transition-all duration-300 dashboard-card-hover overflow-hidden border-t-4 border-purple-500">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
-              <span className="mr-2 text-purple-500 jelly">📦</span>
-              Нийт захиалга
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 text-transparent bg-clip-text">
-              {stats.ordersCount}
-            </div>
-            <p className="text-xs text-muted-foreground flex items-center">
-              <span className="text-green-500 mr-1">↑</span>
-              <span className="text-green-500 font-medium">+12</span> өнгөрсөн долоо хоногоос
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card className="hover:shadow-lg transition-all duration-300 dashboard-card-hover overflow-hidden border-t-4 border-amber-500">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
-              <span className="mr-2 text-amber-500 heartbeat">⭐</span>
-              Дундаж захиалга
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold bg-gradient-to-r from-amber-500 to-orange-600 text-transparent bg-clip-text">
-              {stats.avgOrder.toLocaleString()}₮
-            </div>
-            <p className="text-xs text-muted-foreground flex items-center">
-              <span className="text-green-500 mr-1">↑</span>
-              <span className="text-green-500 font-medium">+2.5%</span> өнгөрсөн сараас
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-      
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <TrendingUp className="mr-2 h-5 w-5" />
-            Сүүлийн 7 хоногийн борлуулалт
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={stats.recentSales}
-                margin={{
-                  top: 5,
-                  right: 30,
-                  left: 20,
-                  bottom: 5,
-                }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
-                <Line 
-                  type="monotone" 
-                  dataKey="revenue" 
-                  name="Борлуулалт" 
-                  stroke="#8884d8" 
-                  activeDot={{ r: 8 }} 
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="orders" 
-                  name="Захиалга" 
-                  stroke="#82ca9d" 
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="flex justify-end mt-4">
-            <Button 
-              variant="outline" 
-              className="bg-gradient-to-r from-indigo-50 to-blue-50 border-blue-200 hover:bg-blue-100 transition-all hover:scale-105"
-              onClick={() => window.location.href = '/dashboard/business/analytics'}
-            >
-              <span className="flex items-center text-blue-700">
-                <TrendingUp className="mr-2 h-4 w-4" />
-                <span className="mr-1">Орцны шинжилгээ харах</span>
-                <span className="ml-1 bounce-soft inline-block">👨‍🍳</span>
-              </span>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-      
-      <div className="mb-6">
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-bold">Захиалга болон бүтээгдэхүүн</h2>
-          <div className="relative">
-            <Input
-              type="text"
-              placeholder="Хайх..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-60"
-            />
-            <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
-          </div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"
+          />
+          <motion.p 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-gray-500"
+          >
+            Мэдээлэл ачааллаж байна...
+          </motion.p>
         </div>
       </div>
-      
-      <Tabs defaultValue="orders">
-        <TabsList className="mb-4">
-          <TabsTrigger value="orders">
-            <span className="flex items-center gap-1">
-              <span className="text-amber-500 jelly">📋</span>
-              Захиалгууд
-            </span>
-          </TabsTrigger>
-          <TabsTrigger value="shop" className="relative">
-            <span className="flex items-center gap-1">
-              <span className="text-indigo-500 bounce-soft">🏪</span>
-              Дэлгүүр
-            </span>
-            <span className="absolute -top-1 -right-1 text-xs text-green-500 pulse">✓</span>
-          </TabsTrigger>
-          <TabsTrigger value="delivery-tracking" className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700 relative overflow-hidden border-b-4 border-indigo-700">
-            <Navigation className="h-4 w-4 text-white wobble" />
-            <span className="font-medium">Хүргэлт хянах</span>
-            <span className="absolute -right-1 -top-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse">3</span>
-          </TabsTrigger>
-          <TabsTrigger value="products" className="relative">
-            <span className="flex items-center gap-1">
-              <span className="text-green-500 spin-slow">🍔</span>
-              Бүтээгдэхүүн
-            </span>
-            <span className="absolute -top-1 -right-1 text-xs text-amber-500 tada">+2</span>
-          </TabsTrigger>
-          <TabsTrigger value="earnings" className="relative">
-            <span className="flex items-center gap-1">
-              <span className="text-amber-500 wiggle">💵</span>
-              <span className="bg-gradient-to-r from-amber-500 to-amber-600 bg-clip-text text-transparent">Орлого</span>
-            </span>
-            <span className="absolute -top-1 -right-1 text-xs text-green-500 pulse">↑</span>
-          </TabsTrigger>
-          <TabsTrigger 
-            value="sales" 
-            onClick={() => window.location.href = '/dashboard/business/analytics'}
-            className="relative overflow-hidden bg-gradient-to-r from-blue-50 to-indigo-50 border-b-2 border-blue-300"
-          >
-            <span className="flex items-center gap-1">
-              <span className="text-blue-500 bounce-soft">📊</span>
-              <span className="text-indigo-700">Орцны шинжилгээ</span>
-              <span className="ml-1 text-xs text-green-600 tada">Шинэ!</span>
-            </span>
-          </TabsTrigger>
-          <TabsTrigger value="settings">
-            <span className="flex items-center gap-1">
-              <span className="text-gray-500 spin-slow">⚙️</span>
-              Тохиргоо
-            </span>
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="orders" className="space-y-4">
-          {loading ? (
-            <div>Захиалга ачааллаж байна...</div>
-          ) : sortedOrders.length > 0 ? (
-            sortedOrders.map((order) => (
-              <OrderItem
-                key={order.id}
-                id={order.id}
-                orderNumber={`#${order.id.substring(0, 6)}`}
-                customerName={order.customerName || "Хэрэглэгч"}
-                items={(order.items || []).map((item: any) => ({
-                  name: item.name,
-                  quantity: item.quantity,
-                  price: item.price
-                }))}
-                total={order.totalAmount || 0}
-                status={order.status || "placed"}
-                address={order.deliveryAddress || ""}
-                requestedTime={order.requestedTime || "Аль болох хурдан"}
-                onStatusChange={() => {
-                  // Determine next status based on current status
-                  let nextStatus = "preparing";
-                  if (order.status === "placed") nextStatus = "preparing";
-                  else if (order.status === "preparing") nextStatus = "ready";
-                  else if (order.status === "ready") nextStatus = "on-the-way";
-                  else if (order.status === "on-the-way") nextStatus = "delivered";
-                  else if (order.status === "delivered") nextStatus = "completed";
-                  
-                  handleStatusChange(order.id, nextStatus);
-                }}
-              />
-            ))
-          ) : (
-            <div className="text-center py-10">
-              <p className="text-gray-500">Одоогоор захиалга байхгүй байна</p>
-            </div>
-          )}
-        </TabsContent>
-        
-        <TabsContent value="products">
-          <div className="mb-4 slide-in-top">
-            <Button onClick={handleAddProduct} className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-md">
-              <Plus className="mr-2 h-4 w-4 jelly" /> <span className="flex items-center">Бүтээгдэхүүн нэмэх <span className="ml-1 text-xs tada">🍔</span></span>
-            </Button>
+    );
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-6">
+      <motion.div
+        className="mb-6"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2 bg-gradient-to-r from-amber-600 to-orange-600 text-transparent bg-clip-text">
+              <ShoppingBag className="h-7 w-7 text-amber-500" />
+              <span>{user?.businessName || "Миний дэлгүүр"}</span>
+              <span className="text-2xl tada">✨</span>
+            </h1>
+            <p className="text-gray-500 text-sm md:text-base mt-1">
+              {formattedDate} | <span className="text-amber-600 font-medium">Сайн байна уу, {user?.name || "Дэлгүүрийн эзэн"}!</span>
+            </p>
           </div>
-          
-          {showProductForm && (
-            <div className="mb-6">
-              <ProductForm 
-                product={selectedProduct} 
-                onSave={handleProductSave} 
-                onCancel={() => setShowProductForm(false)} 
-              />
-            </div>
-          )}
-          
-          {loading ? (
-            <div>Бүтээгдэхүүн ачааллаж байна...</div>
-          ) : filteredProducts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredProducts.map((product) => (
-                <Card key={product.id} className="overflow-hidden">
-                  <div 
-                    className="h-40 bg-center bg-cover bg-gray-100" 
-                    style={{ 
-                      backgroundImage: product.imageUrl 
-                        ? `url(${product.imageUrl})` 
-                        : "none"
-                    }}
+
+          <div className="flex items-center gap-3">
+            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+              <Link href="/dashboard/business/analytics">
+                <Button variant="outline" className="bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 hover:border-amber-300 hover:bg-amber-100">
+                  <BarChart3 className="h-4 w-4 mr-2 text-amber-600" /> Дэлгэрэнгүй статистик
+                </Button>
+              </Link>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+              <Link href="/settings">
+                <Button variant="outline" size="icon" className="rounded-full border-gray-300">
+                  <Settings className="h-4 w-4 text-gray-600" />
+                </Button>
+              </Link>
+            </motion.div>
+          </div>
+        </div>
+
+        <Tabs
+          defaultValue="overview"
+          value={currentTab}
+          onValueChange={setCurrentTab}
+          className="w-full space-y-6"
+        >
+          <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-1 border border-amber-100">
+            <TabsList className="grid grid-cols-5 bg-transparent gap-1 h-auto p-0">
+              <TabsTrigger 
+                value="overview" 
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-orange-500 py-2.5 data-[state=active]:text-white rounded-lg data-[state=active]:shadow-md"
+              >
+                <span className="flex flex-col md:flex-row items-center gap-1 md:gap-2">
+                  <GanttChartSquare className="h-4 w-4" />
+                  <span className="text-xs md:text-sm">Хянах самбар</span>
+                </span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="orders" 
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-orange-500 py-2.5 data-[state=active]:text-white rounded-lg data-[state=active]:shadow-md"
+              >
+                <span className="flex flex-col md:flex-row items-center gap-1 md:gap-2">
+                  <ListOrdered className="h-4 w-4" />
+                  <span className="text-xs md:text-sm">Захиалгууд</span>
+                </span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="products" 
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-orange-500 py-2.5 data-[state=active]:text-white rounded-lg data-[state=active]:shadow-md"
+              >
+                <span className="flex flex-col md:flex-row items-center gap-1 md:gap-2">
+                  <Package className="h-4 w-4" />
+                  <span className="text-xs md:text-sm">Бүтээгдэхүүн</span>
+                </span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="delivery" 
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-orange-500 py-2.5 data-[state=active]:text-white rounded-lg data-[state=active]:shadow-md"
+              >
+                <span className="flex flex-col md:flex-row items-center gap-1 md:gap-2">
+                  <Truck className="h-4 w-4" />
+                  <span className="text-xs md:text-sm">Хүргэлт</span>
+                </span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="settings" 
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-orange-500 py-2.5 data-[state=active]:text-white rounded-lg data-[state=active]:shadow-md"
+              >
+                <span className="flex flex-col md:flex-row items-center gap-1 md:gap-2">
+                  <Wrench className="h-4 w-4" />
+                  <span className="text-xs md:text-sm">Тохиргоо</span>
+                </span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
+
+          <TabsContent value="overview" className="space-y-6 mt-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+            >
+              {/* Stats Overview Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+                {/* Total Sales */}
+                <motion.div 
+                  whileHover={{ scale: 1.02, y: -5 }}
+                  className="bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl p-5 text-white shadow-lg relative overflow-hidden"
+                >
+                  <motion.div 
+                    className="absolute top-0 right-0 bg-white/10 rounded-bl-xl p-2" 
+                    whileHover={{ rotate: 5 }}
                   >
-                    {!product.imageUrl && (
-                      <div className="h-full w-full flex items-center justify-center text-gray-400">
-                        <span>Зураггүй</span>
-                      </div>
-                    )}
+                    <TrendingUp className="h-6 w-6" />
+                  </motion.div>
+                  <h3 className="font-semibold mb-1 text-white/90 text-sm">Нийт борлуулалт</h3>
+                  <p className="text-2xl font-bold">{stats.earnings.toLocaleString()}₮</p>
+                  <div className="flex items-center gap-1 text-white/80 text-xs mt-2">
+                    <span className="bg-white/20 px-1.5 py-0.5 rounded text-white">+13.2%</span>
+                    <span>Өмнөх 7 хоногоос</span>
                   </div>
-                  <CardContent className="p-4">
-                    <h3 className="font-semibold text-lg mb-1">{product.name}</h3>
-                    <p className="text-sm text-gray-600 mb-2">{product.description}</p>
+                  <motion.div 
+                    className="absolute -bottom-6 -right-6 w-24 h-24 bg-white/10 rounded-full"
+                    animate={{ scale: [1, 1.1, 1] }}
+                    transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
+                  />
+                </motion.div>
+
+                {/* Total Orders */}
+                <motion.div 
+                  whileHover={{ scale: 1.02, y: -5 }}
+                  className="bg-white rounded-xl p-5 shadow-md border border-gray-100 relative overflow-hidden"
+                >
+                  <motion.div 
+                    className="absolute top-0 right-0 bg-amber-100 rounded-bl-xl p-2 text-amber-700" 
+                    whileHover={{ rotate: 5 }}
+                  >
+                    <Clipboard className="h-6 w-6" />
+                  </motion.div>
+                  <h3 className="font-semibold mb-1 text-gray-500 text-sm">Нийт захиалга</h3>
+                  <p className="text-2xl font-bold text-gray-800">{stats.ordersCount}</p>
+                  <div className="flex items-center gap-1 text-gray-500 text-xs mt-2">
+                    <span className="bg-green-100 px-1.5 py-0.5 rounded text-green-700">+8.3%</span>
+                    <span>Өмнөх 7 хоногоос</span>
+                  </div>
+                  <div className="mt-2">
+                    <div className="flex justify-between text-xs text-gray-500 mb-1">
+                      <span>Гүйцэтгэл</span>
+                      <span>78%</span>
+                    </div>
+                    <Progress value={78} className="h-1.5 bg-gray-100" indicatorClassName="bg-gradient-to-r from-amber-500 to-amber-600" />
+                  </div>
+                </motion.div>
+
+                {/* Average Order Value */}
+                <motion.div 
+                  whileHover={{ scale: 1.02, y: -5 }}
+                  className="bg-white rounded-xl p-5 shadow-md border border-gray-100 relative overflow-hidden"
+                >
+                  <motion.div 
+                    className="absolute top-0 right-0 bg-green-100 rounded-bl-xl p-2 text-green-700" 
+                    whileHover={{ rotate: 5 }}
+                  >
+                    <LineChart className="h-6 w-6" />
+                  </motion.div>
+                  <h3 className="font-semibold mb-1 text-gray-500 text-sm">Дундаж захиалга</h3>
+                  <p className="text-2xl font-bold text-gray-800">{Math.round(stats.avgOrder).toLocaleString()}₮</p>
+                  <div className="flex items-center gap-1 text-gray-500 text-xs mt-2">
+                    <span className="bg-green-100 px-1.5 py-0.5 rounded text-green-700">+5.1%</span>
+                    <span>Өмнөх 7 хоногоос</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-1 mt-2">
+                    <div className="h-1.5 bg-amber-100 rounded-full"></div>
+                    <div className="h-1.5 bg-amber-300 rounded-full"></div>
+                    <div className="h-1.5 bg-amber-500 rounded-full"></div>
+                  </div>
+                </motion.div>
+
+                {/* Quick Actions Card */}
+                <motion.div 
+                  whileHover={{ scale: 1.02, y: -5 }}
+                  className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-5 shadow-md border border-amber-100"
+                >
+                  <h3 className="font-semibold mb-3 text-amber-800 text-sm flex items-center gap-2">
+                    <RefreshCw className="h-4 w-4" /> Түргэн үйлдлүүд
+                  </h3>
+                  <div className="space-y-2">
+                    <motion.button
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.97 }}
+                      className="w-full bg-white text-left px-3 py-2 rounded-lg border border-gray-100 shadow-sm flex items-center gap-2 text-sm hover:border-amber-200 transition-colors"
+                      onClick={() => {
+                        setShowProductForm(true);
+                        setSelectedProduct(null);
+                      }}
+                    >
+                      <Plus className="h-4 w-4 text-amber-600" />
+                      <span>Шинэ бүтээгдэхүүн нэмэх</span>
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.97 }}
+                      className="w-full bg-white text-left px-3 py-2 rounded-lg border border-gray-100 shadow-sm flex items-center gap-2 text-sm hover:border-amber-200 transition-colors"
+                      onClick={() => setCurrentTab("orders")}
+                    >
+                      <PackageCheck className="h-4 w-4 text-amber-600" />
+                      <span>Захиалга шалгах</span>
+                      {pendingOrders > 0 && (
+                        <Badge className="ml-auto bg-amber-500">{pendingOrders}</Badge>
+                      )}
+                    </motion.button>
+                    <Link href="/dashboard/business/analytics">
+                      <motion.button
+                        whileHover={{ scale: 1.03 }}
+                        whileTap={{ scale: 0.97 }}
+                        className="w-full bg-white text-left px-3 py-2 rounded-lg border border-gray-100 shadow-sm flex items-center gap-2 text-sm hover:border-amber-200 transition-colors"
+                      >
+                        <BarChart3 className="h-4 w-4 text-amber-600" />
+                        <span>Дэлгэрэнгүй тайлан</span>
+                        <ChevronRight className="h-4 w-4 ml-auto text-gray-400" />
+                      </motion.button>
+                    </Link>
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* Charts Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
+                {/* Sales Chart */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.2 }}
+                  className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden lg:col-span-2"
+                >
+                  <div className="p-5">
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="font-semibold text-gray-800">
+                        <span className="flex items-center gap-2">
+                          <TrendingUp className="h-5 w-5 text-amber-500" />
+                          <span>Борлуулалтын тойм</span>
+                        </span>
+                      </h3>
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className={`text-xs py-1 px-3 h-auto ${activePeriod === 'week' ? 'bg-amber-50 border-amber-200 text-amber-700' : ''}`}
+                          onClick={() => setActivePeriod('week')}
+                        >
+                          7 хоног
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className={`text-xs py-1 px-3 h-auto ${activePeriod === 'month' ? 'bg-amber-50 border-amber-200 text-amber-700' : ''}`}
+                          onClick={() => setActivePeriod('month')}
+                        >
+                          Сарын
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="h-[280px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart
+                          data={salesData}
+                          margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+                        >
+                          <defs>
+                            <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3}/>
+                              <stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                          <XAxis dataKey="name" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+                          <YAxis
+                            tickFormatter={(value) => `${value / 1000}K`}
+                            tick={{ fontSize: 12 }}
+                            axisLine={false}
+                            tickLine={false}
+                          />
+                          <Tooltip 
+                            formatter={(value: number) => [`${value.toLocaleString()}₮`, 'Борлуулалт']}
+                            labelFormatter={(name) => `${name} гараг`}
+                            contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', boxShadow: '0 0 10px rgba(0,0,0,0.1)', border: 'none' }}
+                          />
+                          <Area 
+                            type="monotone" 
+                            dataKey="sales" 
+                            stroke="#f59e0b" 
+                            fillOpacity={1} 
+                            fill="url(#salesGradient)" 
+                            strokeWidth={3}
+                          />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* Product Categories Chart */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.3 }}
+                  className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden"
+                >
+                  <div className="p-5">
+                    <h3 className="font-semibold text-gray-800 mb-4">
+                      <span className="flex items-center gap-2">
+                        <Package className="h-5 w-5 text-amber-500" />
+                        <span>Бүтээгдэхүүний ангилал</span>
+                      </span>
+                    </h3>
+                    <div className="h-[250px] relative">
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="text-center">
+                          <p className="text-2xl font-bold text-gray-800">142</p>
+                          <p className="text-sm text-gray-500">Нийт бүтээгдэхүүн</p>
+                        </div>
+                      </div>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={categoryData}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={60}
+                            outerRadius={80}
+                            dataKey="value"
+                            labelLine={false}
+                            startAngle={90}
+                            endAngle={-270}
+                          >
+                            {categoryData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip 
+                            formatter={(value: number) => [`${value}%`, 'Хувь']}
+                            contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', boxShadow: '0 0 10px rgba(0,0,0,0.1)', border: 'none' }}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      {categoryData.map((category, index) => (
+                        <div key={category.name} className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }}></div>
+                          <span className="text-xs text-gray-700">{category.name}</span>
+                          <span className="text-xs text-gray-500 ml-auto">{category.value}%</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* Recent Orders & Top Products */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                {/* Recent Orders */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.4 }}
+                  className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden"
+                >
+                  <div className="p-5">
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="font-semibold text-gray-800">
+                        <span className="flex items-center gap-2">
+                          <Clipboard className="h-5 w-5 text-amber-500" />
+                          <span>Сүүлийн захиалгууд</span>
+                        </span>
+                      </h3>
+                      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-xs text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                          onClick={() => setCurrentTab("orders")}
+                        >
+                          Бүгдийг харах 
+                          <ChevronRight className="h-3 w-3 ml-1" />
+                        </Button>
+                      </motion.div>
+                    </div>
+                    <div className="space-y-3 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
+                      {orders.slice(0, 5).map((order, index) => (
+                        <motion.div
+                          key={order.id || index}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          className="p-3 rounded-lg border hover:border-amber-200 transition-colors flex justify-between items-center gap-3"
+                        >
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-10 w-10 bg-amber-100">
+                              <AvatarFallback className="text-amber-700 text-xs">{order.customerName?.substring(0, 2).toUpperCase() || "ХЭ"}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <div className="font-medium text-sm text-gray-900">{order.customerName || "Хэрэглэгч"}</div>
+                              <div className="text-xs text-gray-500">
+                                {new Date(order.createdAt).toLocaleTimeString()} | {order.items?.length || 0} бүтээгдэхүүн
+                              </div>
+                            </div>
+                          </div>
+                          <div>
+                            <div className="font-semibold text-right text-gray-900">{order.total?.toLocaleString() || 0}₮</div>
+                            <Badge className={`text-xs ${
+                              order.status === "pending" ? "bg-yellow-500" : 
+                              order.status === "processing" ? "bg-blue-500" : 
+                              order.status === "delivered" ? "bg-green-500" : 
+                              "bg-gray-500"
+                            }`}>
+                              {order.status === "pending" ? "Хүлээгдэж буй" : 
+                               order.status === "processing" ? "Бэлтгэж буй" : 
+                               order.status === "delivered" ? "Хүргэгдсэн" : 
+                               "Бусад"}
+                            </Badge>
+                          </div>
+                        </motion.div>
+                      ))}
+                      {orders.length === 0 && (
+                        <div className="text-center py-10 text-gray-500">
+                          <div className="mx-auto w-16 h-16 bg-gray-100 flex items-center justify-center rounded-full mb-3">
+                            <Clipboard className="h-8 w-8 text-gray-400" />
+                          </div>
+                          <p>Захиалга байхгүй байна</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* Top Products */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.5 }}
+                  className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden"
+                >
+                  <div className="p-5">
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="font-semibold text-gray-800">
+                        <span className="flex items-center gap-2">
+                          <ShoppingBag className="h-5 w-5 text-amber-500" />
+                          <span>Шилдэг бүтээгдэхүүн</span>
+                        </span>
+                      </h3>
+                      <div className="flex gap-2">
+                        <Select value="week" onValueChange={() => {}}>
+                          <SelectTrigger className="h-8 text-xs border-gray-200 w-[120px]">
+                            <SelectValue placeholder="7 хоног" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="day">Өнөөдөр</SelectItem>
+                            <SelectItem value="week">7 хоног</SelectItem>
+                            <SelectItem value="month">Сарын</SelectItem>
+                            <SelectItem value="year">Жилийн</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="space-y-2 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
+                      <div className="grid grid-cols-10 text-xs text-gray-500 pb-2 px-3">
+                        <div className="col-span-5">Бүтээгдэхүүн</div>
+                        <div className="col-span-2 text-right">Зарагдсан</div>
+                        <div className="col-span-2 text-right">Орлого</div>
+                        <div className="col-span-1 text-right">Өсөлт</div>
+                      </div>
+                      
+                      {topProducts.map((product, index) => (
+                        <motion.div
+                          key={product.name}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          className="grid grid-cols-10 items-center p-3 rounded-lg border hover:border-amber-200 transition-colors"
+                        >
+                          <div className="col-span-5 flex items-center gap-3">
+                            <div className="bg-gradient-to-r from-amber-100 to-amber-200 h-9 w-9 rounded-md flex items-center justify-center">
+                              <span className="text-amber-700 text-sm font-semibold">#{index+1}</span>
+                            </div>
+                            <div>
+                              <div className="font-medium text-sm">{product.name}</div>
+                              <div className="text-xs text-gray-500">{product.sales} ширхэг</div>
+                            </div>
+                          </div>
+                          <div className="col-span-2 text-right">{product.sales} ш</div>
+                          <div className="col-span-2 text-right font-semibold">{product.amount.toLocaleString()}₮</div>
+                          <div className={`col-span-1 text-right ${product.growth >= 0 ? 'text-green-600' : 'text-red-600'} text-xs font-medium`}>
+                            {product.growth >= 0 ? '+' : ''}{product.growth}%
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+            </motion.div>
+          </TabsContent>
+
+          <TabsContent value="orders" className="space-y-6 mt-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold flex items-center gap-2">
+                  <ListOrdered className="h-5 w-5 text-amber-500" />
+                  <span>Захиалгууд</span>
+                  <Badge className="ml-2 bg-amber-500">{orders.length}</Badge>
+                </h2>
+
+                <div className="flex gap-3">
+                  <div className="relative">
+                    <Search className="absolute top-2.5 left-3 h-4 w-4 text-gray-400" />
+                    <Input 
+                      type="text" 
+                      placeholder="Захиалга хайх..." 
+                      className="pl-9 border-gray-200 focus:border-amber-300"
+                    />
+                  </div>
+                  <Select defaultValue="all">
+                    <SelectTrigger className="w-[180px] border-gray-200">
+                      <SelectValue placeholder="Бүх захиалга" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Бүх захиалга</SelectItem>
+                      <SelectItem value="pending">Хүлээгдэж буй</SelectItem>
+                      <SelectItem value="processing">Бэлтгэж буй</SelectItem>
+                      <SelectItem value="delivered">Хүргэгдсэн</SelectItem>
+                      <SelectItem value="cancelled">Цуцлагдсан</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-8">
+                <Card className="border-l-4 border-l-amber-500 shadow-md">
+                  <CardContent className="pt-6">
                     <div className="flex justify-between items-center">
-                      <span className="font-medium">{product.price.toLocaleString()}₮</span>
-                      <div className="flex space-x-2">
-                        <Button 
-                          size="sm" 
-                          onClick={() => handleEditProduct(product)} 
-                          className="bg-blue-500 hover:bg-blue-600 transition-all duration-300 hover:scale-105 shadow-sm"
-                        >
-                          <Settings className="mr-2 h-4 w-4 spin-slow" /> 
-                          <span className="flex items-center">
-                            Засах <span className="ml-1 text-xs jelly">✏️</span>
-                          </span>
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="destructive" 
-                          onClick={() => handleDeleteProduct(product.id)}
-                          className="transition-all duration-300 hover:scale-105 shadow-sm"
-                        >
-                          <Trash2 className="mr-2 h-4 w-4 wobble" /> 
-                          <span className="flex items-center">
-                            Устгах <span className="ml-1 text-xs bounce-soft">🗑️</span>
-                          </span>
-                        </Button>
+                      <div>
+                        <p className="text-sm text-gray-500">Хүлээгдэж буй</p>
+                        <p className="text-2xl font-bold">{pendingOrders}</p>
+                      </div>
+                      <div className="h-10 w-10 bg-amber-100 rounded-full flex items-center justify-center">
+                        <Clock className="h-5 w-5 text-amber-700" />
                       </div>
                     </div>
                   </CardContent>
                 </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-10">
-              <p className="text-gray-500">Одоогоор бүтээгдэхүүн байхгүй байна</p>
-              <Button 
-                onClick={handleAddProduct} 
-                className="mt-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-md transition-all duration-300 hover:scale-105"
-              >
-                <Plus className="mr-2 h-4 w-4 wiggle" /> 
-                <span className="flex items-center">
-                  Бүтээгдэхүүн нэмэх <span className="ml-1 text-xs jelly">🍔</span>
-                </span>
-              </Button>
-            </div>
-          )}
-        </TabsContent>
-        
-        <TabsContent value="shop">
-          <Card className="slide-in-left">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <span className="text-indigo-500 bounce-soft mr-2">🏪</span>
-                <span className="bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text text-transparent">Дэлгүүрийн хуудас</span>
-              </CardTitle>
-              <p className="text-sm text-gray-500">Энэ хэсэгт таны дэлгүүрийн үзэгдэх байдал харагдана</p>
-            </CardHeader>
-            <CardContent className="slide-in-bottom">
-              <div className="mb-6">
-                <h2 className="text-xl font-bold mb-4">{user?.businessName || "Танай дэлгүүр"}</h2>
                 
-                {user?.coverImage && (
-                  <div className="relative w-full h-40 md:h-60 rounded-lg overflow-hidden mb-4">
-                    <img 
-                      src={user.coverImage} 
-                      alt={user?.businessName || "Дэлгүүрийн ковер зураг"} 
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-                    <div className="absolute bottom-4 left-4 text-white">
-                      <h3 className="text-xl font-bold">{user?.businessName}</h3>
-                      <p className="text-sm opacity-90">{user?.businessType || "Хоолны газар"}</p>
+                <Card className="border-l-4 border-l-blue-500 shadow-md">
+                  <CardContent className="pt-6">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="text-sm text-gray-500">Бэлтгэж буй</p>
+                        <p className="text-2xl font-bold">{processingOrders}</p>
+                      </div>
+                      <div className="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <Package className="h-5 w-5 text-blue-700" />
+                      </div>
                     </div>
-                  </div>
-                )}
+                  </CardContent>
+                </Card>
                 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <h3 className="font-medium mb-2">Дэлгүүрийн мэдээлэл</h3>
-                    <div className="space-y-2 text-sm">
-                      <p><span className="font-medium">Нэр:</span> {user?.businessName || "Тохируулаагүй"}</p>
-                      <p><span className="font-medium">Төрөл:</span> {user?.businessType || "Тохируулаагүй"}</p>
-                      <p><span className="font-medium">Ажиллах цаг:</span> 10:00 - 22:00</p>
-                      <p><span className="font-medium">Утас:</span> {user?.phone || "Тохируулаагүй"}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <h3 className="font-medium mb-2">Байршил</h3>
-                    {user?.location ? (
-                      <div className="space-y-2 text-sm">
-                        <p>{typeof user.location === 'string' ? user.location : 'Байршил оруулсан'}</p>
-                        {user.locationLat && user.locationLng && (
-                          <p className="text-xs text-gray-500">
-                            <span className="font-medium">Координат:</span> {Number(user.locationLat).toFixed(6)}, {Number(user.locationLng).toFixed(6)}
-                          </p>
-                        )}
+                <Card className="border-l-4 border-l-green-500 shadow-md">
+                  <CardContent className="pt-6">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="text-sm text-gray-500">Хүргэгдсэн</p>
+                        <p className="text-2xl font-bold">{deliveredOrders}</p>
                       </div>
-                    ) : (
-                      <p className="text-sm text-gray-500">Байршил тохируулаагүй байна</p>
-                    )}
-                  </div>
-                  
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <h3 className="font-medium mb-2">Үнэлгээ</h3>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center">
-                        <div className="flex text-yellow-400">
-                          <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-5 h-5">
-                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                          </svg>
-                          <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-5 h-5">
-                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                          </svg>
-                          <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-5 h-5">
-                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                          </svg>
-                          <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-5 h-5">
-                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                          </svg>
-                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-5 h-5">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                          </svg>
-                        </div>
-                        <span className="ml-2">4.3 / 5</span>
+                      <div className="h-10 w-10 bg-green-100 rounded-full flex items-center justify-center">
+                        <CheckCheck className="h-5 w-5 text-green-700" />
                       </div>
-                      <p>Нийт үнэлгээ: 27</p>
-                      <p>Сэтгэгдэл: 15</p>
                     </div>
-                  </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-8">
+                <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                  <h3 className="font-medium">Сүүлийн захиалгууд</h3>
+                  <Button variant="outline" size="sm" className="text-xs">Экспортлох</Button>
                 </div>
                 
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold mb-3">Бүтээгдэхүүнүүд</h3>
-                  {filteredProducts.length > 0 ? (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      {filteredProducts.slice(0, 8).map((product) => (
-                        <div key={product.id} className="border rounded-lg overflow-hidden bg-white">
-                          <div 
-                            className="h-28 bg-center bg-cover" 
-                            style={{ backgroundImage: product.imageUrl ? `url(${product.imageUrl})` : "none" }}
-                          >
-                            {!product.imageUrl && (
-                              <div className="h-full w-full flex items-center justify-center bg-gray-100 text-gray-400">
-                                <span className="text-xs">Зураггүй</span>
-                              </div>
-                            )}
-                          </div>
-                          <div className="p-3">
-                            <h4 className="font-medium text-sm truncate">{product.name}</h4>
-                            <p className="text-xs text-gray-500 h-8 overflow-hidden">{product.description}</p>
-                            <div className="flex justify-between items-center mt-2">
-                              <span className="font-medium text-sm">{product.price?.toLocaleString()}₮</span>
-                              <button className="text-xs bg-primary text-white px-2 py-1 rounded-full">
-                                Захиалах
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-6 bg-gray-50 rounded-lg">
-                      <p className="text-gray-500">Одоогоор бүтээгдэхүүн байхгүй байна</p>
-                      <Button 
-                        onClick={handleAddProduct} 
-                        size="sm" 
-                        className="mt-2 bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 shadow-sm transition-all duration-300 hover:scale-105"
-                      >
-                        <Plus className="mr-1 h-3 w-3 bounce-soft" /> 
-                        <span className="flex items-center">
-                          Бүтээгдэхүүн нэмэх <span className="ml-1 text-xs jelly">🧁</span>
-                        </span>
-                      </Button>
-                    </div>
-                  )}
+                <div className="divide-y">
+                  {orders.slice(0, 8).map((order) => (
+                    <OrderItem
+                      key={order.id}
+                      id={order.id}
+                      orderNumber={order.id.substring(0, 8).toUpperCase()}
+                      customerName={order.customerName || "Үл мэдэгдэх"}
+                      items={order.items || []}
+                      total={order.total || 0}
+                      status={order.status || "pending"}
+                      address={order.address || "Хаяг оруулаагүй"}
+                      requestedTime={order.requestedTime || "Аль болох хурдан"}
+                      onStatusChange={() => handleStatusChange(order.id, order.status === "pending" ? "processing" : "delivered")}
+                    />
+                  ))}
                   
-                  {filteredProducts.length > 8 && (
-                    <div className="text-center mt-4">
-                      <Button 
-                        variant="outline" 
-                        className="transition-all duration-300 hover:shadow-md hover:bg-gray-50 hover:scale-105 border-indigo-200"
-                      >
-                        <span className="flex items-center">
-                          <span className="text-xs mr-2 pulse">🔍</span>
-                          Бүгдийг харах ({filteredProducts.length})
-                          <span className="ml-2 text-xs bounce-soft">👉</span>
-                        </span>
-                      </Button>
+                  {orders.length === 0 && (
+                    <div className="py-12 text-center text-gray-500">
+                      <div className="mx-auto w-16 h-16 bg-gray-100 flex items-center justify-center rounded-full mb-3">
+                        <Clipboard className="h-8 w-8 text-gray-400" />
+                      </div>
+                      <p>Одоогоор захиалга байхгүй байна</p>
                     </div>
                   )}
                 </div>
-                
-                <div>
-                  <h3 className="text-lg font-semibold mb-3">Сэтгэгдлүүд</h3>
-                  <div className="space-y-4">
-                    <div className="border rounded-lg p-4">
-                      <div className="flex justify-between mb-2">
-                        <div className="flex items-center">
-                          <div className="w-8 h-8 rounded-full bg-gray-200 mr-2"></div>
-                          <div>
-                            <p className="font-medium text-sm">Болд Бат</p>
-                            <div className="flex text-yellow-400">
-                              <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-3 h-3">
-                                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                              </svg>
-                              <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-3 h-3">
-                                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                              </svg>
-                              <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-3 h-3">
-                                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                              </svg>
-                              <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-3 h-3">
-                                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                              </svg>
-                              <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-3 h-3">
-                                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                              </svg>
-                            </div>
-                          </div>
-                        </div>
-                        <p className="text-xs text-gray-500">2023-11-20</p>
-                      </div>
-                      <p className="text-sm">Маш амттай, үйлчилгээ түргэн шуурхай байсан. Хоолны амт чанар өндөр.</p>
-                    </div>
-                    
-                    <div className="border rounded-lg p-4">
-                      <div className="flex justify-between mb-2">
-                        <div className="flex items-center">
-                          <div className="w-8 h-8 rounded-full bg-gray-200 mr-2"></div>
-                          <div>
-                            <p className="font-medium text-sm">Оюун Дуламсүрэн</p>
-                            <div className="flex text-yellow-400">
-                              <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-3 h-3">
-                                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                              </svg>
-                              <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-3 h-3">
-                                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                              </svg>
-                              <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-3 h-3">
-                                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                              </svg>
-                              <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-3 h-3">
-                                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                              </svg>
-                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-3 h-3">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                              </svg>
-                            </div>
-                          </div>
-                        </div>
-                        <p className="text-xs text-gray-500">2023-11-15</p>
-                      </div>
-                      <p className="text-sm">Нэг л удаа захиалсан, хоол амттай байсан ч, хүргэлт жоохон удсан.</p>
-                    </div>
-                  </div>
-                </div>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="earnings">
-          <Card className="bounce-in">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <span className="text-amber-500 wiggle mr-2">💵</span>
-                <span className="bg-gradient-to-r from-amber-500 to-amber-600 bg-clip-text text-transparent">Орлогын мэдээлэл</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="slide-in-right">
-              <div className="mb-8">
-                <h3 className="text-lg font-semibold mb-4">Орлогын хураангуй</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">
-                        Өнөөдрийн орлого
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">
-                        {stats.recentSales[stats.recentSales.length - 1]?.revenue.toLocaleString()}₮
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {stats.recentSales[stats.recentSales.length - 1]?.orders || 0} захиалга
-                      </p>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">
-                        Өнгөрсөн 7 хоногийн орлого
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">
-                        {stats.recentSales.reduce((sum: number, day: any) => sum + day.revenue, 0).toLocaleString()}₮
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {stats.recentSales.reduce((sum, day) => sum + day.orders, 0)} захиалга
-                      </p>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">
-                        Нийт орлого
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">
-                        {stats.earnings.toLocaleString()}₮
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {stats.ordersCount} захиалга
-                      </p>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-semibold mb-4">Сүүлийн 7 хоногийн орлого</h3>
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart
-                      data={stats.recentSales}
-                      margin={{
-                        top: 5,
-                        right: 30,
-                        left: 20,
-                        bottom: 5,
-                      }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="date" />
-                      <YAxis />
-                      <Tooltip />
-                      <Line 
-                        type="monotone" 
-                        dataKey="revenue" 
-                        name="Борлуулалт (₮)" 
-                        stroke="#8884d8" 
-                        activeDot={{ r: 8 }} 
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="orders" 
-                        name="Захиалгын тоо" 
-                        stroke="#82ca9d" 
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-              
-              <div className="mt-8">
-                <h3 className="text-lg font-semibold mb-4">Орлогын жагсаалт</h3>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Огноо
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Захиалгын дугаар
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Хэрэглэгч
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Төлбөр
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Төлөв
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {sortedOrders.filter(order => order.status === "completed").slice(0, 10).map((order) => (
-                        <tr key={order.id}>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {new Date(order.createdAt || new Date()).toLocaleDateString()}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            #{order.id.substring(0, 6)}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {order.customerName || "Хэрэглэгч"}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
-                            {order.totalAmount ? order.totalAmount.toLocaleString() : 0}₮
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                              Гүйцэтгэсэн
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                      {sortedOrders.filter(order => order.status === "completed").length === 0 && (
-                        <tr>
-                          <td colSpan={5} className="px-6 py-4 text-center text-sm text-gray-500">
-                            Одоогоор гүйцэтгэсэн захиалга байхгүй байна
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="sales">
-          <Card className="border-t-4 border-indigo-500 hover:shadow-lg transition-all duration-300">
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center">
-                <span className="mr-3 text-indigo-500 tada text-xl">📊</span>
-                <span className="bg-gradient-to-r from-indigo-500 to-purple-600 text-transparent bg-clip-text">Бараа бүтээгдэхүүний борлуулалт</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="mb-6 slide-in-left">
-                <h3 className="text-lg font-semibold mb-4 flex items-center">
-                  <span className="mr-2 text-indigo-600 wiggle">📈</span>
-                  Борлуулалтын тойм
-                </h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-5 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
-                    <h4 className="text-sm font-medium text-gray-600 mb-1 flex items-center">
-                      <span className="mr-2 text-blue-500 bounce-soft">🛒</span>
-                      Нийт борлуулсан бүтээгдэхүүн
-                    </h4>
-                    <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-transparent bg-clip-text">
-                      {sortedOrders.reduce((sum, order) => {
-                        return sum + (order.items || []).reduce((itemSum, item) => itemSum + (item.quantity || 0), 0);
-                      }, 0)}
-                    </div>
-                  </div>
-                  
-                  <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-5 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
-                    <h4 className="text-sm font-medium text-gray-600 mb-1 flex items-center">
-                      <span className="mr-2 text-purple-500 jelly">🍽️</span>
-                      Бүтээгдэхүүний төрөл
-                    </h4>
-                    <div className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 text-transparent bg-clip-text">
-                      {filteredProducts.length}
-                    </div>
-                  </div>
-                  
-                  <div className="bg-gradient-to-r from-amber-50 to-orange-50 p-5 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
-                    <h4 className="text-sm font-medium text-gray-600 mb-1 flex items-center">
-                      <span className="mr-2 text-amber-500 wobble">💲</span>
-                      Дундаж үнэ</h4>
-                    <div className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 text-transparent bg-clip-text">
-                      {filteredProducts.length ? 
-                        Math.round(filteredProducts.reduce((sum, product) => sum + (product.price || 0), 0) / filteredProducts.length).toLocaleString() : 0}₮
-                    </div>
-                  </div>
-                  
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="text-sm font-medium text-gray-500 mb-1">Хамгийн их зарагдсан</h4>
-                    <div className="text-xl font-bold truncate">
-                      {(() => {
-                        // Бүх захиалгын item-уудыг нэгтгэж, хамгийн их зарагдсаныг олох
-                        const allItems: { [key: string]: { name: string; quantity: number } } = {};
-                        
-                        sortedOrders.forEach(order => {
-                          (order.items || []).forEach(item => {
-                            if (!allItems[item.name]) {
-                              allItems[item.name] = { name: item.name, quantity: 0 };
-                            }
-                            allItems[item.name].quantity += (item.quantity || 0);
-                          });
-                        });
-                        
-                        const itemsArray = Object.values(allItems);
-                        if (itemsArray.length === 0) return "Байхгүй";
-                        
-                        const mostSold = itemsArray.reduce((max, item) => 
-                          item.quantity > max.quantity ? item : max, itemsArray[0]);
-                          
-                        return mostSold.name;
-                      })()}
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="bg-white border rounded-lg overflow-hidden">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Бүтээгдэхүүн
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Нийт зарагдсан
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Нийт орлого
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Сүүлийн борлуулалт
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {(() => {
-                        // Бүх захиалгын item-уудыг нэгтгэж, бүтээгдэхүүн бүрээр нь ангилах
-                        const soldItems: {
-                          [key: string]: {
-                            name: string;
-                            quantity: number;
-                            revenue: number;
-                            lastSold?: Date;
-                          }
-                        } = {};
-                        
-                        sortedOrders.forEach(order => {
-                          const orderDate = new Date(order.createdAt || new Date());
-                          
-                          (order.items || []).forEach(item => {
-                            if (!soldItems[item.name]) {
-                              soldItems[item.name] = {
-                                name: item.name,
-                                quantity: 0,
-                                revenue: 0,
-                                lastSold: undefined
-                              };
-                            }
-                            
-                            const currentItem = soldItems[item.name];
-                            currentItem.quantity += (item.quantity || 0);
-                            currentItem.revenue += ((item.price || 0) * (item.quantity || 0));
-                            
-                            // Сүүлийн зарагдсан хугацааг шинэчлэх
-                            if (!currentItem.lastSold || orderDate > currentItem.lastSold) {
-                              currentItem.lastSold = orderDate;
-                            }
-                          });
-                        });
-                        
-                        // Массив болгож, борлуулалтын хэмжээгээр эрэмбэлэх
-                        const sortedItems = Object.values(soldItems).sort((a, b) => b.quantity - a.quantity);
-                        
-                        if (sortedItems.length === 0) {
-                          return (
-                            <tr>
-                              <td colSpan={4} className="px-6 py-8 text-center text-sm text-gray-500">
-                                Одоогоор бүтээгдэхүүн зарагдаагүй байна
-                              </td>
-                            </tr>
-                          );
-                        }
-                        
-                        return sortedItems.map((item, index) => (
-                          <tr key={index}>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                              {item.name}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {item.quantity} ширхэг
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {item.revenue.toLocaleString()}₮
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {item.lastSold ? item.lastSold.toLocaleDateString() : "Тодорхойгүй"}
-                            </td>
-                          </tr>
-                        ));
-                      })()}
-                    </tbody>
-                  </table>
-                </div>
-                
-                <div className="mt-8 mb-10">
-                  <h3 className="text-lg font-semibold mb-4 flex items-center">
-                    <span className="mr-2 text-indigo-600 jelly">🔍</span>
-                    Бүтээгдэхүүн хөрөнгийн дүн шинжилгээ
-                  </h3>
-                  
-                  <div className="bg-gradient-to-r from-indigo-50 to-blue-50 p-6 rounded-lg shadow-sm">
-                    <h4 className="text-base font-medium mb-4 flex items-center">
-                      <span className="mr-2 text-indigo-600 pulse">🍳</span>
-                      Хамгийн их зарагдсан орц материал
-                    </h4>
-                    
-                    <div className="flex flex-wrap justify-center gap-3 mb-6">
-                      {/* Онгоц хэлбэртэй визуализаци */}
-                      <div className="relative h-60 w-full">
-                        {/* Онгоцын их бие */}
-                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4/5 h-1 bg-indigo-300 rounded"></div>
-                        
-                        {/* Орц бүрээр тойргууд үүсгэх */}
-                        {['Гурил', 'Өндөг', 'Сүү', 'Мах', 'Төмс', 'Гоймон', 'Хиам', 'Байцаа', 'Лууван', 'Сонгино'].map((ingredient, index) => {
-                          const size = 75 - (index * 5); // Их зарагдалттай нь том хэмжээтэй
-                          const left = 10 + (index * 8.5) + '%';
-                          const delay = index * 0.2;
-                          const icons = ['🍞', '🥚', '🥛', '🥩', '🥔', '🍜', '🌭', '🥬', '🥕', '🧅'];
-                          
-                          return (
-                            <div 
-                              key={ingredient}
-                              className="absolute bounce-ingredient rounded-full flex items-center justify-center shadow-md"
-                              style={{
-                                width: `${size}px`,
-                                height: `${size}px`, 
-                                left,
-                                top: '50%',
-                                transform: 'translateY(-50%)',
-                                backgroundColor: `hsla(${220 + index * 15}, 85%, 85%, 0.9)`,
-                                border: `2px solid hsla(${220 + index * 15}, 85%, 75%, 1)`,
-                                animationDelay: `${delay}s`,
-                                zIndex: 10 - index, // Эрэмбээр давхарлах
-                              }}
-                            >
-                              <div className="flex flex-col items-center">
-                                <span className="text-xl mb-1 wiggle" style={{ animationDelay: `${delay + 0.5}s` }}>{icons[index % icons.length]}</span>
-                                <span className="text-xs font-medium text-indigo-900">{ingredient}</span>
-                                <span className="text-xs font-bold text-indigo-800">{Math.round(100 - (index * 8))}%</span>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <Card className="bg-white hover:shadow-md transition-all">
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-sm font-medium flex items-center">
-                            <span className="mr-2 text-red-500 tada">🔴</span>
-                            Хамгийн их дутагдалтай орц
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-lg font-medium">Сонгино</div>
-                          <div className="text-sm text-gray-500">Нөөц: 15%</div>
-                        </CardContent>
-                      </Card>
-                      
-                      <Card className="bg-white hover:shadow-md transition-all">
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-sm font-medium flex items-center">
-                            <span className="mr-2 text-green-500 pulse">🟢</span>
-                            Хамгийн их нөөцтэй орц
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-lg font-medium">Гурил</div>
-                          <div className="text-sm text-gray-500">Нөөц: 87%</div>
-                        </CardContent>
-                      </Card>
-                      
-                      <Card className="bg-white hover:shadow-md transition-all">
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-sm font-medium flex items-center">
-                            <span className="mr-2 text-amber-500 wiggle">⚠️</span>
-                            Дууссан орц
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-lg font-medium">Үхрийн мах</div>
-                          <div className="text-sm text-gray-500">Шаардлагатай: 5 кг</div>
-                        </CardContent>
-                      </Card>
-                      
-                      <Card className="bg-white hover:shadow-md transition-all">
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-sm font-medium flex items-center">
-                            <span className="mr-2 text-blue-500 jelly">📊</span>
-                            Зарцуулалтын өсөлт
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-lg font-medium">+23%</div>
-                          <div className="text-sm text-gray-500">Өнгөрсөн 7 хоног</div>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="mt-8">
-                  <h3 className="text-lg font-semibold mb-4 flex items-center">
-                    <span className="mr-2 text-indigo-600 float">📝</span>
-                    Сүүлийн захиалгууд</h3>
-                  <div className="bg-white border rounded-lg overflow-hidden">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Огноо
-                          </th>
-                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Хэрэглэгч
-                          </th>
-                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Бүтээгдэхүүн
-                          </th>
-                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Төлбөр
-                          </th>
-                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Төлөв
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {sortedOrders.slice(0, 5).map((order) => (
-                          <tr key={order.id}>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {new Date(order.createdAt || new Date()).toLocaleDateString()}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {order.customerName || "Хэрэглэгч"}
-                            </td>
-                            <td className="px-6 py-4 text-sm text-gray-500">
-                              <div className="max-w-xs truncate">
-                                {(order.items || []).map(item => `${item.name} (${item.quantity})`).join(", ")}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                              {order.totalAmount?.toLocaleString()}₮
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                ${order.status === "completed" ? "bg-green-100 text-green-800" : 
-                                  order.status === "on-the-way" ? "bg-blue-100 text-blue-800" : 
-                                  order.status === "cancelled" ? "bg-red-100 text-red-800" : 
-                                  "bg-yellow-100 text-yellow-800"}`}>
-                                {getStatusText(order.status || "")}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                        {sortedOrders.length === 0 && (
-                          <tr>
-                            <td colSpan={5} className="px-6 py-8 text-center text-sm text-gray-500">
-                              Одоогоор захиалга байхгүй байна
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="settings">
-          <Card className="slide-in-bottom">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <span className="text-gray-500 spin-slow mr-2">⚙️</span>
-                <span className="bg-gradient-to-r from-gray-700 to-gray-900 bg-clip-text text-transparent">Бизнес тохиргоо</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="fade-in">
-              <p className="text-gray-500 mb-6">
-                Энэ хэсэгт та өөрийн бизнесийн үндсэн тохиргоог хийх боломжтой.
-              </p>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Бизнесийн нэр</label>
-                  <Input 
-                    type="text" 
-                    value={user?.businessName || ""}
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium mb-1">Хаяг</label>
-                  <Input 
-                    type="text" 
-                    value={user?.address || ""}
-                  />
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Нээх цаг</label>
+            </motion.div>
+          </TabsContent>
+
+          <TabsContent value="products" className="space-y-6 mt-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold flex items-center gap-2">
+                  <Package className="h-5 w-5 text-amber-500" />
+                  <span>Бүтээгдэхүүнүүд</span>
+                  <Badge className="ml-2 bg-amber-500">{products.length}</Badge>
+                </h2>
+
+                <div className="flex gap-3">
+                  <div className="relative">
+                    <Search className="absolute top-2.5 left-3 h-4 w-4 text-gray-400" />
                     <Input 
-                      type="time" 
-                      defaultValue="10:00" 
+                      type="text" 
+                      placeholder="Бүтээгдэхүүн хайх..." 
+                      className="pl-9 border-gray-200 focus:border-amber-300"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Хаах цаг</label>
-                    <Input 
-                      type="time" 
-                      defaultValue="22:00"
-                    />
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium mb-1">Хүргэлтийн төлбөр (₮)</label>
-                  <Input 
-                    type="number" 
-                    defaultValue="3000"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium mb-1">Үндсэн ангилал</label>
-                  <Select defaultValue="restaurant">
-                    <SelectTrigger>
-                      <SelectValue placeholder="Ангилал сонгох" />
+                  <Select defaultValue="all">
+                    <SelectTrigger className="w-[180px] border-gray-200">
+                      <SelectValue placeholder="Бүх ангилал" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="restaurant">Ресторан</SelectItem>
-                      <SelectItem value="fastfood">Түргэн хоол</SelectItem>
-                      <SelectItem value="cafe">Кафе</SelectItem>
-                      <SelectItem value="bakery">Бэйкери</SelectItem>
-                      <SelectItem value="grocery">Хүнсний дэлгүүр</SelectItem>
+                      <SelectItem value="all">Бүх ангилал</SelectItem>
+                      <SelectItem value="food">Хоол</SelectItem>
+                      <SelectItem value="drink">Ундаа</SelectItem>
+                      <SelectItem value="dessert">Амттан</SelectItem>
+                      <SelectItem value="other">Бусад</SelectItem>
                     </SelectContent>
                   </Select>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium mb-1">Логоны зураг</label>
-                  <Input 
-                    type="text" 
-                    placeholder="https://example.com/logo.jpg" 
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium mb-1">Дэвсгэр зураг</label>
-                  <Input 
-                    type="text" 
-                    placeholder="https://example.com/cover.jpg" 
-                  />
-                </div>
-                
-                <div className="pt-4 slide-in-top">
-                  <Button 
-                    onClick={() => {
-                      toast({
-                        title: "Тохиргоо хадгалагдлаа",
-                        description: "Таны бизнесийн мэдээлэл амжилттай шинэчлэгдлээ",
-                      });
-                    }}
-                    className="bg-gradient-to-r from-gray-700 to-gray-900 hover:from-gray-800 hover:to-black shadow-lg transition-all duration-300 hover:scale-105"
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                   >
-                    <span className="flex items-center">
-                      <span className="text-xs mr-2 spin-slow">⚙️</span>
-                      Тохиргоо хадгалах
-                      <span className="ml-2 text-xs tada">✓</span>
-                    </span>
-                  </Button>
+                    <Button 
+                      className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700"
+                      onClick={() => {
+                        setShowProductForm(true);
+                        setSelectedProduct(null);
+                      }}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Бүтээгдэхүүн нэмэх
+                    </Button>
+                  </motion.div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="delivery-tracking">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="slide-in-left">
-              <h3 className="mb-4 text-lg font-semibold flex items-center">
-                <Navigation className="mr-2 h-5 w-5 text-primary wiggle" />
-                <span className="bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-                  Хүргэлтийн байршил
-                </span>
-                <span className="ml-2 tada">🚚</span>
-              </h3>
-              <DeliveryLocationTracker
-                origin={user?.location ? 
-                  { 
-                    lat: user.locationLat ? parseFloat(user.locationLat.toString()) : 47.9184676, 
-                    lng: user.locationLng ? parseFloat(user.locationLng.toString()) : 106.917693 
-                  } : 
-                  { lat: 47.9184676, lng: 106.917693 }}
-                destination={{ lat: 47.9234676, lng: 106.9237016 }}
-                estimatedTime="15-20 мин"
-                deliveryPersonName="Батаа"
-              />
-            </div>
-            
-            <div className="slide-in-right">
-              <h3 className="mb-4 text-lg font-semibold flex items-center">
-                <MapPin className="mr-2 h-5 w-5 text-primary pulse" />
-                <span className="bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-                  Хүргэлтийн дэлгэрэнгүй
-                </span>
-              </h3>
-              <Card className="dashboard-card-hover">
-                <CardHeader className="pb-2">
-                  <CardTitle className="flex items-center text-lg">
-                    <Phone className="mr-2 h-5 w-5 text-primary" />
-                    Хүргэлтийн мэдээлэл
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4 bounce-in">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Захиалгын дугаар:</span>
-                    <span className="font-medium">#AB1234</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Хэрэглэгч:</span>
-                    <span className="font-medium">Болд Очир</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Хаяг:</span>
-                    <span className="font-medium">Чингэлтэй 1-р хороо, 45-р байр</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Утас:</span>
-                    <span className="font-medium">9911-2233</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Төлбөр:</span>
-                    <span className="font-medium">45,000₮ (Карт)</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Жолооч:</span>
-                    <span className="font-medium">Батаа</span>
-                  </div>
-                  <div className="flex justify-between text-primary">
-                    <span className="font-medium">Одоогийн байршил:</span>
-                    <span className="font-medium">1.5 км зайтай</span>
-                  </div>
+
+              <div className="mb-4 flex justify-between items-center">
+                <div>
+                  <p className="text-sm text-gray-500">
+                    Нийт <span className="font-semibold text-amber-600">{filteredProducts.length}</span> бүтээгдэхүүн
+                    {searchQuery && <span> - Хайлт: <span className="font-medium">"{searchQuery}"</span></span>}
+                  </p>
                 </div>
-                
-                <div className="mt-6 space-y-2">
-                  <h3 className="font-medium">Захиалгын бүтээгдэхүүнүүд:</h3>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>2x Ангус бургер</span>
-                      <span>30,000₮</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span>1x Пепси 0.5л</span>
-                      <span>3,000₮</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span>1x Төмсний чипс</span>
-                      <span>7,000₮</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span>Хүргэлтийн төлбөр</span>
-                      <span>5,000₮</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="mt-6 pt-4 border-t">
-                  <Button 
-                    className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-md transition-all duration-300 hover:scale-105"
-                    variant="default"
+                <div className="flex items-center gap-2">
+                  <div 
+                    className={`p-1.5 rounded-md cursor-pointer ${productViewType === 'grid' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-500'}`}
+                    onClick={() => setProductViewType('grid')}
                   >
-                    <Phone className="mr-2 h-4 w-4 wiggle" />
-                    <span className="flex items-center">
-                      Хэрэглэгчтэй холбогдох <span className="ml-2 text-xs pulse">📱</span>
-                    </span>
-                  </Button>
+                    <LayoutGrid className="h-4 w-4" />
+                  </div>
+                  <div 
+                    className={`p-1.5 rounded-md cursor-pointer ${productViewType === 'list' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-500'}`}
+                    onClick={() => setProductViewType('list')}
+                  >
+                    <List className="h-4 w-4" />
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-            </div>
-          </div>
-        </TabsContent>
-      </Tabs>
+              </div>
+
+              {productViewType === 'grid' ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {filteredProducts.map((product) => (
+                    <motion.div
+                      key={product.id}
+                      layout
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.3 }}
+                      whileHover={{ y: -5 }}
+                      className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-all"
+                    >
+                      <div className="relative h-40 bg-gray-100">
+                        {product.imageUrl ? (
+                          <img 
+                            src={product.imageUrl} 
+                            alt={product.name} 
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-r from-amber-50 to-orange-50">
+                            <Package className="h-12 w-12 text-amber-300" />
+                          </div>
+                        )}
+                        <div className="absolute top-2 right-2">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-40">
+                              <DropdownMenuLabel>Үйлдлүүд</DropdownMenuLabel>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => {
+                                setSelectedProduct(product);
+                                setShowProductForm(true);
+                              }}>
+                                <Pencil className="h-4 w-4 mr-2" /> Засах
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                className="text-red-600 focus:text-red-600"
+                                onClick={() => handleOpenDeleteDialog(product)}
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" /> Устгах
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </div>
+                      <div className="p-4">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="font-semibold text-gray-800 line-clamp-1">{product.name}</h3>
+                            <p className="text-sm text-gray-500 line-clamp-1">{product.category || "Ангилалгүй"}</p>
+                          </div>
+                          <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100">{product.price?.toLocaleString()}₮</Badge>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-2 line-clamp-2">{product.description || "Тайлбаргүй"}</p>
+                        
+                        <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100">
+                          <div className="text-xs text-gray-500">
+                            {product.lastSold ? (
+                              <span>Сүүлд: {new Date(product.lastSold).toLocaleDateString()}</span>
+                            ) : (
+                              <span>Зарагдаагүй</span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            {product.inStock ? (
+                              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Нөөцтэй</Badge>
+                            ) : (
+                              <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Дууссан</Badge>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              ) : (
+                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                  <div className="grid grid-cols-12 p-3 border-b border-gray-100 bg-gray-50 text-xs font-medium text-gray-500">
+                    <div className="col-span-5">Бүтээгдэхүүн</div>
+                    <div className="col-span-2">Ангилал</div>
+                    <div className="col-span-2 text-right">Үнэ</div>
+                    <div className="col-span-2 text-center">Нөөц</div>
+                    <div className="col-span-1 text-right">Үйлдэл</div>
+                  </div>
+                  
+                  {filteredProducts.map((product) => (
+                    <motion.div
+                      key={product.id}
+                      layout
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="grid grid-cols-12 p-3 border-b border-gray-100 items-center hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="col-span-5 flex items-center gap-3">
+                        <div className="h-10 w-10 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
+                          {product.imageUrl ? (
+                            <img 
+                              src={product.imageUrl} 
+                              alt={product.name} 
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-r from-amber-50 to-orange-50">
+                              <Package className="h-5 w-5 text-amber-400" />
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="font-medium text-sm text-gray-800">{product.name}</h3>
+                          <p className="text-xs text-gray-500 line-clamp-1">{product.description || "Тайлбаргүй"}</p>
+                        </div>
+                      </div>
+                      <div className="col-span-2">
+                        <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">{product.category || "Ангилалгүй"}</Badge>
+                      </div>
+                      <div className="col-span-2 text-right font-medium">{product.price?.toLocaleString()}₮</div>
+                      <div className="col-span-2 text-center">
+                        {product.inStock ? (
+                          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Нөөцтэй</Badge>
+                        ) : (
+                          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Дууссан</Badge>
+                        )}
+                      </div>
+                      <div className="col-span-1 text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-40">
+                            <DropdownMenuLabel>Үйлдлүүд</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => {
+                              setSelectedProduct(product);
+                              setShowProductForm(true);
+                            }}>
+                              <Pencil className="h-4 w-4 mr-2" /> Засах
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              className="text-red-600 focus:text-red-600"
+                              onClick={() => handleOpenDeleteDialog(product)}
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" /> Устгах
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </motion.div>
+                  ))}
+                  
+                  {filteredProducts.length === 0 && (
+                    <div className="py-12 text-center text-gray-500">
+                      <div className="mx-auto w-16 h-16 bg-gray-100 flex items-center justify-center rounded-full mb-3">
+                        <Package className="h-8 w-8 text-gray-400" />
+                      </div>
+                      <p>Бүтээгдэхүүн олдсонгүй</p>
+                      {searchQuery && (
+                        <p className="mt-1 text-sm">Хайлт: "{searchQuery}"</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </motion.div>
+          </TabsContent>
+
+          <TabsContent value="delivery" className="space-y-6 mt-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold flex items-center gap-2">
+                  <Truck className="h-5 w-5 text-amber-500" />
+                  <span>Хүргэлтийн хяналт</span>
+                </h2>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2">
+                  <Card className="overflow-hidden border-amber-100">
+                    <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100 p-4">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <MapPin className="h-5 w-5 text-amber-500" />
+                        <span>Хүргэлтийн байршил</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                      <div className="h-[400px] relative bg-gray-100">
+                        <DeliveryLocationTracker />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+                
+                <div>
+                  <Card className="overflow-hidden border-amber-100">
+                    <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100 p-4">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <Users className="h-5 w-5 text-amber-500" />
+                        <span>Хүргэлтийн ажилтнууд</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-4">
+                      <div className="space-y-4">
+                        {[
+                          { id: 1, name: "Батболд", phone: "9911-2233", status: "active", orders: 2 },
+                          { id: 2, name: "Цэцэг", phone: "8822-1144", status: "busy", orders: 3 },
+                          { id: 3, name: "Болд", phone: "9955-6677", status: "offline", orders: 0 },
+                        ].map((driver) => (
+                          <motion.div
+                            key={driver.id}
+                            whileHover={{ scale: 1.02 }}
+                            className="flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:border-amber-200 transition-colors"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="relative">
+                                <Avatar className="h-10 w-10 border-2 border-white bg-amber-100">
+                                  <AvatarFallback className="bg-amber-100 text-amber-700">
+                                    {driver.name.substring(0, 2).toUpperCase()}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className={`absolute -bottom-1 -right-1 h-3 w-3 rounded-full border-2 border-white ${
+                                  driver.status === "active" ? "bg-green-500" : 
+                                  driver.status === "busy" ? "bg-amber-500" : 
+                                  "bg-gray-400"
+                                }`} />
+                              </div>
+                              <div>
+                                <div className="font-medium text-sm">{driver.name}</div>
+                                <div className="text-xs text-gray-500">{driver.orders} захиалга</div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-green-600">
+                                <Phone className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-amber-600">
+                                <Info className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="overflow-hidden border-amber-100 mt-5">
+                    <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100 p-4">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <Clock className="h-5 w-5 text-amber-500" />
+                        <span>Хүргэлтийн статистик</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-4">
+                      <div className="h-[180px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={timeData}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                            <XAxis dataKey="time" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
+                            <YAxis 
+                              tick={{ fontSize: 10 }} 
+                              axisLine={false} 
+                              tickLine={false} 
+                              width={20}
+                            />
+                            <Tooltip 
+                              formatter={(value: number) => [`${value}`, 'Захиалга']}
+                              contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', boxShadow: '0 0 10px rgba(0,0,0,0.1)', border: 'none' }}
+                            />
+                            <Bar 
+                              dataKey="orders" 
+                              fill="#f59e0b" 
+                              radius={[4, 4, 0, 0]} 
+                              barSize={15}
+                            />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                      <div className="mt-2 pt-2 border-t border-gray-100">
+                        <div className="flex justify-between items-center text-sm">
+                          <div>
+                            <span className="text-gray-500">Дундаж хүргэлтийн хугацаа:</span>
+                          </div>
+                          <div>
+                            <span className="font-semibold text-amber-600">28 минут</span>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </motion.div>
+          </TabsContent>
+
+          <TabsContent value="settings" className="space-y-6 mt-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold flex items-center gap-2">
+                  <Wrench className="h-5 w-5 text-amber-500" />
+                  <span>Дэлгүүрийн тохиргоо</span>
+                </h2>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <Card className="lg:col-span-2 overflow-hidden border-amber-100">
+                  <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100">
+                    <CardTitle className="flex items-center gap-2">
+                      <Building2 className="h-5 w-5 text-amber-500" />
+                      <span>Дэлгүүрийн мэдээлэл</span>
+                    </CardTitle>
+                    <CardDescription>
+                      Дэлгүүрийн үндсэн мэдээллийг удирдах
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-6 space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="business-name" className="text-sm font-medium">Дэлгүүрийн нэр</Label>
+                        <Input id="business-name" defaultValue={user?.businessName} className="mt-1" />
+                      </div>
+                      <div>
+                        <Label htmlFor="business-type" className="text-sm font-medium">Дэлгүүрийн төрөл</Label>
+                        <Select defaultValue={user?.businessType || "restaurant"}>
+                          <SelectTrigger id="business-type" className="mt-1">
+                            <SelectValue placeholder="Дэлгүүрийн төрөл сонгох" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="restaurant">Ресторан</SelectItem>
+                            <SelectItem value="grocery">Хүнсний дэлгүүр</SelectItem>
+                            <SelectItem value="retail">Жижиглэн худалдааны дэлгүүр</SelectItem>
+                            <SelectItem value="other">Бусад</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="business-phone" className="text-sm font-medium">Утасны дугаар</Label>
+                        <Input id="business-phone" defaultValue={user?.phone} className="mt-1" />
+                      </div>
+                      <div>
+                        <Label htmlFor="business-email" className="text-sm font-medium">Имэйл хаяг</Label>
+                        <Input id="business-email" defaultValue={user?.email} className="mt-1" />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="business-description" className="text-sm font-medium">Дэлгүүрийн тайлбар</Label>
+                      <textarea 
+                        id="business-description" 
+                        className="w-full mt-1 p-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-transparent"
+                        rows={3}
+                        defaultValue={user?.description}
+                      ></textarea>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="business-address" className="text-sm font-medium">Хаяг</Label>
+                      <textarea 
+                        id="business-address" 
+                        className="w-full mt-1 p-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-transparent"
+                        rows={2}
+                        defaultValue={user?.address}
+                      ></textarea>
+                    </div>
+                  </CardContent>
+                  <CardFooter className="border-t border-gray-100 bg-gray-50 p-6">
+                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                      <Button className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700">
+                        Мэдээлэл хадгалах
+                      </Button>
+                    </motion.div>
+                  </CardFooter>
+                </Card>
+
+                <div className="space-y-6">
+                  <Card className="overflow-hidden border-amber-100">
+                    <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100">
+                      <CardTitle className="flex items-center gap-2 text-base">
+                        <Clock className="h-5 w-5 text-amber-500" />
+                        <span>Ажлын цаг</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-4 space-y-3">
+                      {['Даваа', 'Мягмар', 'Лхагва', 'Пүрэв', 'Баасан', 'Бямба', 'Ням'].map((day, i) => (
+                        <div key={day} className="flex items-center justify-between">
+                          <div className="font-medium text-sm">{day}</div>
+                          <div className="flex items-center gap-2">
+                            <Select defaultValue={i < 5 ? "09:00" : (i === 5 ? "10:00" : "closed")}>
+                              <SelectTrigger className="w-[100px] h-8 text-xs">
+                                <SelectValue placeholder="Нээх цаг" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="closed">Хаалттай</SelectItem>
+                                <SelectItem value="09:00">09:00</SelectItem>
+                                <SelectItem value="10:00">10:00</SelectItem>
+                                <SelectItem value="11:00">11:00</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <span className="text-gray-500">-</span>
+                            <Select defaultValue={i < 5 ? "21:00" : (i === 5 ? "18:00" : "closed")}>
+                              <SelectTrigger className="w-[100px] h-8 text-xs">
+                                <SelectValue placeholder="Хаах цаг" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="closed">Хаалттай</SelectItem>
+                                <SelectItem value="18:00">18:00</SelectItem>
+                                <SelectItem value="20:00">20:00</SelectItem>
+                                <SelectItem value="21:00">21:00</SelectItem>
+                                <SelectItem value="22:00">22:00</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      ))}
+                    </CardContent>
+                    <CardFooter className="border-t border-gray-100 bg-gray-50 p-3 flex justify-end">
+                      <Button variant="outline" size="sm" className="text-xs">
+                        Хадгалах
+                      </Button>
+                    </CardFooter>
+                  </Card>
+
+                  <Card className="overflow-hidden border-amber-100">
+                    <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100">
+                      <CardTitle className="flex items-center gap-2 text-base">
+                        <Settings className="h-5 w-5 text-amber-500" />
+                        <span>Дэлгүүрийн тохиргоо</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-4 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium">Захиалга авах</p>
+                          <p className="text-xs text-gray-500">Дэлгүүрийн захиалга авах боломж</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+
+                      <Separator />
+
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium">Хүргэлтийн үйлчилгээ</p>
+                          <p className="text-xs text-gray-500">Хүргэлтийн үйлчилгээ идэвхжүүлэх</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+
+                      <Separator />
+
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium">Захиалга баталгаажуулалт</p>
+                          <p className="text-xs text-gray-500">Захиалга автоматаар зөвшөөрөх</p>
+                        </div>
+                        <Switch />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </motion.div>
+          </TabsContent>
+        </Tabs>
+      </motion.div>
+
+      {/* Product Form Dialog */}
+      <AnimatePresence>
+        {showProductForm && (
+          <Dialog open={showProductForm} onOpenChange={setShowProductForm}>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>
+                  {selectedProduct ? "Бүтээгдэхүүн засах" : "Шинэ бүтээгдэхүүн нэмэх"}
+                </DialogTitle>
+                <DialogDescription>
+                  {selectedProduct 
+                    ? "Бүтээгдэхүүний мэдээллийг шинэчлэнэ" 
+                    : "Шинэ бүтээгдэхүүний мэдээллийг оруулна"}
+                </DialogDescription>
+              </DialogHeader>
+
+              <ProductForm 
+                product={selectedProduct} 
+                onSave={handleSaveProduct}
+                onCancel={() => {
+                  setShowProductForm(false);
+                  setSelectedProduct(null);
+                }}
+              />
+            </DialogContent>
+          </Dialog>
+        )}
+      </AnimatePresence>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialog.open} onOpenChange={(open) => setDeleteDialog({ ...deleteDialog, open })}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Бүтээгдэхүүн устгах</DialogTitle>
+            <DialogDescription>
+              Энэ үйлдлийг буцаах боломжгүй. Та "{deleteDialog.product?.name}" бүтээгдэхүүнийг устгахдаа итгэлтэй байна уу?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex justify-between sm:justify-end mt-5">
+            <Button variant="outline" onClick={() => setDeleteDialog({ open: false, product: null })}>
+              Цуцлах
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={() => deleteDialog.product && handleDeleteProduct(deleteDialog.product.id)}
+            >
+              <Trash2 className="h-4 w-4 mr-2" /> Устгах
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
+
+import {
+  LayoutGrid,
+  List,
+  MoreHorizontal,
+  Pencil,
+  MoreVertical,
+  Clock,
+  CheckCheck,
+  Info
+} from "lucide-react";
