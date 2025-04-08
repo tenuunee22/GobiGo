@@ -10,8 +10,7 @@ import {
   updateProfile,
   PhoneAuthProvider,
   signInWithPhoneNumber,
-  RecaptchaVerifier,
-  connectAuthEmulator
+  RecaptchaVerifier
 } from "firebase/auth";
 import { 
   getFirestore, 
@@ -25,18 +24,17 @@ import {
   getDocs,
   updateDoc,
   deleteDoc,
-  serverTimestamp,
-  connectFirestoreEmulator
+  serverTimestamp
 } from "firebase/firestore";
 
 // Firebase configuration
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "demo-api-key",
-  authDomain: `${import.meta.env.VITE_FIREBASE_PROJECT_ID || "demo-project"}.firebaseapp.com`,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "demo-project",
-  storageBucket: `${import.meta.env.VITE_FIREBASE_PROJECT_ID || "demo-project"}.appspot.com`,
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebaseapp.com`,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.appspot.com`,
   messagingSenderId: "307246836509", // Default value, can be replaced with actual value if available
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "demo-app-id"
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 // Initialize Firebase
@@ -52,24 +50,8 @@ try {
     throw error;
   }
 }
-
-// Initialize services
 const auth = getAuth();
 const db = getFirestore();
-
-// Connect to Firebase Emulators when in development
-const useEmulator = import.meta.env.DEV || true; // Always use emulator for now
-if (useEmulator) {
-  try {
-    console.log("Using Firebase Auth Emulator");
-    connectAuthEmulator(auth, "http://localhost:9099", { disableWarnings: true });
-    // For Firestore, add this line if you set up Firestore emulator too
-    // connectFirestoreEmulator(db, "localhost", 8080);
-  } catch (error) {
-    console.error("Error connecting to Firebase Emulator:", error);
-  }
-}
-
 const googleProvider = new GoogleAuthProvider();
 let recaptchaVerifier: RecaptchaVerifier | null = null;
 

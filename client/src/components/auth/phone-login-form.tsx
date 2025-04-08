@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/contexts/auth-context";
+import { sendPhoneVerificationCode, verifyPhoneCode } from "@/lib/firebase";
 
 // Define schemas for validation
 const phoneSchema = z.object({
@@ -40,17 +40,16 @@ interface PhoneLoginFormProps {
 export function PhoneLoginForm({ onToggleForm }: PhoneLoginFormProps) {
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
-  const { setUser } = useAuth();
   const [step, setStep] = useState<"phone" | "verification">("phone");
   const [loading, setLoading] = useState(false);
   const recaptchaContainerRef = useRef<HTMLDivElement>(null);
-  const storedPhoneRef = useRef<string>("");
+  const confirmationResultRef = useRef<any>(null);
 
   // Form for phone number input
   const phoneForm = useForm<z.infer<typeof phoneSchema>>({
     resolver: zodResolver(phoneSchema),
     defaultValues: {
-      phoneNumber: "99112233", // Анхнаасаа дээж утасны дугаар байрлуулах
+      phoneNumber: "",
     },
   });
 
@@ -58,7 +57,7 @@ export function PhoneLoginForm({ onToggleForm }: PhoneLoginFormProps) {
   const verificationForm = useForm<z.infer<typeof verificationSchema>>({
     resolver: zodResolver(verificationSchema),
     defaultValues: {
-      code: "123456", // Анхнаасаа тестийн код байрлуулах
+      code: "",
     },
   });
 
@@ -77,29 +76,28 @@ export function PhoneLoginForm({ onToggleForm }: PhoneLoginFormProps) {
       setLoading(true);
       const formattedPhoneNumber = formatPhoneNumber(values.phoneNumber);
       
-      // MOCK IMPLEMENTATION FOR DEVELOPMENT
-      // In real implementation, we would use Firebase Authentication with SMS
-      // But for development without billing, we'll just move to verification step
+      // Make sure recaptcha container exists
+      if (!recaptchaContainerRef.current) {
+        throw new Error("reCAPTCHA container not found");
+      }
+
+      // Send verification code
+      const confirmationResult = await sendPhoneVerificationCode(
+        formattedPhoneNumber,
+        "recaptcha-container"
+      );
       
-      // Store the phone number for verification step
-      storedPhoneRef.current = formattedPhoneNumber;
-      
-      // Simulate a delay like a real API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      confirmationResultRef.current = confirmationResult;
       setStep("verification");
-      
-      // Автоматаар 123456 кодыг оруулах
-      verificationForm.setValue("code", "123456");
       
       toast({
         title: "Баталгаажуулах код илгээгдлээ",
-        description: "Хөгжүүлэлтийн тест код: 123456. Энэ кодыг баталгаажуулахад ашиглана уу.",
+        description: "Таны утсанд баталгаажуулах код илгээлээ.",
       });
     } catch (error: any) {
       console.error("Error sending verification code:", error);
       toast({
-        title: "Алдаа гарлаа", 
+        title: "Алдаа гарлаа",
         description: error.message || "Баталгаажуулах код илгээхэд алдаа гарлаа.",
         variant: "destructive",
       });
@@ -107,38 +105,16 @@ export function PhoneLoginForm({ onToggleForm }: PhoneLoginFormProps) {
       setLoading(false);
     }
   };
-  
+
   const onSubmitVerificationCode = async (values: z.infer<typeof verificationSchema>) => {
     try {
       setLoading(true);
       
-      if (!storedPhoneRef.current) {
+      if (!confirmationResultRef.current) {
         throw new Error("Баталгаажуулах код илгээгдээгүй байна.");
       }
       
-      // MOCK IMPLEMENTATION FOR DEVELOPMENT
-      // In the real implementation, we would verify with Firebase
-      // For testing, we'll accept "123456" as the valid code
-      
-      // Баталгаажуулах код ямар ч тохиолдолд 123456 байх ёстой
-  if (values.code !== "123456") {
-        throw new Error("Баталгаажуулах код буруу байна. Зөв код: 123456");
-      }
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Create a mock user object that would come from Firebase
-      const mockUser = {
-        uid: `phone-${Date.now()}`, // Create a unique ID
-        email: null, // Email can be null in our interface
-        phoneNumber: storedPhoneRef.current,
-        displayName: null,
-        role: "customer" as const
-      };
-      
-      // Set the user in auth context
-      setUser(mockUser);
+      await verifyPhoneCode(confirmationResultRef.current, values.code);
       
       toast({
         title: "Амжилттай нэвтэрлээ",
@@ -202,21 +178,12 @@ export function PhoneLoginForm({ onToggleForm }: PhoneLoginFormProps) {
                   )}
                 />
 
+                {/* Container for reCAPTCHA */}
+                <div id="recaptcha-container" ref={recaptchaContainerRef}></div>
+
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? "Илгээж байна..." : "Баталгаажуулах код авах"}
                 </Button>
-                
-                {/* Зөвхөн хөгжүүлэлтийн үед тест нэвтрэхэд хурдан арга - бүтээмжид */}
-                <div className="mt-2">
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    className="w-full text-xs" 
-                    onClick={() => onSubmitPhoneNumber({ phoneNumber: "99112233" })}
-                  >
-                    TEST: 99112233-р шууд нэвтрэх
-                  </Button>
-                </div>
               </form>
             </Form>
 
@@ -259,18 +226,6 @@ export function PhoneLoginForm({ onToggleForm }: PhoneLoginFormProps) {
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? "Шалгаж байна..." : "Нэвтрэх"}
                 </Button>
-                
-                {/* Зөвхөн хөгжүүлэлтийн үед тест нэвтрэхэд хурдан арга - бүтээмжид */}
-                <div className="mt-2">
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    className="w-full text-xs" 
-                    onClick={() => onSubmitVerificationCode({ code: "123456" })}
-                  >
-                    TEST: Кодыг шалгах
-                  </Button>
-                </div>
               </form>
             </Form>
 
