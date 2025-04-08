@@ -22,6 +22,21 @@ export function CustomerDashboard() {
   // Add user location state
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
   
+  // Mock driver location for the OrderTracking component
+  const [driverLocation, setDriverLocation] = useState<{lat: number, lng: number}>({
+    lat: 47.9184676,
+    lng: 106.9177016
+  });
+  
+  // Mock destination location (customer address)
+  const destinationLocation = {
+    lat: 47.9234676,
+    lng: 106.9237016
+  };
+  
+  // Test animation by changing status
+  const [demoStatus, setDemoStatus] = useState<"placed" | "preparing" | "on-the-way" | "delivered">("placed");
+  
   // Get user location
   useEffect(() => {
     if (navigator.geolocation) {
@@ -37,10 +52,34 @@ export function CustomerDashboard() {
             description: "Байршлаа идэвхжүүлнэ үү",
             variant: "destructive",
           });
+          
+          // Fall back to Ulaanbaatar coordinates if geolocation fails
+          setUserLocation({
+            lat: 47.9184676,
+            lng: 106.9177016
+          });
         }
       );
     }
   }, [toast]);
+  
+  // Simulate driver movement
+  useEffect(() => {
+    // Only simulate movement when status is "on-the-way"
+    if (demoStatus === "on-the-way") {
+      const interval = setInterval(() => {
+        setDriverLocation(prev => {
+          // Move driver slightly toward the destination
+          return {
+            lat: prev.lat + (destinationLocation.lat - prev.lat) * 0.1,
+            lng: prev.lng + (destinationLocation.lng - prev.lng) * 0.1
+          };
+        });
+      }, 3000); // Update every 3 seconds
+      
+      return () => clearInterval(interval);
+    }
+  }, [demoStatus]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -217,12 +256,9 @@ export function CustomerDashboard() {
     arrivalTime: "10-15 минут"
   };
   
-  // Test animation by changing status
-  const [demoStatus, setDemoStatus] = useState<"placed" | "preparing" | "on-the-way" | "delivered">("placed");
-  
   useEffect(() => {
     let timer: NodeJS.Timeout;
-    if (activeOrders.length > 0) {
+    if (activeOrders.length > 0 || true) { // Always run for demo
       // Auto cycle through statuses for demo purposes
       timer = setTimeout(() => {
         switch (demoStatus) {
@@ -376,6 +412,8 @@ export function CustomerDashboard() {
             subtotal={23970}
             deliveryFee={2490}
             total={26460}
+            currentLocation={driverLocation}
+            destination={destinationLocation}
           />
         ) : null}
       </div>

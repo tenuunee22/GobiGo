@@ -3,6 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { useAuth } from "@/contexts/auth-context";
+import { CartProvider } from "@/contexts/cart-context";
 import { useEffect } from "react";
 import { Header } from "@/components/shared/header-fixed";
 import { OnboardingProvider } from "@/components/onboarding/onboarding-context";
@@ -119,17 +120,19 @@ function App() {
   
   return (
     <QueryClientProvider client={queryClient}>
-      <OnboardingProvider>
-        <div className="flex flex-col min-h-screen">
-          {!isLoginPage && !needsRoleSelection && <Header />}
-          <main className="flex-grow">
-            {needsRoleSelection && !loading ? <RoleSelection /> : <Router />}
-          </main>
-          {!isLoginPage && !needsRoleSelection && <OnboardingModal />}
-          {!isLoginPage && !needsRoleSelection && <OnboardingHintButton position="bottom-right" />}
-        </div>
-        <Toaster />
-      </OnboardingProvider>
+      <CartProvider>
+        <OnboardingProvider>
+          <div className="flex flex-col min-h-screen">
+            {!isLoginPage && !needsRoleSelection && <Header />}
+            <main className="flex-grow">
+              {needsRoleSelection && !loading ? <RoleSelection /> : <Router />}
+            </main>
+            {!isLoginPage && !needsRoleSelection && <OnboardingModal />}
+            {!isLoginPage && !needsRoleSelection && <OnboardingHintButton position="bottom-right" />}
+          </div>
+          <Toaster />
+        </OnboardingProvider>
+      </CartProvider>
     </QueryClientProvider>
   );
 }

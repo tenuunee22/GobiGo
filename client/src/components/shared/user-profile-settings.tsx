@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { useLocation } from "wouter";
 import { Separator } from "@/components/ui/separator";
 import { LogOut, CheckCircle, Mail, Phone, User, Key } from "lucide-react";
+import { changeUserPassword, logoutUser, updateUserProfile } from "@/lib/firebase";
 
 interface UserProfileSettingsProps {
   userType?: "customer" | "business" | "delivery";
@@ -42,7 +43,7 @@ export function UserProfileSettings({ userType = "customer" }: UserProfileSettin
     }
   };
   
-  const handleUpdatePassword = () => {
+  const handleUpdatePassword = async () => {
     // Basic validation
     if (!currentPassword) {
       toast({
@@ -70,29 +71,66 @@ export function UserProfileSettings({ userType = "customer" }: UserProfileSettin
       return;
     }
     
-    // In a real app, this would update the password in the database
-    toast({
-      title: "Нууц үг шинэчлэгдлээ",
-      description: "Таны нууц үг амжилттай шинэчлэгдлээ",
-    });
-    
-    // Clear password fields
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
+    try {
+      // Call the Firebase function to change password
+      await changeUserPassword(currentPassword, newPassword);
+      
+      toast({
+        title: "Нууц үг шинэчлэгдлээ",
+        description: "Таны нууц үг амжилттай шинэчлэгдлээ",
+      });
+      
+      // Clear password fields
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error: any) {
+      console.error("Password change error:", error);
+      
+      // Handle specific Firebase Auth errors
+      if (error.code === 'auth/wrong-password') {
+        toast({
+          title: "Одоогийн нууц үг буруу байна",
+          description: "Одоогийн нууц үгээ зөв оруулна уу",
+          variant: "destructive"
+        });
+      } else if (error.code === 'auth/requires-recent-login') {
+        toast({
+          title: "Дахин нэвтрэх шаардлагатай",
+          description: "Аюулгүй байдлын үүднээс та дахин нэвтэрнэ үү",
+          variant: "destructive"
+        });
+        // Logout the user and redirect to login page
+        await logoutUser();
+        setLocation("/login");
+      } else {
+        toast({
+          title: "Нууц үг шинэчлэхэд алдаа гарлаа",
+          description: error.message || "Дахин оролдоно уу",
+          variant: "destructive"
+        });
+      }
+    }
   };
   
-  const handleLogout = () => {
-    // In a real app, this would perform a logout action
-    toast({
-      title: "Амжилттай гарлаа",
-      description: "Та системээс гарлаа",
-    });
-    
-    // Navigate to login page
-    setTimeout(() => {
-      setLocation("/login");
-    }, 1000);
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+      toast({
+        title: "Амжилттай гарлаа",
+        description: "Та системээс гарлаа",
+      });
+      
+      // Navigate to login page
+      setLocation("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast({
+        title: "Алдаа гарлаа",
+        description: "Системээс гарах үед алдаа гарлаа. Дахин оролдоно уу.",
+        variant: "destructive",
+      });
+    }
   };
   
   const getTitleByUserType = () => {
@@ -156,6 +194,40 @@ export function UserProfileSettings({ userType = "customer" }: UserProfileSettin
                   placeholder="Мотоцикл, Машин..."
                 />
               </div>
+            )}
+            
+            {userType === "customer" && (
+              <>
+                <div className="sm:col-span-2">
+                  <Label htmlFor="primaryAddress">Гэрийн хаяг</Label>
+                  <Input
+                    id="primaryAddress"
+                    value={user?.primaryAddress || ""}
+                    onChange={(e) => setUser({...user, primaryAddress: e.target.value})}
+                    placeholder="Дүүрэг, хороо, байр, орц, давхар, тоот..."
+                  />
+                </div>
+                
+                <div className="sm:col-span-2">
+                  <Label htmlFor="secondaryAddress">Хоёрдогч хаяг</Label>
+                  <Input
+                    id="secondaryAddress"
+                    value={user?.secondaryAddress || ""}
+                    onChange={(e) => setUser({...user, secondaryAddress: e.target.value})}
+                    placeholder="Өөр газар дахь хаяг..."
+                  />
+                </div>
+                
+                <div className="sm:col-span-2">
+                  <Label htmlFor="workAddress">Ажлын хаяг</Label>
+                  <Input
+                    id="workAddress"
+                    value={user?.workAddress || ""}
+                    onChange={(e) => setUser({...user, workAddress: e.target.value})}
+                    placeholder="Ажлын газрын хаяг..."
+                  />
+                </div>
+              </>
             )}
           </div>
           

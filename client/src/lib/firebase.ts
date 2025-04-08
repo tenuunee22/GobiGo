@@ -11,6 +11,9 @@ import {
   signInWithRedirect,
   getRedirectResult,
   updateProfile,
+  updatePassword,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
   PhoneAuthProvider,
   signInWithPhoneNumber,
   RecaptchaVerifier
@@ -538,6 +541,53 @@ export const updateBusinessProfile = async (uid: string, profileData: any) => {
     return true;
   } catch (error) {
     console.error("Error updating business profile:", error);
+    throw error;
+  }
+};
+
+// Update user profile data
+export const updateUserProfile = async (uid: string, profileData: any) => {
+  try {
+    const userRef = doc(db, "users", uid);
+    
+    // Update display name in auth if name is provided
+    if (profileData.name && auth.currentUser) {
+      await updateProfile(auth.currentUser, {
+        displayName: profileData.name
+      });
+    }
+    
+    // Update user data in Firestore
+    await updateDoc(userRef, {
+      ...profileData,
+      updatedAt: serverTimestamp()
+    });
+    
+    return true;
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+    throw error;
+  }
+};
+
+// Change password function
+export const changeUserPassword = async (currentPassword: string, newPassword: string) => {
+  try {
+    const user = auth.currentUser;
+    if (!user || !user.email) {
+      throw new Error("No user logged in or user email is not available");
+    }
+
+    // Reauthenticate user before changing password
+    const credential = EmailAuthProvider.credential(user.email, currentPassword);
+    await reauthenticateWithCredential(user, credential);
+    
+    // Update password
+    await updatePassword(user, newPassword);
+    
+    return true;
+  } catch (error) {
+    console.error("Error changing password:", error);
     throw error;
   }
 };

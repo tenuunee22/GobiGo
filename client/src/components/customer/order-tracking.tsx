@@ -1,6 +1,8 @@
 import { Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
+import { GoogleMapComponent } from "@/components/shared/google-map";
+import { GoogleMapWithDirections } from "@/components/shared/google-map-with-directions";
 
 interface OrderItem {
   name: string;
@@ -202,11 +204,32 @@ export function OrderTracking({
           </div>
         </div>
         
-        {/* Map placeholder with Mongolian text */}
-        <div className="w-full h-64 bg-gray-200 rounded-lg mb-4 relative overflow-hidden">
-          <div className="absolute inset-0 flex items-center justify-center text-gray-400">
-            Энд Google Maps жолоочийн бодит цагийн байршил үзүүлэх болно
-          </div>
+        {/* Google Maps integration */}
+        <div className="w-full h-64 rounded-lg mb-4 relative overflow-hidden">
+          {/* Import Google Maps Component */}
+          {status === "on-the-way" && currentLocation && destination ? (
+            <GoogleMapWithDirections 
+              origin={currentLocation} 
+              destination={destination} 
+              driverName={driver?.name || "Жолооч"}
+            />
+          ) : (
+            <GoogleMapComponent 
+              center={destination || { lat: 47.9184676, lng: 106.9177016 }}
+              markers={[
+                {
+                  position: destination || { lat: 47.9184676, lng: 106.9177016 },
+                  title: "Хүргэлтийн хаяг"
+                },
+                ...(currentLocation ? [{
+                  position: currentLocation,
+                  title: "Жолоочийн байршил",
+                  icon: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png"
+                }] : [])
+              ]}
+              zoom={15}
+            />
+          )}
           
           <div className="absolute bottom-4 right-4">
             <button className="p-2 bg-white rounded-full shadow hover:shadow-md focus:outline-none" aria-label="Миний байршил">

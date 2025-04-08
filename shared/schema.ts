@@ -22,6 +22,12 @@ export const users = pgTable("users", {
   businessPhone: text("business_phone"),
   businessDescription: text("business_description"),
   
+  // Customer specific fields
+  phone: text("phone"),
+  primaryAddress: text("primary_address"),
+  secondaryAddress: text("secondary_address"),
+  workAddress: text("work_address"),
+  
   // Delivery specific fields
   vehicleType: text("vehicle_type"), // car, motorcycle, bicycle, scooter
   licenseNumber: text("license_number"),

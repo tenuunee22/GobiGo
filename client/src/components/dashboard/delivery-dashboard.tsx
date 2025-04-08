@@ -252,7 +252,17 @@ export function DeliveryDashboard() {
               </div>
               
               <div className="flex space-x-3">
-                <Button className="flex-1">
+                <Button 
+                  className="flex-1"
+                  onClick={() => {
+                    // Open Google Maps with the delivery coordinates
+                    const customerLat = currentOrder.deliveryLat || 47.9234676;
+                    const customerLng = currentOrder.deliveryLng || 106.9237016;
+                    // Create Google Maps URL with the destination coordinates
+                    const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${customerLat},${customerLng}`;
+                    window.open(mapsUrl, '_blank');
+                  }}
+                >
                   <Navigation className="h-4 w-4 mr-2" />
                   Navigate
                 </Button>

@@ -1,6 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/auth-context";
+import { useCart } from "@/contexts/cart-context";
 import { logoutUser } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -75,6 +76,7 @@ interface SearchResult {
 export function Header() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { items: cartItems, removeItem, getTotal, getTotalItems } = useCart();
   const isMobile = useIsMobile();
   const [, setLocation] = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
@@ -82,20 +84,10 @@ export function Header() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   
-  // Load cart items from localStorage
-  useEffect(() => {
-    const savedCart = localStorage.getItem('cartItems');
-    if (savedCart) {
-      try {
-        setCartItems(JSON.parse(savedCart));
-      } catch (error) {
-        console.error("Error parsing cart items from localStorage", error);
-      }
-    }
-  }, []);
+  // No need to load cart items from localStorage anymore 
+  // as we are using CartContext
   
   // Set greeting based on time of day
   useEffect(() => {
@@ -297,21 +289,14 @@ export function Header() {
     }, 300);
   };
   
-  // Remove item from cart
-  const removeFromCart = (id: string) => {
-    const updatedCart = cartItems.filter(item => item.id !== id);
-    setCartItems(updatedCart);
-    localStorage.setItem('cartItems', JSON.stringify(updatedCart));
+  // Remove item from cart - now using the cart context
+  const handleRemoveFromCart = (id: string) => {
+    removeItem(id);
     
     toast({
       title: "Бүтээгдэхүүн хасагдлаа",
       description: "Сагснаас бүтээгдэхүүн амжилттай хасагдлаа",
     });
-  };
-  
-  // Calculate total cart price
-  const getTotalPrice = () => {
-    return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
   };
 
   // Desktop navigation content
@@ -417,7 +402,7 @@ export function Header() {
                               variant="ghost" 
                               size="icon" 
                               className="h-8 w-8 text-gray-500 hover:text-red-500"
-                              onClick={() => removeFromCart(item.id)}
+                              onClick={() => handleRemoveFromCart(item.id)}
                             >
                               <X className="h-4 w-4" />
                             </Button>
@@ -427,7 +412,7 @@ export function Header() {
                       <div className="p-4">
                         <div className="flex justify-between mb-4">
                           <span className="font-medium">Нийт дүн</span>
-                          <span className="font-bold">{getTotalPrice().toLocaleString()}₮</span>
+                          <span className="font-bold">{getTotal().toLocaleString()}₮</span>
                         </div>
                         <Button 
                           className="w-full" 
@@ -438,7 +423,7 @@ export function Header() {
                               const order = {
                                 id: Date.now().toString(),
                                 items: cartItems,
-                                totalAmount: getTotalPrice(),
+                                totalAmount: getTotal(),
                                 date: new Date(),
                               };
                               

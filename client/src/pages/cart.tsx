@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { useCart } from "@/contexts/cart-context";
 import { ArrowLeft, Trash2, ShoppingBag, CreditCard, ShoppingCart, Package, PartyPopper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,38 +21,20 @@ interface CartItem {
 export default function Cart() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const { 
+    items: cartItems, 
+    updateQuantity, 
+    removeItem, 
+    clearCart, 
+    getSubtotal, 
+    getDeliveryFee,
+    getTotal 
+  } = useCart();
   const [loading, setLoading] = useState(false);
   
-  // Load cart items from localStorage
-  useEffect(() => {
-    const savedCart = localStorage.getItem('cartItems');
-    if (savedCart) {
-      try {
-        setCartItems(JSON.parse(savedCart));
-      } catch (error) {
-        console.error("Error parsing cart items from localStorage", error);
-      }
-    }
-  }, []);
-  
-  // Update cart item quantity
-  const updateQuantity = (id: string, newQuantity: number) => {
-    if (newQuantity < 1) return;
-    
-    const updatedCart = cartItems.map(item => 
-      item.id === id ? { ...item, quantity: newQuantity } : item
-    );
-    
-    setCartItems(updatedCart);
-    localStorage.setItem('cartItems', JSON.stringify(updatedCart));
-  };
-  
-  // Remove item from cart
-  const removeFromCart = (id: string) => {
-    const updatedCart = cartItems.filter(item => item.id !== id);
-    setCartItems(updatedCart);
-    localStorage.setItem('cartItems', JSON.stringify(updatedCart));
+  // Handle remove from cart with toast notification
+  const handleRemoveItem = (id: string) => {
+    removeItem(id);
     
     toast({
       title: "Бүтээгдэхүүн хасагдлаа",
@@ -59,34 +42,14 @@ export default function Cart() {
     });
   };
   
-  // Clear cart
-  const clearCart = () => {
-    setCartItems([]);
-    localStorage.removeItem('cartItems');
+  // Handle clearing cart with toast notification
+  const handleClearCart = () => {
+    clearCart();
     
     toast({
       title: "Сагс цэвэрлэгдлээ",
       description: "Таны сагсанд байсан бүх бүтээгдэхүүн хасагдлаа",
     });
-  };
-  
-  // Calculate subtotal
-  const getSubtotal = () => {
-    return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
-  };
-  
-  // Calculate delivery fee
-  const getDeliveryFee = () => {
-    const subtotal = getSubtotal();
-    // Free delivery for orders over 50,000₮
-    if (subtotal >= 50000) return 0;
-    // Base delivery fee
-    return 2490;
-  };
-  
-  // Calculate total price
-  const getTotalPrice = () => {
-    return getSubtotal() + getDeliveryFee();
   };
   
   // Handle checkout - Direct to Stripe static checkout
@@ -97,7 +60,7 @@ export default function Cart() {
     const order = {
       id: Date.now().toString(),
       items: cartItems,
-      totalAmount: getTotalPrice(),
+      totalAmount: getTotal(),
       deliveryFee: getDeliveryFee(),
       subtotal: getSubtotal(),
       date: new Date(),
@@ -313,7 +276,7 @@ export default function Cart() {
                   variant="ghost" 
                   size="sm" 
                   className="text-gray-500 hover:text-red-500 hover:border-red-500 transition-colors"
-                  onClick={clearCart}
+                  onClick={handleClearCart}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -329,7 +292,7 @@ export default function Cart() {
                   variant="outline" 
                   size="sm" 
                   className="text-gray-500 hover:text-red-500 hover:border-red-500 transition-colors hidden md:flex items-center"
-                  onClick={clearCart}
+                  onClick={handleClearCart}
                 >
                   <Trash2 className="h-4 w-4 mr-2" /> Сагс цэвэрлэх
                 </Button>
@@ -382,7 +345,7 @@ export default function Cart() {
                               variant="ghost" 
                               size="icon" 
                               className="text-gray-400 hover:text-red-500 hover:bg-red-50 h-8 w-8 rounded-full"
-                              onClick={() => removeFromCart(item.id)}
+                              onClick={() => handleRemoveItem(item.id)}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -431,7 +394,7 @@ export default function Cart() {
                                 variant="ghost" 
                                 size="icon" 
                                 className="text-gray-400 hover:text-red-500 hover:bg-red-50 h-8 w-8 rounded-full"
-                                onClick={() => removeFromCart(item.id)}
+                                onClick={() => handleRemoveItem(item.id)}
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
@@ -491,7 +454,7 @@ export default function Cart() {
                 >
                   <span>Нийт дүн</span>
                   <span className="text-lg md:text-xl bg-gradient-to-r from-primary to-indigo-600 bg-clip-text text-transparent">
-                    {getTotalPrice().toLocaleString()}₮
+                    {getTotal().toLocaleString()}₮
                   </span>
                 </motion.div>
                 
@@ -545,7 +508,7 @@ export default function Cart() {
                   ) : (
                     <>
                       <CreditCard className="mr-2 h-5 w-5" />
-                      Төлбөр төлөх ({getTotalPrice().toLocaleString()}₮)
+                      Төлбөр төлөх ({getTotal().toLocaleString()}₮)
                     </>
                   )}
                 </Button>
