@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { useAuth } from "@/contexts/auth-context";
 import { useEffect } from "react";
+import { Header } from "@/components/shared/header";
 
 // Pages
 import NotFound from "@/pages/not-found";
@@ -42,13 +43,15 @@ function Router() {
   }
 
   return (
-    <div className="page-transition">
+    <div className="page-transition p-1">
       <Switch>
         <Route path="/" component={CustomerDashboard} />
         <Route path="/login" component={Login} />
         <Route path="/register" component={Register} />
         <Route path="/dashboard" component={CustomerDashboard} />
         <Route path="/profile/user" component={UserProfile} />
+        <Route path="/profile/business" component={BusinessProfile} />
+        <Route path="/profile/driver" component={DriverProfile} />
         <Route path="/dashboard/store" component={BusinessDashboard} />
         <Route path="/dashboard/driver" component={DeliveryDashboard} />
         <Route path="/restaurant/:id" component={RestaurantDetail} />
@@ -63,7 +66,12 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router />
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        <main className="flex-grow">
+          <Router />
+        </main>
+      </div>
       <Toaster />
     </QueryClientProvider>
   );

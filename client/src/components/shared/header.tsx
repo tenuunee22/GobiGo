@@ -1,96 +1,196 @@
-import { useAuth } from "@/contexts/auth-context";
-import { logoutUser } from "@/lib/firebase";
-import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
-import { Link, useLocation } from "wouter";
-import { Bell } from "lucide-react";
+import { useLocation } from "wouter";
+import { useAuth } from "@/contexts/auth-context";
+import { Button } from "@/components/ui/button";
+import { 
+  Sheet, 
+  SheetContent, 
+  SheetTrigger 
+} from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { 
+  Menu, 
+  User, 
+  LogOut, 
+  Store, 
+  Truck, 
+  ShoppingBag 
+} from "lucide-react";
 
 export function Header() {
+  const [location, setLocation] = useLocation();
   const { user } = useAuth();
-  const { toast } = useToast();
-  const [, setLocation] = useLocation();
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
-
-  const handleLogout = async () => {
-    try {
-      await logoutUser();
-      toast({
-        title: "Амжилттай гарлаа",
-      });
-      setLocation("/login");
-    } catch (error) {
-      toast({
-        title: "Гарахад алдаа гарлаа",
-        description: "Дахин оролдоно уу",
-        variant: "destructive",
-      });
-    }
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  
+  const handleNavigate = (path: string) => {
+    setLocation(path);
+    setIsMenuOpen(false);
   };
-
+  
+  const getUserRoleBasedLink = () => {
+    if (!user) return "/login";
+    
+    // This could be extended to check user.role and return different links
+    // based on the user's role (customer, business, delivery)
+    // For demo purposes, make all role-related pages accessible
+    return "/profile/user";
+  };
+  
   return (
-    <header className="bg-white shadow-sm">
-      <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-        <div className="flex items-center">
-          <Link href="/">
-            <a className="text-2xl font-bold text-primary">GobiGo</a>
-          </Link>
-        </div>
-        
-        {user && (
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-              <button className="text-gray-500 hover:text-gray-700 p-1" aria-label="Мэдэгдлүүд">
-                <Bell className="h-6 w-6" />
-                {/* Notification indicator */}
-                <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"></span>
-              </button>
-            </div>
-            
-            <div className="relative">
-              <button 
-                className="flex items-center text-sm font-medium text-gray-700 hover:text-gray-900"
-                onClick={() => setUserMenuOpen(!userMenuOpen)}
-                aria-expanded={userMenuOpen}
-              >
-                <span className="hidden md:block mr-2">{user.name || user.displayName}</span>
-                <div className="h-8 w-8 rounded-full bg-primary text-white flex items-center justify-center">
-                  {(user.name || user.displayName || 'U').charAt(0).toUpperCase()}
-                </div>
-              </button>
-              
-              {userMenuOpen && (
-                <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
-                  {user.role === "customer" && (
-                    <Link href="/profile/user">
-                      <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Таны профайл</a>
-                    </Link>
-                  )}
-                  {user.role === "business" && (
-                    <Link href="/dashboard/store">
-                      <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Бизнесийн хянах самбар</a>
-                    </Link>
-                  )}
-                  {user.role === "delivery" && (
-                    <Link href="/dashboard/driver">
-                      <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Хүргэлтийн хянах самбар</a>
-                    </Link>
-                  )}
-                  <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Тохиргоо</a>
-                  <a 
-                    href="#" 
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleLogout();
-                    }}
-                  >
-                    Гарах
-                  </a>
-                </div>
-              )}
+    <header className="bg-white border-b sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <div className="flex-shrink-0 cursor-pointer" onClick={() => handleNavigate("/")}>
+            <div className="flex items-center">
+              <span className="font-bold text-xl text-primary">GobiGo</span>
+              <span className="ml-1 text-gray-500 text-sm">Хүргэлт</span>
             </div>
           </div>
-        )}
+          
+          {/* Desktop navigation */}
+          <nav className="hidden md:flex space-x-6">
+            <Button 
+              variant="ghost" 
+              className="flex items-center gap-2" 
+              onClick={() => handleNavigate("/")}
+            >
+              <ShoppingBag className="h-4 w-4" />
+              Захиалах
+            </Button>
+            
+            <Button 
+              variant="ghost" 
+              className="flex items-center gap-2" 
+              onClick={() => handleNavigate("/dashboard/store")}
+            >
+              <Store className="h-4 w-4" />
+              Бизнес эзэд
+            </Button>
+            
+            <Button 
+              variant="ghost" 
+              className="flex items-center gap-2" 
+              onClick={() => handleNavigate("/dashboard/driver")}
+            >
+              <Truck className="h-4 w-4" />
+              Хүргэлт
+            </Button>
+          </nav>
+          
+          {/* User menu */}
+          <div className="hidden md:flex items-center">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="rounded-full">
+                  <User className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => handleNavigate("/profile/user")}>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Хэрэглэгч</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleNavigate("/profile/business")}>
+                  <Store className="mr-2 h-4 w-4" />
+                  <span>Бизнес</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleNavigate("/profile/driver")}>
+                  <Truck className="mr-2 h-4 w-4" />
+                  <span>Жолооч</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleNavigate("/login")}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Гарах</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          
+          {/* Mobile menu button */}
+          <div className="md:hidden">
+            <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-10 w-10">
+                  <Menu className="h-6 w-6" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[80%] sm:w-[350px]">
+                <div className="mt-8 flex flex-col space-y-3">
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start flex items-center gap-3" 
+                    onClick={() => handleNavigate("/")}
+                  >
+                    <ShoppingBag className="h-5 w-5" />
+                    Захиалах
+                  </Button>
+                  
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start flex items-center gap-3" 
+                    onClick={() => handleNavigate("/dashboard/store")}
+                  >
+                    <Store className="h-5 w-5" />
+                    Бизнес эзэд
+                  </Button>
+                  
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start flex items-center gap-3" 
+                    onClick={() => handleNavigate("/dashboard/driver")}
+                  >
+                    <Truck className="h-5 w-5" />
+                    Хүргэлт
+                  </Button>
+                  
+                  <hr className="my-4" />
+                  
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start flex items-center gap-3" 
+                    onClick={() => handleNavigate("/profile/user")}
+                  >
+                    <User className="h-5 w-5" />
+                    Хэрэглэгчийн профайл
+                  </Button>
+                  
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start flex items-center gap-3" 
+                    onClick={() => handleNavigate("/profile/business")}
+                  >
+                    <Store className="h-5 w-5" />
+                    Бизнесийн профайл
+                  </Button>
+                  
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start flex items-center gap-3" 
+                    onClick={() => handleNavigate("/profile/driver")}
+                  >
+                    <Truck className="h-5 w-5" />
+                    Жолоочийн профайл
+                  </Button>
+                  
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start flex items-center gap-3" 
+                    onClick={() => handleNavigate("/login")}
+                  >
+                    <LogOut className="h-5 w-5" />
+                    Гарах
+                  </Button>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+        </div>
       </div>
     </header>
   );
