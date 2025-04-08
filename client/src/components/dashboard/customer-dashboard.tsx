@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { getBusinesses, getCustomerOrders } from "@/lib/firebase";
 import { CategoryCard } from "@/components/customer/category-card";
@@ -828,85 +828,245 @@ export function CustomerDashboard() {
           
           <div className="flex justify-center gap-8">
             {/* Facebook */}
-            <motion.a 
-              href="https://www.facebook.com/profile.php?id=100074258054037"
-              target="_blank"
-              rel="noopener noreferrer"
+            <motion.div
               className="flex flex-col items-center"
-              whileHover={{ scale: 1.1, y: -5 }}
-              whileTap={{ scale: 0.95 }}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.3 }}
               viewport={{ once: true }}
-              onClick={() => {
-                // Confirm clicking will send them to your own Facebook
-                if (window) {
-                  window.open("https://www.facebook.com/profile.php?id=100074258054037", "_blank");
-                }
-              }}
+              whileTap={{ scale: 0.9 }}
             >
-              <div className="w-24 h-24 flex items-center justify-center bg-blue-600 text-white rounded-full shadow-lg mb-3">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95z"/>
-                </svg>
-              </div>
-              <span className="text-amber-900 font-medium">GobiGo Facebook</span>
-            </motion.a>
+              <motion.button
+                onClick={(e) => {
+                  // Add ripple effect at click position
+                  const button = e.currentTarget;
+                  const rect = button.getBoundingClientRect();
+                  const x = e.clientX - rect.left;
+                  const y = e.clientY - rect.top;
+                  
+                  // Create ripple element
+                  const ripple = document.createElement('span');
+                  ripple.style.position = 'absolute';
+                  ripple.style.backgroundColor = 'rgba(255, 255, 255, 0.4)';
+                  ripple.style.borderRadius = '50%';
+                  ripple.style.width = '100px';
+                  ripple.style.height = '100px';
+                  ripple.style.left = `${x - 50}px`;
+                  ripple.style.top = `${y - 50}px`;
+                  ripple.style.transform = 'scale(0)';
+                  ripple.style.opacity = '1';
+                  ripple.style.transition = 'transform 0.8s, opacity 0.8s';
+                  
+                  // Append and animate
+                  button.appendChild(ripple);
+                  setTimeout(() => {
+                    ripple.style.transform = 'scale(4)';
+                    ripple.style.opacity = '0';
+                  }, 10);
+                  
+                  // Clean up
+                  setTimeout(() => {
+                    ripple.remove();
+                  }, 800);
+
+                  toast({
+                    title: "Facebook хуудас руу очиж байна",
+                    description: "Шинэ цонхонд нээж байна...",
+                    variant: "default",
+                  });
+                  window.open("https://www.facebook.com/profile.php?id=100074258054037", "_blank");
+                }}
+                className="bg-blue-600 text-white w-24 h-24 rounded-full shadow-lg mb-3 flex items-center justify-center relative overflow-hidden"
+                whileHover={{ 
+                  scale: 1.1, 
+                  y: -5,
+                  backgroundColor: "#4267B2",
+                  boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)" 
+                }}
+                transition={{ type: "spring", stiffness: 400, damping: 15 }}
+              >
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  className="relative z-10"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95z"/>
+                  </svg>
+                </motion.div>
+                <motion.div
+                  className="absolute inset-0 bg-white opacity-0 rounded-full"
+                  animate={{ opacity: 0.2 }}
+                  transition={{ duration: 0.3 }}
+                />
+              </motion.button>
+              <motion.span 
+                className="text-amber-900 font-medium"
+                whileHover={{ scale: 1.05 }}
+                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+              >
+                GobiGo Facebook
+              </motion.span>
+            </motion.div>
             
             {/* Instagram */}
-            <motion.a 
-              href="https://www.instagram.com/te_nuune/"
-              target="_blank"
-              rel="noopener noreferrer"
+            <motion.div
               className="flex flex-col items-center"
-              whileHover={{ scale: 1.1, y: -5 }}
-              whileTap={{ scale: 0.95 }}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.4 }}
               viewport={{ once: true }}
-              onClick={() => {
-                // Confirm clicking will send them to your own Instagram
-                if (window) {
-                  window.open("https://www.instagram.com/te_nuune/", "_blank");
-                }
-              }}
+              whileTap={{ scale: 0.9 }}
             >
-              <div className="w-24 h-24 flex items-center justify-center bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 text-white rounded-full shadow-lg mb-3">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2c2.717 0 3.056.01 4.122.06 1.065.05 1.79.217 2.428.465.66.254 1.216.598 1.772 1.153.509.5.902 1.105 1.153 1.772.247.637.415 1.363.465 2.428.047 1.066.06 1.405.06 4.122 0 2.717-.01 3.056-.06 4.122-.05 1.065-.218 1.79-.465 2.428a4.883 4.883 0 01-1.153 1.772c-.5.508-1.105.902-1.772 1.153-.637.247-1.363.415-2.428.465-1.066.047-1.405.06-4.122.06-2.717 0-3.056-.01-4.122-.06-1.065-.05-1.79-.218-2.428-.465a4.89 4.89 0 01-1.772-1.153 4.904 4.904 0 01-1.153-1.772c-.247-.637-.415-1.363-.465-2.428C2.013 15.056 2 14.717 2 12c0-2.717.01-3.056.06-4.122.05-1.066.218-1.79.465-2.428.254-.66.598-1.216 1.153-1.772.5-.509 1.105-.902 1.772-1.153.637-.247 1.363-.415 2.428-.465C8.944 2.013 9.283 2 12 2zm0 5a5 5 0 100 10 5 5 0 000-10zm6.5-.25a1.25 1.25 0 10-2.5 0 1.25 1.25 0 002.5 0zM12 9a3 3 0 110 6 3 3 0 010-6z"/>
-                </svg>
-              </div>
-              <span className="text-amber-900 font-medium">GobiGo Instagram</span>
-            </motion.a>
+              <motion.button
+                onClick={(e) => {
+                  // Add ripple effect at click position
+                  const button = e.currentTarget;
+                  const rect = button.getBoundingClientRect();
+                  const x = e.clientX - rect.left;
+                  const y = e.clientY - rect.top;
+                  
+                  // Create ripple element
+                  const ripple = document.createElement('span');
+                  ripple.style.position = 'absolute';
+                  ripple.style.backgroundColor = 'rgba(255, 255, 255, 0.4)';
+                  ripple.style.borderRadius = '50%';
+                  ripple.style.width = '100px';
+                  ripple.style.height = '100px';
+                  ripple.style.left = `${x - 50}px`;
+                  ripple.style.top = `${y - 50}px`;
+                  ripple.style.transform = 'scale(0)';
+                  ripple.style.opacity = '1';
+                  ripple.style.transition = 'transform 0.8s, opacity 0.8s';
+                  
+                  // Append and animate
+                  button.appendChild(ripple);
+                  setTimeout(() => {
+                    ripple.style.transform = 'scale(4)';
+                    ripple.style.opacity = '0';
+                  }, 10);
+                  
+                  // Clean up
+                  setTimeout(() => {
+                    ripple.remove();
+                  }, 800);
+
+                  toast({
+                    title: "Instagram хуудас руу очиж байна",
+                    description: "Шинэ цонхонд нээж байна...",
+                    variant: "default",
+                  });
+                  window.open("https://www.instagram.com/te_nuune/", "_blank");
+                }}
+                className="bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 text-white w-24 h-24 rounded-full shadow-lg mb-3 flex items-center justify-center relative overflow-hidden"
+                whileHover={{ 
+                  scale: 1.1, 
+                  y: -5,
+                  boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)" 
+                }}
+                transition={{ type: "spring", stiffness: 400, damping: 15 }}
+              >
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  className="relative z-10"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2c2.717 0 3.056.01 4.122.06 1.065.05 1.79.217 2.428.465.66.254 1.216.598 1.772 1.153.509.5.902 1.105 1.153 1.772.247.637.415 1.363.465 2.428.047 1.066.06 1.405.06 4.122 0 2.717-.01 3.056-.06 4.122-.05 1.065-.218 1.79-.465 2.428a4.883 4.883 0 01-1.153 1.772c-.5.508-1.105.902-1.772 1.153-.637.247-1.363.415-2.428.465-1.066.047-1.405.06-4.122.06-2.717 0-3.056-.01-4.122-.06-1.065-.05-1.79-.218-2.428-.465a4.89 4.89 0 01-1.772-1.153 4.904 4.904 0 01-1.153-1.772c-.247-.637-.415-1.363-.465-2.428C2.013 15.056 2 14.717 2 12c0-2.717.01-3.056.06-4.122.05-1.066.218-1.79.465-2.428.254-.66.598-1.216 1.153-1.772.5-.509 1.105-.902 1.772-1.153.637-.247 1.363-.415 2.428-.465C8.944 2.013 9.283 2 12 2zm0 5a5 5 0 100 10 5 5 0 000-10zm6.5-.25a1.25 1.25 0 10-2.5 0 1.25 1.25 0 002.5 0zM12 9a3 3 0 110 6 3 3 0 010-6z"/>
+                  </svg>
+                </motion.div>
+                <motion.div
+                  className="absolute inset-0 bg-white opacity-0 rounded-full"
+                  animate={{ opacity: 0.2 }}
+                  transition={{ duration: 0.3 }}
+                />
+              </motion.button>
+              <motion.span 
+                className="text-amber-900 font-medium"
+                whileHover={{ scale: 1.05 }}
+                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+              >
+                GobiGo Instagram
+              </motion.span>
+            </motion.div>
             
             {/* Twitter */}
-            <motion.a 
-              href="https://twitter.com/gobigo_official"
-              target="_blank"
-              rel="noopener noreferrer"
+            <motion.div
               className="flex flex-col items-center"
-              whileHover={{ scale: 1.1, y: -5 }}
-              whileTap={{ scale: 0.95 }}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.5 }}
               viewport={{ once: true }}
-              onClick={() => {
-                // Confirm clicking will send them to your own Twitter/X
-                if (window) {
-                  window.open("https://twitter.com/gobigo_official", "_blank");
-                }
-              }}
+              whileTap={{ scale: 0.9 }}
             >
-              <div className="w-24 h-24 flex items-center justify-center bg-black text-white rounded-full shadow-lg mb-3">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z" />
-                </svg>
-              </div>
-              <span className="text-amber-900 font-medium">GobiGo Twitter</span>
-            </motion.a>
+              <motion.button
+                onClick={(e) => {
+                  // Add ripple effect at click position
+                  const button = e.currentTarget;
+                  const rect = button.getBoundingClientRect();
+                  const x = e.clientX - rect.left;
+                  const y = e.clientY - rect.top;
+                  
+                  // Create ripple element
+                  const ripple = document.createElement('span');
+                  ripple.style.position = 'absolute';
+                  ripple.style.backgroundColor = 'rgba(255, 255, 255, 0.4)';
+                  ripple.style.borderRadius = '50%';
+                  ripple.style.width = '100px';
+                  ripple.style.height = '100px';
+                  ripple.style.left = `${x - 50}px`;
+                  ripple.style.top = `${y - 50}px`;
+                  ripple.style.transform = 'scale(0)';
+                  ripple.style.opacity = '1';
+                  ripple.style.transition = 'transform 0.8s, opacity 0.8s';
+                  
+                  // Append and animate
+                  button.appendChild(ripple);
+                  setTimeout(() => {
+                    ripple.style.transform = 'scale(4)';
+                    ripple.style.opacity = '0';
+                  }, 10);
+                  
+                  // Clean up
+                  setTimeout(() => {
+                    ripple.remove();
+                  }, 800);
+
+                  toast({
+                    title: "Twitter хуудас руу очиж байна",
+                    description: "Шинэ цонхонд нээж байна...",
+                    variant: "default",
+                  });
+                  window.open("https://twitter.com/gobigo_official", "_blank");
+                }}
+                className="bg-black text-white w-24 h-24 rounded-full shadow-lg mb-3 flex items-center justify-center relative overflow-hidden"
+                whileHover={{ 
+                  scale: 1.1, 
+                  y: -5,
+                  boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)" 
+                }}
+                transition={{ type: "spring", stiffness: 400, damping: 15 }}
+              >
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  className="relative z-10"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z" />
+                  </svg>
+                </motion.div>
+                <motion.div
+                  className="absolute inset-0 bg-white opacity-0 rounded-full"
+                  animate={{ opacity: 0.2 }}
+                  transition={{ duration: 0.3 }}
+                />
+              </motion.button>
+              <motion.span 
+                className="text-amber-900 font-medium"
+                whileHover={{ scale: 1.05 }}
+                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+              >
+                GobiGo Twitter
+              </motion.span>
+            </motion.div>
           </div>
         </div>
       </section>
