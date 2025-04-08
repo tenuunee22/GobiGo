@@ -173,20 +173,6 @@ export function Header() {
         </Link>
       </NavigationMenuItem>
       <NavigationMenuItem>
-        <Link href="/search">
-          <div className="px-3 py-2 flex items-center gap-2 hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer">
-            <Search size={18} /> Хайх
-          </div>
-        </Link>
-      </NavigationMenuItem>
-      <NavigationMenuItem>
-        <Link href="/orders">
-          <div className="px-3 py-2 flex items-center gap-2 hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer">
-            <Clock size={18} /> Захиалгууд
-          </div>
-        </Link>
-      </NavigationMenuItem>
-      <NavigationMenuItem>
         <Link href="/cart">
           <div className="px-3 py-2 flex items-center gap-2 hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer">
             <ShoppingBag size={18} /> Сагс

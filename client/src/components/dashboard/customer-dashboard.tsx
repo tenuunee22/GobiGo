@@ -87,27 +87,87 @@ export function CustomerDashboard() {
   }, [user, toast, userLocation]);
 
   const categories = [
+    { id: "all", name: "Бүх ангилал", icon: <PlusCircle className="h-6 w-6 text-primary" /> },
     { id: "restaurants", name: "Рестораны", icon: <Pizza className="h-6 w-6 text-primary" /> },
     { id: "groceries", name: "Хүнсний дэлгүүр", icon: <ShoppingCart className="h-6 w-6 text-primary" /> },
-    { id: "pharmacy", name: "Эмийн сан", icon: <Pill className="h-6 w-6 text-primary" /> },
     { id: "retail", name: "Жижиглэн худалдаа", icon: <PlusCircle className="h-6 w-6 text-primary" /> },
   ];
 
+  const [activeCategory, setActiveCategory] = useState<string>("all");
+
   const handleCategoryClick = (categoryId: string) => {
+    // Set active category
+    setActiveCategory(categoryId);
+    
+    // Ангилал сонгосон нэрийг монгол хэл дээр авах
+    const getCategoryDisplayName = (id: string) => {
+      const category = categories.find(c => c.id === id);
+      return category ? category.name : id;
+    };
+    
     // Filter businesses by category
     toast({
-      title: `${categoryId} ангилал сонгогдлоо`,
+      title: categoryId === "all" ? "Бүх ангилал харуулж байна" : `"${getCategoryDisplayName(categoryId)}" ангилал сонгогдлоо`,
       description: "Ангилалд тохирох газруудыг харуулж байна",
     });
     
     // Simulate filtering by adding a small delay
     setLoading(true);
     setTimeout(() => {
+      // Original business data
+      const allBusinesses = [...businesses];
+      
       // Filter businesses based on the category
-      let filteredBusinesses = [...businesses];
-      // In a real app, this would use actual filtering logic
-      // For demo purposes, we're just shuffling the array
-      filteredBusinesses.sort(() => Math.random() - 0.5);
+      let filteredBusinesses;
+      
+      if (categoryId === "all") {
+        // Show all businesses
+        filteredBusinesses = allBusinesses;
+      } else {
+        // Filter by category
+        filteredBusinesses = allBusinesses.filter(business => {
+          const businessCategory = (business.businessType || business.category || "").toLowerCase();
+          const businessName = (business.businessName || business.name || "").toLowerCase();
+          
+          // Map category IDs to business categories
+          switch (categoryId) {
+            case "restaurants":
+              return businessCategory.includes("ресторан") || 
+                     businessCategory.includes("хоол") || 
+                     businessName.includes("ресторан") || 
+                     businessName.includes("хоолны газар") || 
+                     businessName.includes("хоол");
+            case "groceries":
+              return businessCategory.includes("хүнс") || 
+                     businessCategory.includes("дэлгүүр") || 
+                     businessName.includes("хүнс") || 
+                     businessName.includes("дэлгүүр") ||
+                     businessName.includes("маркет");
+            case "retail":
+              return businessCategory.includes("худалдаа") || 
+                     businessCategory.includes("дэлгүүр") || 
+                     businessName.includes("дэлгүүр") || 
+                     businessName.includes("худалдаа");
+            default:
+              return true;
+          }
+        });
+        
+        // If no results found, show all businesses
+        if (filteredBusinesses.length === 0) {
+          filteredBusinesses = allBusinesses;
+          
+          toast({
+            title: "Хайлтын үр дүн олдсонгүй",
+            description: "Бүх ангилалыг харуулж байна",
+            variant: "destructive"
+          });
+          
+          // Reset active category to "all"
+          setActiveCategory("all");
+        }
+      }
+      
       setBusinesses(filteredBusinesses);
       setLoading(false);
     }, 500);
@@ -232,6 +292,7 @@ export function CustomerDashboard() {
                 key={category.id}
                 name={category.name}
                 icon={category.icon}
+                isActive={activeCategory === category.id}
                 onClick={() => handleCategoryClick(category.id)}
               />
             ))}
