@@ -145,49 +145,89 @@ export default function Cart() {
             initial={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", duration: 0.8 }}
-            className="mb-6"
+            className="mb-8"
           >
-            <div className="w-24 h-24 md:w-28 md:h-28 mx-auto relative">
+            <div className="w-28 h-28 md:w-36 md:h-36 mx-auto relative">
               <motion.div
                 animate={{ 
-                  y: [0, -10, 0],
+                  y: [0, -15, 0],
+                  rotateZ: [0, -5, 0, 5, 0],
                 }}
                 transition={{ 
                   repeat: Infinity, 
-                  duration: 2.5,
+                  duration: 3,
                   ease: "easeInOut"
                 }}
+                className="absolute inset-0 flex items-center justify-center"
               >
-                <ShoppingCart className="h-20 w-20 md:h-24 md:w-24 mx-auto text-primary/20" />
+                <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-primary/5 flex items-center justify-center">
+                  <ShoppingCart className="h-16 w-16 md:h-20 md:w-20 text-primary/30" />
+                </div>
               </motion.div>
               <motion.div
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.5, duration: 0.3 }}
-                className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-7 h-7 md:w-8 md:h-8 flex items-center justify-center text-sm font-bold"
+                initial={{ opacity: 0, scale: 0, x: 10, y: -10 }}
+                animate={{ opacity: 1, scale: 1, x: 0, y: 0 }}
+                transition={{ delay: 0.5, duration: 0.3, type: "spring" }}
+                className="absolute top-0 right-0 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-sm md:text-base font-bold shadow-lg"
               >
                 0
               </motion.div>
             </div>
           </motion.div>
           
-          <motion.h1 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="text-2xl md:text-3xl font-bold mb-3 bg-gradient-to-r from-primary to-indigo-500 bg-clip-text text-transparent"
+            className="mb-3"
           >
-            Таны сагс хоосон байна
-          </motion.h1>
+            <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-indigo-600 bg-clip-text text-transparent">
+              Таны сагс хоосон байна
+            </h1>
+          </motion.div>
           
-          <motion.p 
+          <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="text-gray-600 mb-6 md:mb-8 text-sm md:text-base"
+            className="mb-8"
           >
-            Хоолны газар эсвэл дэлгүүрээс дуртай хоол болон бүтээгдэхүүнээ сонгож, сагсандаа нэмнэ үү.
-          </motion.p>
+            <p className="text-gray-600 mb-2 text-sm md:text-base">
+              Хоолны газар эсвэл дэлгүүрээс дуртай хоол болон бүтээгдэхүүнээ сонгож, сагсандаа нэмнэ үү.
+            </p>
+            <div className="flex justify-center mt-6 space-x-2">
+              <motion.span 
+                animate={{ 
+                  scale: [1, 1.2, 1],
+                  rotate: [0, 5, 0, -5, 0],
+                }} 
+                transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+                className="text-2xl"
+              >
+                🍔
+              </motion.span>
+              <motion.span 
+                animate={{ 
+                  scale: [1, 1.2, 1],
+                  rotate: [0, -5, 0, 5, 0],
+                }} 
+                transition={{ duration: 2, repeat: Infinity, repeatDelay: 1.3 }}
+                className="text-2xl"
+              >
+                🍕
+              </motion.span>
+              <motion.span 
+                animate={{ 
+                  scale: [1, 1.2, 1],
+                  rotate: [0, 5, 0, -5, 0],
+                }} 
+                transition={{ duration: 2, repeat: Infinity, repeatDelay: 1.6 }}
+                className="text-2xl"
+              >
+                🍱
+              </motion.span>
+            </div>
+          </motion.div>
           
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -195,8 +235,13 @@ export default function Cart() {
             transition={{ delay: 0.7 }}
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
+            className="mx-auto"
           >
-            <Button asChild size="lg" className="mobile-button px-6 md:px-8 h-12 text-base">
+            <Button 
+              asChild 
+              size="lg" 
+              className="mobile-button px-8 py-6 md:px-10 h-12 md:h-14 text-base font-semibold bg-gradient-to-r from-primary to-primary-foreground shadow-lg shadow-primary/20"
+            >
               <Link href="/">
                 <Package className="mr-2 h-5 w-5" /> 
                 Хоол захиалах
@@ -225,7 +270,7 @@ export default function Cart() {
         </Link>
       </motion.div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Cart items */}
         <motion.div 
           className="lg:col-span-8"
@@ -233,17 +278,29 @@ export default function Cart() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.4 }}
         >
-          <Card className="overflow-hidden shadow-sm border-gray-200">
-            <CardHeader className="flex flex-row items-center justify-between p-4 md:p-6">
+          <Card className="overflow-hidden shadow-md border-gray-200 rounded-xl">
+            <CardHeader className="flex flex-row items-center justify-between p-4 md:p-6 bg-gradient-to-r from-primary/5 to-primary/10">
               <div className="flex items-center gap-3">
                 <div className="relative">
-                  <ShoppingCart className="h-6 w-6 text-primary" />
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                    {cartItems.length}
-                  </span>
+                  <motion.div
+                    initial={{ scale: 0.8 }}
+                    animate={{ scale: 1 }}
+                    transition={{ 
+                      type: "spring", 
+                      stiffness: 300, 
+                      damping: 20 
+                    }}
+                  >
+                    <ShoppingCart className="h-6 w-6 text-primary" />
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                      {cartItems.length}
+                    </span>
+                  </motion.div>
                 </div>
                 <div>
-                  <CardTitle className="text-base md:text-lg">Миний сагс</CardTitle>
+                  <CardTitle className="text-base md:text-lg font-bold bg-gradient-to-r from-primary to-primary-foreground bg-clip-text text-transparent">
+                    Миний сагс
+                  </CardTitle>
                   <CardDescription className="text-xs md:text-sm">
                     {cartItems.length} төрлийн бүтээгдэхүүн
                   </CardDescription>
@@ -251,24 +308,32 @@ export default function Cart() {
               </div>
               
               {/* Утасны хэмжээнд харагдах товч */}
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="text-gray-500 hover:text-red-500 hover:border-red-500 transition-colors md:hidden"
-                onClick={clearCart}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              <motion.div whileTap={{ scale: 0.9 }} className="md:hidden">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-gray-500 hover:text-red-500 hover:border-red-500 transition-colors"
+                  onClick={clearCart}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </motion.div>
               
               {/* Том дэлгэцэнд харагдах товч */}
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="text-gray-500 hover:text-red-500 hover:border-red-500 transition-colors hidden md:flex items-center"
-                onClick={clearCart}
+              <motion.div 
+                whileHover={{ scale: 1.05 }} 
+                whileTap={{ scale: 0.95 }}
+                className="hidden md:block"
               >
-                <Trash2 className="h-4 w-4 mr-2" /> Сагс цэвэрлэх
-              </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="text-gray-500 hover:text-red-500 hover:border-red-500 transition-colors hidden md:flex items-center"
+                  onClick={clearCart}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" /> Сагс цэвэрлэх
+                </Button>
+              </motion.div>
             </CardHeader>
             
             <CardContent className="p-0">
@@ -279,11 +344,11 @@ export default function Cart() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1, duration: 0.3 }}
-                    className="p-4 md:p-5 hover:bg-gray-50 transition-colors"
+                    className="cart-item p-4 md:p-5 hover:bg-gray-50/80"
                   >
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                    <div className="flex flex-col sm:flex-row gap-4">
                       {/* Зураг */}
-                      <div className="w-full sm:w-20 h-32 sm:h-20 rounded-md overflow-hidden shadow-sm">
+                      <div className="cart-item-image shadow-sm mx-auto sm:mx-0">
                         {item.imageUrl ? (
                           <motion.img 
                             whileHover={{ scale: 1.05 }}
@@ -294,17 +359,17 @@ export default function Cart() {
                           />
                         ) : (
                           <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                            <ShoppingBag className="h-8 w-8 text-gray-400" />
+                            <ShoppingBag className="h-10 w-10 text-gray-400" />
                           </div>
                         )}
                       </div>
                       
-                      <div className="flex-1">
+                      <div className="cart-item-details">
                         {/* Нэр, үнэ */}
-                        <div className="flex justify-between items-start mb-2">
+                        <div className="flex justify-between items-start">
                           <div>
-                            <h3 className="font-medium text-base">{item.name}</h3>
-                            <p className="text-gray-600 text-sm">{item.price.toLocaleString()}₮</p>
+                            <h3 className="font-semibold text-base sm:text-lg">{item.name}</h3>
+                            <p className="text-gray-600 text-sm">{item.price.toLocaleString()}₮ / ширхэг</p>
                           </div>
                           
                           {/* Утасны дэлгэцэнд хасах товч */}
@@ -316,7 +381,7 @@ export default function Cart() {
                             <Button 
                               variant="ghost" 
                               size="icon" 
-                              className="text-gray-500 hover:text-red-500 hover:bg-red-50 h-8 w-8"
+                              className="text-gray-400 hover:text-red-500 hover:bg-red-50 h-8 w-8 rounded-full"
                               onClick={() => removeFromCart(item.id)}
                             >
                               <Trash2 className="h-4 w-4" />
@@ -325,39 +390,34 @@ export default function Cart() {
                         </div>
                         
                         {/* Тоо болон үнийн мэдээлэл */}
-                        <div className="flex justify-between items-center mt-2">
-                          <div className="flex items-center gap-2">
-                            <motion.div whileTap={{ scale: 0.9 }}>
-                              <Button 
-                                variant="outline" 
-                                size="icon" 
-                                className="h-8 w-8 rounded-full"
-                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                              >
-                                -
-                              </Button>
-                            </motion.div>
-                            <Input
+                        <div className="flex flex-wrap sm:flex-nowrap justify-between items-center gap-2 sm:gap-4 mt-4">
+                          <div className="cart-quantity-controls">
+                            <motion.button 
+                              whileTap={{ scale: 0.9 }}
+                              className="cart-quantity-button text-gray-500"
+                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                              disabled={item.quantity <= 1}
+                            >
+                              -
+                            </motion.button>
+                            <input
                               type="number"
                               value={item.quantity}
                               onChange={(e) => updateQuantity(item.id, parseInt(e.target.value) || 1)}
-                              className="w-12 text-center"
+                              className="cart-quantity-input"
                               min="1"
                             />
-                            <motion.div whileTap={{ scale: 0.9 }}>
-                              <Button 
-                                variant="outline" 
-                                size="icon" 
-                                className="h-8 w-8 rounded-full"
-                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                              >
-                                +
-                              </Button>
-                            </motion.div>
+                            <motion.button 
+                              whileTap={{ scale: 0.9 }}
+                              className="cart-quantity-button text-gray-500"
+                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                            >
+                              +
+                            </motion.button>
                           </div>
                           
-                          <div className="flex items-center gap-3">
-                            <div className="text-right font-medium">
+                          <div className="flex items-center justify-between w-full sm:w-auto sm:justify-end gap-3">
+                            <div className="text-right font-semibold text-lg bg-gradient-to-r from-primary to-indigo-600 bg-clip-text text-transparent">
                               {(item.price * item.quantity).toLocaleString()}₮
                             </div>
                             
@@ -370,7 +430,7 @@ export default function Cart() {
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
-                                className="text-gray-500 hover:text-red-500 hover:bg-red-50 h-8 w-8"
+                                className="text-gray-400 hover:text-red-500 hover:bg-red-50 h-8 w-8 rounded-full"
                                 onClick={() => removeFromCart(item.id)}
                               >
                                 <Trash2 className="h-4 w-4" />
@@ -394,20 +454,26 @@ export default function Cart() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.4, delay: 0.2 }}
         >
-          <Card className="sticky top-16 shadow-sm border-gray-200">
-            <CardHeader className="p-4 md:p-6">
-              <CardTitle className="flex items-center gap-2 text-base md:text-lg">
-                <PartyPopper className="h-5 w-5 text-primary" />
+          <Card className="cart-summary-card sticky top-16 shadow-md border-gray-200">
+            <CardHeader className="p-4 md:p-6 bg-gradient-to-r from-primary/5 to-primary/10">
+              <CardTitle className="flex items-center gap-2 text-base md:text-lg font-bold bg-gradient-to-r from-primary to-primary-foreground bg-clip-text text-transparent">
+                <motion.div
+                  initial={{ rotate: -15 }}
+                  animate={{ rotate: 0 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                >
+                  <PartyPopper className="h-5 w-5 text-primary" />
+                </motion.div>
                 Захиалгын нийлбэр
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 md:p-6 pt-0">
-              <div className="space-y-4">
-                <div className="flex justify-between text-sm md:text-base">
+              <div className="space-y-3 mt-4">
+                <div className="cart-summary-row">
                   <span className="text-gray-600">Бүтээгдэхүүний дүн</span>
-                  <span>{getSubtotal().toLocaleString()}₮</span>
+                  <span className="font-medium">{getSubtotal().toLocaleString()}₮</span>
                 </div>
-                <div className="flex justify-between text-sm md:text-base">
+                <div className="cart-summary-row">
                   <span className="text-gray-600">Хүргэлтийн хураамж</span>
                   <span>
                     {getDeliveryFee() > 0 ? (
@@ -417,31 +483,45 @@ export default function Cart() {
                     )}
                   </span>
                 </div>
-                <Separator />
+                <Separator className="my-2" />
                 <motion.div 
-                  className="flex justify-between font-bold"
+                  className="cart-total-row"
                   animate={{ scale: [1, 1.03, 1] }}
                   transition={{ duration: 1, repeat: Infinity, repeatDelay: 3 }}
                 >
                   <span>Нийт дүн</span>
-                  <span className="text-lg text-primary">{getTotalPrice().toLocaleString()}₮</span>
+                  <span className="text-lg md:text-xl bg-gradient-to-r from-primary to-indigo-600 bg-clip-text text-transparent">
+                    {getTotalPrice().toLocaleString()}₮
+                  </span>
                 </motion.div>
                 
                 {getSubtotal() < 50000 && (
                   <motion.div 
-                    className="bg-amber-50 border border-amber-200 text-amber-800 rounded-md p-3 text-xs md:text-sm"
+                    className="bg-gradient-to-r from-amber-50 to-amber-100/50 border border-amber-200 text-amber-800 rounded-xl p-4 text-xs md:text-sm mt-4"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.5 }}
                   >
-                    <p>50,000₮-с дээш захиалгад хүргэлт үнэгүй</p>
-                    <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                      <div 
-                        className="bg-primary h-2 rounded-full" 
-                        style={{ width: `${Math.min(100, (getSubtotal() / 50000) * 100)}%` }}
-                      ></div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <motion.div 
+                        animate={{ scale: [1, 1.1, 1] }} 
+                        transition={{ duration: 2, repeat: Infinity }}
+                      >
+                        <span role="img" aria-label="fire" className="text-lg">🔥</span>
+                      </motion.div>
+                      <p className="font-medium">50,000₮-с дээш захиалгад <span className="text-green-600">хүргэлт үнэгүй</span></p>
                     </div>
-                    <p className="text-xs mt-1 text-right">Үнэгүй хүргэлтэд: {(50000 - getSubtotal()).toLocaleString()}₮</p>
+                    <div className="w-full bg-gray-200 rounded-full h-2.5 mt-3 overflow-hidden">
+                      <motion.div 
+                        className="bg-gradient-to-r from-primary to-indigo-600 h-2.5 rounded-full" 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${Math.min(100, (getSubtotal() / 50000) * 100)}%` }}
+                        transition={{ duration: 1, delay: 0.8, ease: "easeOut" }}
+                      ></motion.div>
+                    </div>
+                    <p className="text-xs mt-2 text-right font-medium">
+                      Үнэгүй хүргэлтэд дутуу: <span className="text-amber-600">{(50000 - getSubtotal()).toLocaleString()}₮</span>
+                    </p>
                   </motion.div>
                 )}
               </div>
@@ -453,13 +533,13 @@ export default function Cart() {
                 whileTap={{ scale: 0.98 }}
               >
                 <Button 
-                  className="w-full mobile-button h-12 text-base"
+                  className="w-full mobile-button h-12 md:h-14 text-base font-semibold bg-gradient-to-r from-primary to-primary-foreground shadow-lg shadow-primary/20"
                   onClick={handleCheckout}
                   disabled={loading}
                 >
                   {loading ? (
                     <div className="flex items-center gap-2">
-                      <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full"></div>
+                      <div className="animate-spin h-5 w-5 border-2 border-current border-t-transparent rounded-full"></div>
                       <span>Боловсруулж байна...</span>
                     </div>
                   ) : (
