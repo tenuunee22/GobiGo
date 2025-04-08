@@ -64,6 +64,8 @@ try {
 }
 const auth = getAuth();
 const db = getFirestore();
+
+// Initialize providers
 const googleProvider = new GoogleAuthProvider();
 const facebookProvider = new FacebookAuthProvider();
 let recaptchaVerifier: RecaptchaVerifier | null = null;
@@ -592,11 +594,43 @@ export const changeUserPassword = async (currentPassword: string, newPassword: s
   }
 };
 
+// Handle the redirect result from login providers
+export const handleAuthRedirect = async () => {
+  try {
+    const result = await getRedirectResult(auth);
+    
+    if (result && result.user) {
+      // Check if user data exists in Firestore
+      const userDoc = await getDoc(doc(db, "users", result.user.uid));
+      
+      if (!userDoc.exists()) {
+        // User is logging in for the first time, add to Firestore
+        await setDoc(doc(db, "users", result.user.uid), {
+          uid: result.user.uid,
+          email: result.user.email,
+          name: result.user.displayName,
+          role: "customer", // Default role for new users
+          createdAt: serverTimestamp()
+        });
+      }
+      
+      return result.user;
+    }
+    
+    return null;
+  } catch (error) {
+    console.error("Error handling auth redirect:", error);
+    throw error;
+  }
+};
+
 export { 
   app, 
   auth, 
   db, 
   storage,
   onAuthStateChanged,
-  recaptchaVerifier
+  recaptchaVerifier,
+  googleProvider,
+  facebookProvider
 };
