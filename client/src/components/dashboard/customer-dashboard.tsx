@@ -7,7 +7,7 @@ import { OrderTracking } from "@/components/customer/order-tracking";
 import { WelcomeBanner } from "@/components/shared/welcome-banner";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
-import { Search, Pizza, ShoppingCart, PlusCircle, Pill } from "lucide-react";
+import { Search, ShoppingCart, PlusCircle, Pill, Utensils, Store, Grid3X3 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 export function CustomerDashboard() {
@@ -87,10 +87,30 @@ export function CustomerDashboard() {
   }, [user, toast, userLocation]);
 
   const categories = [
-    { id: "all", name: "Бүх ангилал", icon: <PlusCircle className="h-6 w-6 text-primary" /> },
-    { id: "restaurants", name: "Рестораны", icon: <Pizza className="h-6 w-6 text-primary" /> },
-    { id: "groceries", name: "Хүнсний дэлгүүр", icon: <ShoppingCart className="h-6 w-6 text-primary" /> },
-    { id: "retail", name: "Жижиглэн худалдаа", icon: <PlusCircle className="h-6 w-6 text-primary" /> },
+    { 
+      id: "all", 
+      name: "Бүх ангилал", 
+      icon: <Grid3X3 className="h-6 w-6 text-primary" />,
+      emoji: "🔍"
+    },
+    { 
+      id: "restaurants", 
+      name: "Рестораны", 
+      icon: <Utensils className="h-6 w-6 text-primary" />,
+      emoji: "🍴"
+    },
+    { 
+      id: "groceries", 
+      name: "Хүнсний дэлгүүр", 
+      icon: <ShoppingCart className="h-6 w-6 text-primary" />,
+      emoji: "🛒"
+    },
+    { 
+      id: "retail", 
+      name: "Жижиглэн худалдаа", 
+      icon: <Store className="h-6 w-6 text-primary" />,
+      emoji: "🏪"
+    },
   ];
 
   const [activeCategory, setActiveCategory] = useState<string>("all");
@@ -292,6 +312,7 @@ export function CustomerDashboard() {
                 key={category.id}
                 name={category.name}
                 icon={category.icon}
+                emoji={category.emoji}
                 isActive={activeCategory === category.id}
                 onClick={() => handleCategoryClick(category.id)}
               />

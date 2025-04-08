@@ -22,6 +22,7 @@ import OrderDetail from "@/pages/order/[id]";
 import Checkout from "@/pages/checkout";
 import Cart from "@/pages/cart";
 import TooltipExample from "@/pages/tooltip-example";
+import Settings from "@/pages/settings";
 
 // Customer components
 import { CustomerDashboard } from "@/components/dashboard/customer-dashboard";
@@ -104,7 +105,7 @@ function Router() {
         <Route path="/earnings" component={CustomerDashboard} />
         <Route path="/delivery-history" component={DeliveryDashboard} />
         <Route path="/products" component={BusinessDashboard} />
-        <Route path="/settings" component={CustomerDashboard} />
+        <Route path="/settings" component={Settings} />
         <Route component={NotFound} />
       </Switch>
     </div>
