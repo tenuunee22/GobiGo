@@ -8,6 +8,8 @@ import {
   GoogleAuthProvider,
   FacebookAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   updateProfile,
   PhoneAuthProvider,
   signInWithPhoneNumber,
@@ -99,24 +101,10 @@ export const loginUser = async (email: string, password: string) => {
 
 export const loginWithGoogle = async () => {
   try {
-    const result = await signInWithPopup(auth, googleProvider);
-    const user = result.user;
-    
-    // Check if the user document exists
-    const userDoc = await getDoc(doc(db, "users", user.uid));
-    
-    if (!userDoc.exists()) {
-      // This is the user's first login, create a document with default role
-      await setDoc(doc(db, "users", user.uid), {
-        uid: user.uid,
-        email: user.email,
-        name: user.displayName,
-        role: "customer", // Default role
-        createdAt: serverTimestamp()
-      });
-    }
-    
-    return user;
+    await signInWithRedirect(auth, googleProvider);
+    // The user will be redirected to Google's sign-in page and then back to the app
+    // The redirect result will be handled by the handleAuthRedirect function
+    return null;
   } catch (error) {
     console.error("Error logging in with Google:", error);
     throw error;
@@ -125,24 +113,10 @@ export const loginWithGoogle = async () => {
 
 export const loginWithFacebook = async () => {
   try {
-    const result = await signInWithPopup(auth, facebookProvider);
-    const user = result.user;
-    
-    // Check if the user document exists
-    const userDoc = await getDoc(doc(db, "users", user.uid));
-    
-    if (!userDoc.exists()) {
-      // This is the user's first login, create a document with default role
-      await setDoc(doc(db, "users", user.uid), {
-        uid: user.uid,
-        email: user.email,
-        name: user.displayName,
-        role: "customer", // Default role
-        createdAt: serverTimestamp()
-      });
-    }
-    
-    return user;
+    await signInWithRedirect(auth, facebookProvider);
+    // The user will be redirected to Facebook's sign-in page and then back to the app
+    // The redirect result will be handled by the handleAuthRedirect function
+    return null;
   } catch (error) {
     console.error("Error logging in with Facebook:", error);
     throw error;

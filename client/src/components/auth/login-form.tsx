@@ -61,26 +61,16 @@ export function LoginForm({ onToggleForm }: LoginFormProps) {
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     try {
-      const userCredential = await loginWithGoogle();
-      toast({
-        title: "Амжилттай нэвтэрлээ",
-        description: "Тавтай морил!",
-      });
+      await loginWithGoogle();
+      // No need to handle the result here as we now use redirect flow
+      // The redirect will happen automatically and the result will be
+      // processed by the handleAuthRedirect in AuthContext on return
       
-      // Get user data from Firestore to determine role
-      const userData = await import("@/lib/firebase").then(m => m.getUserData(userCredential.uid));
-      if (userData) {
-        // Set user data in auth context
-        setUser({
-          uid: userCredential.uid,
-          email: userCredential.email,
-          displayName: userCredential.displayName,
-          ...userData
-        });
-        
-        // Redirect to home page
-        setLocation("/");
-      }
+      // We'll show a toast to indicate the process has started
+      toast({
+        title: "Google нэвтрэлт эхэллээ",
+        description: "Google хуудас руу шилжиж байна...",
+      });
     } catch (error: any) {
       console.error("Google login error:", error);
       toast({
@@ -88,7 +78,6 @@ export function LoginForm({ onToggleForm }: LoginFormProps) {
         description: error.message || "Google-ээр нэвтрэх үед алдаа гарлаа",
         variant: "destructive",
       });
-    } finally {
       setIsLoading(false);
     }
   };
@@ -96,26 +85,16 @@ export function LoginForm({ onToggleForm }: LoginFormProps) {
   const handleFacebookLogin = async () => {
     setIsLoading(true);
     try {
-      const userCredential = await loginWithFacebook();
-      toast({
-        title: "Амжилттай нэвтэрлээ",
-        description: "Тавтай морил!",
-      });
+      await loginWithFacebook();
+      // No need to handle the result here as we now use redirect flow
+      // The redirect will happen automatically and the result will be
+      // processed by the handleAuthRedirect in AuthContext on return
       
-      // Get user data from Firestore to determine role
-      const userData = await import("@/lib/firebase").then(m => m.getUserData(userCredential.uid));
-      if (userData) {
-        // Set user data in auth context
-        setUser({
-          uid: userCredential.uid,
-          email: userCredential.email,
-          displayName: userCredential.displayName,
-          ...userData
-        });
-        
-        // Redirect to home page
-        setLocation("/");
-      }
+      // We'll show a toast to indicate the process has started
+      toast({
+        title: "Facebook нэвтрэлт эхэллээ",
+        description: "Facebook хуудас руу шилжиж байна...",
+      });
     } catch (error: any) {
       console.error("Facebook login error:", error);
       toast({
@@ -123,7 +102,6 @@ export function LoginForm({ onToggleForm }: LoginFormProps) {
         description: error.message || "Facebook-ээр нэвтрэх үед алдаа гарлаа",
         variant: "destructive",
       });
-    } finally {
       setIsLoading(false);
     }
   };
