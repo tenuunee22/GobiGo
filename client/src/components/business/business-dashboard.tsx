@@ -362,7 +362,9 @@ export function BusinessDashboard() {
         <TabsList className="mb-4">
           <TabsTrigger value="orders">Захиалгууд</TabsTrigger>
           <TabsTrigger value="products">Бүтээгдэхүүн</TabsTrigger>
+          <TabsTrigger value="shop">Дэлгүүр</TabsTrigger>
           <TabsTrigger value="earnings">Орлого</TabsTrigger>
+          <TabsTrigger value="sales">Борлуулалт</TabsTrigger>
           <TabsTrigger value="settings">Тохиргоо</TabsTrigger>
         </TabsList>
         
@@ -470,6 +472,203 @@ export function BusinessDashboard() {
           )}
         </TabsContent>
         
+        <TabsContent value="shop">
+          <Card>
+            <CardHeader>
+              <CardTitle>Дэлгүүрийн хуудас</CardTitle>
+              <p className="text-sm text-gray-500">Энэ хэсэгт таны дэлгүүрийн үзэгдэх байдал харагдана</p>
+            </CardHeader>
+            <CardContent>
+              <div className="mb-6">
+                <h2 className="text-xl font-bold mb-4">{user?.businessName || "Танай дэлгүүр"}</h2>
+                
+                {user?.coverImage && (
+                  <div className="relative w-full h-40 md:h-60 rounded-lg overflow-hidden mb-4">
+                    <img 
+                      src={user.coverImage} 
+                      alt={user?.businessName || "Дэлгүүрийн ковер зураг"} 
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                    <div className="absolute bottom-4 left-4 text-white">
+                      <h3 className="text-xl font-bold">{user?.businessName}</h3>
+                      <p className="text-sm opacity-90">{user?.businessType || "Хоолны газар"}</p>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h3 className="font-medium mb-2">Дэлгүүрийн мэдээлэл</h3>
+                    <div className="space-y-2 text-sm">
+                      <p><span className="font-medium">Нэр:</span> {user?.businessName || "Тохируулаагүй"}</p>
+                      <p><span className="font-medium">Төрөл:</span> {user?.businessType || "Тохируулаагүй"}</p>
+                      <p><span className="font-medium">Ажиллах цаг:</span> 10:00 - 22:00</p>
+                      <p><span className="font-medium">Утас:</span> {user?.phone || "Тохируулаагүй"}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h3 className="font-medium mb-2">Байршил</h3>
+                    {user?.location ? (
+                      <div className="space-y-2 text-sm">
+                        <p>{typeof user.location === 'string' ? user.location : 'Байршил оруулсан'}</p>
+                        {user.locationLat && user.locationLng && (
+                          <p className="text-xs text-gray-500">
+                            <span className="font-medium">Координат:</span> {Number(user.locationLat).toFixed(6)}, {Number(user.locationLng).toFixed(6)}
+                          </p>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-500">Байршил тохируулаагүй байна</p>
+                    )}
+                  </div>
+                  
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h3 className="font-medium mb-2">Үнэлгээ</h3>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center">
+                        <div className="flex text-yellow-400">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-5 h-5">
+                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                          </svg>
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-5 h-5">
+                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                          </svg>
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-5 h-5">
+                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                          </svg>
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-5 h-5">
+                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                          </svg>
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-5 h-5">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                          </svg>
+                        </div>
+                        <span className="ml-2">4.3 / 5</span>
+                      </div>
+                      <p>Нийт үнэлгээ: 27</p>
+                      <p>Сэтгэгдэл: 15</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold mb-3">Бүтээгдэхүүнүүд</h3>
+                  {filteredProducts.length > 0 ? (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      {filteredProducts.slice(0, 8).map((product) => (
+                        <div key={product.id} className="border rounded-lg overflow-hidden bg-white">
+                          <div 
+                            className="h-28 bg-center bg-cover" 
+                            style={{ backgroundImage: product.imageUrl ? `url(${product.imageUrl})` : "none" }}
+                          >
+                            {!product.imageUrl && (
+                              <div className="h-full w-full flex items-center justify-center bg-gray-100 text-gray-400">
+                                <span className="text-xs">Зураггүй</span>
+                              </div>
+                            )}
+                          </div>
+                          <div className="p-3">
+                            <h4 className="font-medium text-sm truncate">{product.name}</h4>
+                            <p className="text-xs text-gray-500 h-8 overflow-hidden">{product.description}</p>
+                            <div className="flex justify-between items-center mt-2">
+                              <span className="font-medium text-sm">{product.price?.toLocaleString()}₮</span>
+                              <button className="text-xs bg-primary text-white px-2 py-1 rounded-full">
+                                Захиалах
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-6 bg-gray-50 rounded-lg">
+                      <p className="text-gray-500">Одоогоор бүтээгдэхүүн байхгүй байна</p>
+                      <Button onClick={handleAddProduct} size="sm" className="mt-2">
+                        <Plus className="mr-1 h-3 w-3" /> Бүтээгдэхүүн нэмэх
+                      </Button>
+                    </div>
+                  )}
+                  
+                  {filteredProducts.length > 8 && (
+                    <div className="text-center mt-4">
+                      <Button variant="outline">
+                        Бүгдийг харах ({filteredProducts.length})
+                      </Button>
+                    </div>
+                  )}
+                </div>
+                
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Сэтгэгдлүүд</h3>
+                  <div className="space-y-4">
+                    <div className="border rounded-lg p-4">
+                      <div className="flex justify-between mb-2">
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 rounded-full bg-gray-200 mr-2"></div>
+                          <div>
+                            <p className="font-medium text-sm">Болд Бат</p>
+                            <div className="flex text-yellow-400">
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-3 h-3">
+                                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                              </svg>
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-3 h-3">
+                                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                              </svg>
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-3 h-3">
+                                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                              </svg>
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-3 h-3">
+                                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                              </svg>
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-3 h-3">
+                                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                        <p className="text-xs text-gray-500">2023-11-20</p>
+                      </div>
+                      <p className="text-sm">Маш амттай, үйлчилгээ түргэн шуурхай байсан. Хоолны амт чанар өндөр.</p>
+                    </div>
+                    
+                    <div className="border rounded-lg p-4">
+                      <div className="flex justify-between mb-2">
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 rounded-full bg-gray-200 mr-2"></div>
+                          <div>
+                            <p className="font-medium text-sm">Оюун Дуламсүрэн</p>
+                            <div className="flex text-yellow-400">
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-3 h-3">
+                                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                              </svg>
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-3 h-3">
+                                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                              </svg>
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-3 h-3">
+                                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                              </svg>
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-3 h-3">
+                                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                              </svg>
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-3 h-3">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                        <p className="text-xs text-gray-500">2023-11-15</p>
+                      </div>
+                      <p className="text-sm">Нэг л удаа захиалсан, хоол амттай байсан ч, хүргэлт жоохон удсан.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
         <TabsContent value="earnings">
           <Card>
             <CardHeader>
@@ -503,7 +702,7 @@ export function BusinessDashboard() {
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">
-                        {stats.recentSales.reduce((sum, day) => sum + day.revenue, 0).toLocaleString()}₮
+                        {stats.recentSales.reduce((sum: number, day: any) => sum + day.revenue, 0).toLocaleString()}₮
                       </div>
                       <p className="text-xs text-muted-foreground">
                         {stats.recentSales.reduce((sum, day) => sum + day.orders, 0)} захиалга
@@ -618,6 +817,221 @@ export function BusinessDashboard() {
                       )}
                     </tbody>
                   </table>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="sales">
+          <Card>
+            <CardHeader>
+              <CardTitle>Бараа бүтээгдэхүүний борлуулалт</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-4">Борлуулалтын тойм</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="text-sm font-medium text-gray-500 mb-1">Нийт борлуулсан бүтээгдэхүүн</h4>
+                    <div className="text-2xl font-bold">
+                      {sortedOrders.reduce((sum, order) => {
+                        return sum + (order.items || []).reduce((itemSum, item) => itemSum + (item.quantity || 0), 0);
+                      }, 0)}
+                    </div>
+                  </div>
+                  
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="text-sm font-medium text-gray-500 mb-1">Бүтээгдэхүүний төрөл</h4>
+                    <div className="text-2xl font-bold">{filteredProducts.length}</div>
+                  </div>
+                  
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="text-sm font-medium text-gray-500 mb-1">Дундаж үнэ</h4>
+                    <div className="text-2xl font-bold">
+                      {filteredProducts.length ? 
+                        Math.round(filteredProducts.reduce((sum, product) => sum + (product.price || 0), 0) / filteredProducts.length).toLocaleString() : 0}₮
+                    </div>
+                  </div>
+                  
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="text-sm font-medium text-gray-500 mb-1">Хамгийн их зарагдсан</h4>
+                    <div className="text-xl font-bold truncate">
+                      {(() => {
+                        // Бүх захиалгын item-уудыг нэгтгэж, хамгийн их зарагдсаныг олох
+                        const allItems: { [key: string]: { name: string; quantity: number } } = {};
+                        
+                        sortedOrders.forEach(order => {
+                          (order.items || []).forEach(item => {
+                            if (!allItems[item.name]) {
+                              allItems[item.name] = { name: item.name, quantity: 0 };
+                            }
+                            allItems[item.name].quantity += (item.quantity || 0);
+                          });
+                        });
+                        
+                        const itemsArray = Object.values(allItems);
+                        if (itemsArray.length === 0) return "Байхгүй";
+                        
+                        const mostSold = itemsArray.reduce((max, item) => 
+                          item.quantity > max.quantity ? item : max, itemsArray[0]);
+                          
+                        return mostSold.name;
+                      })()}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-white border rounded-lg overflow-hidden">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Бүтээгдэхүүн
+                        </th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Нийт зарагдсан
+                        </th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Нийт орлого
+                        </th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Сүүлийн борлуулалт
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {(() => {
+                        // Бүх захиалгын item-уудыг нэгтгэж, бүтээгдэхүүн бүрээр нь ангилах
+                        const soldItems: {
+                          [key: string]: {
+                            name: string;
+                            quantity: number;
+                            revenue: number;
+                            lastSold?: Date;
+                          }
+                        } = {};
+                        
+                        sortedOrders.forEach(order => {
+                          const orderDate = new Date(order.createdAt || new Date());
+                          
+                          (order.items || []).forEach(item => {
+                            if (!soldItems[item.name]) {
+                              soldItems[item.name] = {
+                                name: item.name,
+                                quantity: 0,
+                                revenue: 0,
+                                lastSold: undefined
+                              };
+                            }
+                            
+                            const currentItem = soldItems[item.name];
+                            currentItem.quantity += (item.quantity || 0);
+                            currentItem.revenue += ((item.price || 0) * (item.quantity || 0));
+                            
+                            // Сүүлийн зарагдсан хугацааг шинэчлэх
+                            if (!currentItem.lastSold || orderDate > currentItem.lastSold) {
+                              currentItem.lastSold = orderDate;
+                            }
+                          });
+                        });
+                        
+                        // Массив болгож, борлуулалтын хэмжээгээр эрэмбэлэх
+                        const sortedItems = Object.values(soldItems).sort((a, b) => b.quantity - a.quantity);
+                        
+                        if (sortedItems.length === 0) {
+                          return (
+                            <tr>
+                              <td colSpan={4} className="px-6 py-8 text-center text-sm text-gray-500">
+                                Одоогоор бүтээгдэхүүн зарагдаагүй байна
+                              </td>
+                            </tr>
+                          );
+                        }
+                        
+                        return sortedItems.map((item, index) => (
+                          <tr key={index}>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                              {item.name}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {item.quantity} ширхэг
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {item.revenue.toLocaleString()}₮
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {item.lastSold ? item.lastSold.toLocaleDateString() : "Тодорхойгүй"}
+                            </td>
+                          </tr>
+                        ));
+                      })()}
+                    </tbody>
+                  </table>
+                </div>
+                
+                <div className="mt-8">
+                  <h3 className="text-lg font-semibold mb-4">Сүүлийн захиалгууд</h3>
+                  <div className="bg-white border rounded-lg overflow-hidden">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Огноо
+                          </th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Хэрэглэгч
+                          </th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Бүтээгдэхүүн
+                          </th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Төлбөр
+                          </th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Төлөв
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {sortedOrders.slice(0, 5).map((order) => (
+                          <tr key={order.id}>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {new Date(order.createdAt || new Date()).toLocaleDateString()}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {order.customerName || "Хэрэглэгч"}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-500">
+                              <div className="max-w-xs truncate">
+                                {(order.items || []).map(item => `${item.name} (${item.quantity})`).join(", ")}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                              {order.totalAmount?.toLocaleString()}₮
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                ${order.status === "completed" ? "bg-green-100 text-green-800" : 
+                                  order.status === "on-the-way" ? "bg-blue-100 text-blue-800" : 
+                                  order.status === "cancelled" ? "bg-red-100 text-red-800" : 
+                                  "bg-yellow-100 text-yellow-800"}`}>
+                                {getStatusText(order.status || "")}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                        {sortedOrders.length === 0 && (
+                          <tr>
+                            <td colSpan={5} className="px-6 py-8 text-center text-sm text-gray-500">
+                              Одоогоор захиалга байхгүй байна
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </CardContent>
