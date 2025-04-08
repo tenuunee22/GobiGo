@@ -5,8 +5,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Bell, Lock, User, Map, CreditCard, ShieldCheck, Check, Plus, Trash2 } from "lucide-react";
+import { Bell, Lock, User, Map, CreditCard, ShieldCheck, Check, Plus, Trash2, Key } from "lucide-react";
 import { motion } from "framer-motion";
+import { Link, useLocation } from "wouter";
 
 export default function Settings() {
   const { user } = useAuth();
@@ -128,9 +129,11 @@ export default function Settings() {
                 </CardContent>
                 <CardFooter className="p-4 md:p-6 pt-0">
                   <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                    <Button variant="default" className="mobile-button px-4 md:px-5 flex gap-2 text-sm md:text-base">
-                      <span>Профайл засах</span> <User className="h-4 w-4" />
-                    </Button>
+                    <Link href="/profile/user">
+                      <Button variant="default" className="mobile-button px-4 md:px-5 flex gap-2 text-sm md:text-base">
+                        <span>Профайл засах</span> <User className="h-4 w-4" />
+                      </Button>
+                    </Link>
                   </motion.div>
                 </CardFooter>
               </Card>
@@ -161,10 +164,12 @@ export default function Settings() {
                           </p>
                         </div>
                         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="self-end sm:self-center">
-                          <Button variant="outline" size="sm" className="mobile-button px-3 h-9 text-xs md:text-sm">
-                            <Map className="h-4 w-4 mr-1 md:mr-2" />
-                            <span>Хаяг нэмэх</span>
-                          </Button>
+                          <Link href="/profile/user">
+                            <Button variant="outline" size="sm" className="mobile-button px-3 h-9 text-xs md:text-sm">
+                              <Map className="h-4 w-4 mr-1 md:mr-2" />
+                              <span>Хаяг нэмэх</span>
+                            </Button>
+                          </Link>
                         </motion.div>
                       </div>
                     </div>
@@ -273,10 +278,12 @@ export default function Settings() {
                   <p className="text-xs md:text-sm text-muted-foreground max-w-[220px] md:max-w-none">Visa, Mastercard, болон бусад картууд.</p>
                   
                   <motion.div className="mt-4" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                    <Button className="mobile-button px-5 rounded-full bg-gradient-to-r from-primary to-indigo-600 text-sm">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Шинэ карт нэмэх
-                    </Button>
+                    <Link href="/profile/user">
+                      <Button className="mobile-button px-5 rounded-full bg-gradient-to-r from-primary to-indigo-600 text-sm">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Шинэ карт нэмэх
+                      </Button>
+                    </Link>
                   </motion.div>
                 </motion.div>
                 
@@ -301,10 +308,12 @@ export default function Settings() {
                     </div>
                     <div className="flex items-center">
                       <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                        <Button variant="outline" size="sm" className="text-green-600 border-green-200 hover:bg-green-50">
-                          <Plus className="h-4 w-4 md:mr-2" />
-                          <span className="hidden md:inline">Холбох</span>
-                        </Button>
+                        <Link href="/profile/user">
+                          <Button variant="outline" size="sm" className="text-green-600 border-green-200 hover:bg-green-50">
+                            <Plus className="h-4 w-4 md:mr-2" />
+                            <span className="hidden md:inline">Холбох</span>
+                          </Button>
+                        </Link>
                       </motion.div>
                     </div>
                   </div>
@@ -348,9 +357,11 @@ export default function Settings() {
                       </div>
                     </div>
                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                      <Button variant="outline" size="sm" className="px-4 flex items-center gap-2">
-                        Солих <Lock className="h-4 w-4 ml-1" />
-                      </Button>
+                      <Link href="/profile/user">
+                        <Button variant="outline" size="sm" className="px-4 flex items-center gap-2">
+                          Солих <Key className="h-4 w-4 ml-1" />
+                        </Button>
+                      </Link>
                     </motion.div>
                   </div>
                   
@@ -365,9 +376,11 @@ export default function Settings() {
                         <p className="text-xs text-muted-foreground">Аккаунтын нууц үгээ шинэчлэх</p>
                       </div>
                       <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                        <Button variant="outline" size="sm" className="px-3 h-8 text-xs">
-                          Солих
-                        </Button>
+                        <Link href="/profile/user">
+                          <Button variant="outline" size="sm" className="px-3 h-8 text-xs">
+                            Солих
+                          </Button>
+                        </Link>
                       </motion.div>
                     </div>
                   </div>
