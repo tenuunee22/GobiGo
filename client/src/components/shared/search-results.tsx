@@ -1,22 +1,16 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Link } from "wouter";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { X, Search, MapPin, Store, Pizza, ShoppingBag } from "lucide-react";
+import { useLocation } from "wouter";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { motion, AnimatePresence } from "framer-motion";
+import { Store, Beef, X } from "lucide-react";
 
-// Хайлтын үр дүнгийн төрөл
 interface SearchResult {
   id: string;
-  type: "restaurant" | "food" | "store" | "category";
   name: string;
-  image?: string;
-  category?: string;
-  location?: string;
-  rating?: number;
-  distance?: string;
-  price?: number;
+  type: 'restaurant' | 'product' | 'category';
+  imageUrl?: string;
+  description?: string;
 }
 
 interface SearchResultsProps {
@@ -26,243 +20,215 @@ interface SearchResultsProps {
 }
 
 export function SearchResults({ query, isVisible, onClose }: SearchResultsProps) {
+  const [, setLocation] = useLocation();
   const [results, setResults] = useState<SearchResult[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [categories, setCategories] = useState<string[]>([
-    "Рестораны", "Хүнсний", "Эм", "Хоол", "Хүргэлт"
-  ]);
+  const [selectedType, setSelectedType] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  // Хайлтын үр дүн дуурайх
+  // Mock function to simulate API search
   useEffect(() => {
-    if (!query || query.length < 2) {
+    if (!query.trim() || !isVisible) {
       setResults([]);
       return;
     }
 
-    // Хайлтын үйлдэл дуурайх
-    setIsLoading(true);
-    const timer = setTimeout(() => {
-      // Dummy data
-      const dummyResults: SearchResult[] = [
+    setLoading(true);
+
+    // Simulate API delay
+    const timeoutId = setTimeout(() => {
+      // Mock data
+      const mockData: SearchResult[] = [
         {
-          id: "r1",
-          type: "restaurant",
-          name: "Мон Пицца",
-          image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?q=80&w=250&auto=format&fit=crop",
-          category: "Пицца",
-          location: "Баянзүрх дүүрэг",
-          rating: 4.5,
-          distance: "2.3 км"
+          id: '1',
+          name: 'Хүслэн Ресторан',
+          type: 'restaurant',
+          imageUrl: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
+          description: 'Монгол үндэсний хоолны газар'
         },
         {
-          id: "r2",
-          type: "restaurant",
-          name: "Кимчи Ресторан",
-          image: "https://images.unsplash.com/photo-1563245372-f21724e3856d?q=80&w=250&auto=format&fit=crop",
-          category: "Солонгос",
-          location: "Сүхбаатар дүүрэг",
-          rating: 4.7,
-          distance: "1.8 км"
+          id: '2',
+          name: 'Пицца',
+          type: 'product',
+          imageUrl: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
+          description: 'Пепперони пицца'
         },
         {
-          id: "f1",
-          type: "food",
-          name: "Кимчи хуурга",
-          image: "https://images.unsplash.com/photo-1590301157890-4810ed352733?q=80&w=250&auto=format&fit=crop",
-          category: "Солонгос хоол",
-          price: 15000
+          id: '3',
+          name: 'Монгол Амтат',
+          type: 'restaurant',
+          imageUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
+          description: 'Үндэсний хоолны газар'
         },
         {
-          id: "f2",
-          type: "food",
-          name: "Пеперони пицца",
-          image: "https://images.unsplash.com/photo-1628840042765-356cda07504e?q=80&w=250&auto=format&fit=crop",
-          category: "Пицца",
-          price: 22000
+          id: '4',
+          name: 'Хамбургер',
+          type: 'product',
+          imageUrl: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
+          description: 'Тахианы махан бургер'
         },
         {
-          id: "s1",
-          type: "store",
-          name: "Гоё Дэлгүүр",
-          category: "Хүнсний",
-          location: "Хан-Уул дүүрэг",
-          distance: "3.1 км"
-        }
+          id: '5',
+          name: 'Хүнсний дэлгүүр',
+          type: 'category',
+          description: 'Хүнсний барааны дэлгүүрүүд'
+        },
       ];
 
-      // Хайлтын үр дүнг шүүж, өгөгдсөн query-тэй тохирох бүх үр дүнг буцаана
-      const filtered = dummyResults.filter(result => 
-        result.name.toLowerCase().includes(query.toLowerCase()) || 
-        (result.category && result.category.toLowerCase().includes(query.toLowerCase()))
+      // Filter by search query
+      const filtered = mockData.filter(item => 
+        item.name.toLowerCase().includes(query.toLowerCase()) || 
+        (item.description && item.description.toLowerCase().includes(query.toLowerCase()))
       );
-      
-      setResults(filtered);
-      setIsLoading(false);
-    }, 500);
 
-    return () => clearTimeout(timer);
-  }, [query]);
+      // Filter by selected type if any
+      const typeFiltered = selectedType 
+        ? filtered.filter(item => item.type === selectedType)
+        : filtered;
 
-  if (!isVisible) return null;
+      setResults(typeFiltered);
+      setLoading(false);
+    }, 300);
 
-  return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -10 }}
-        className="absolute top-full left-0 right-0 bg-white rounded-b-lg shadow-xl border z-50 max-h-[80vh] overflow-auto"
-      >
-        <div className="flex justify-between items-center p-4 border-b sticky top-0 bg-white">
-          <p className="text-sm font-medium">
-            {query && query.length >= 2 ? (
-              <span>
-                <span className="text-primary">{results.length}</span> хайлтын үр дүн:
-                <span className="font-semibold ml-1">"{query}"</span>
-              </span>
-            ) : (
-              <span>Санал болгох категориуд</span>
-            )}
-          </p>
-          <Button size="sm" variant="ghost" onClick={onClose}>
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-        
-        {isLoading ? (
-          <div className="p-6 text-center">
-            <div className="animate-spin inline-block h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
-            <p className="mt-2 text-sm text-gray-500">Хайж байна...</p>
-          </div>
-        ) : (
-          <div className="p-3">
-            {query && query.length >= 2 ? (
-              // Хайлтын үр дүн харуулах
-              results.length > 0 ? (
-                <div className="space-y-3">
-                  {results.map((result) => (
-                    <SearchResultItem key={result.id} result={result} onClose={onClose} />
-                  ))}
-                </div>
-              ) : (
-                <div className="p-6 text-center">
-                  <Search className="h-12 w-12 mx-auto text-gray-300 mb-2" />
-                  <p className="text-gray-500">"{query}" гэх хайлтаар үр дүн олдсонгүй</p>
-                  <p className="text-sm text-gray-400 mt-1">Өөр түлхүүр үг ашиглан дахин хайна уу</p>
-                </div>
-              )
-            ) : (
-              // Категори санал болгох
-              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
-                {categories.map((category, index) => (
-                  <Button 
-                    key={index} 
-                    variant="outline" 
-                    className="text-sm h-auto py-2 px-3 justify-start"
-                    onClick={() => {
-                      // Санал болгосон категори дээр дарахад
-                      console.log(`Selected category: ${category}`);
-                      onClose();
-                    }}
-                  >
-                    {category}
-                  </Button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-      </motion.div>
-    </AnimatePresence>
-  );
-}
+    return () => clearTimeout(timeoutId);
+  }, [query, isVisible, selectedType]);
 
-function SearchResultItem({ result, onClose }: { result: SearchResult; onClose: () => void }) {
-  // Үр дүнгийн төрлөөс хамаарсан линк үүсгэх
-  const getLink = () => {
-    switch (result.type) {
-      case "restaurant":
-        return `/restaurant/${result.id}`;
-      case "food":
-        return `/food/${result.id}`;
-      case "store":
-        return `/store/${result.id}`;
-      case "category":
-        return `/category/${result.id}`;
-      default:
-        return `/`;
-    }
+  // Handle type filter
+  const handleTypeFilter = (type: string) => {
+    setSelectedType(type === selectedType ? null : type);
   };
 
-  // Үр дүнгийн төрлөөс хамаарсан Icon үүсгэх
-  const getIcon = () => {
-    switch (result.type) {
-      case "restaurant":
-        return <Store className="h-4 w-4 text-primary" />;
-      case "food":
-        return <Pizza className="h-4 w-4 text-orange-500" />;
-      case "store":
-        return <ShoppingBag className="h-4 w-4 text-blue-500" />;
+  // Get unique types for filter buttons
+  const getUniqueTypes = () => {
+    const types = results.map(result => result.type);
+    return Array.from(new Set(types));
+  };
+
+  // Handle item click
+  const handleItemClick = (result: SearchResult) => {
+    const path = result.type === 'restaurant' 
+      ? `/restaurant/${result.id}` 
+      : result.type === 'product'
+      ? `/product/${result.id}`
+      : `/category/${result.id}`;
+    
+    setLocation(path);
+    onClose();
+  };
+
+  // Return empty if not visible
+  if (!isVisible) return null;
+
+  // Render type icon based on result type
+  const renderTypeIcon = (type: string) => {
+    switch (type) {
+      case 'restaurant':
+        return <Store className="h-4 w-4 mr-1" />;
+      case 'product':
+        return <Beef className="h-4 w-4 mr-1" />;
       default:
         return null;
     }
   };
 
   return (
-    <Link href={getLink()}>
-      <Card className="cursor-pointer hover:bg-gray-50 transition-colors" onClick={onClose}>
-        <CardContent className="p-3 flex gap-3">
-          {result.image ? (
-            <div className="w-16 h-16 rounded-md overflow-hidden bg-gray-100 flex-shrink-0">
-              <img src={result.image} alt={result.name} className="w-full h-full object-cover" />
-            </div>
-          ) : (
-            <div className="w-16 h-16 rounded-md overflow-hidden bg-gray-100 flex-shrink-0 flex items-center justify-center">
-              {getIcon() || <Store className="h-6 w-6 text-gray-400" />}
-            </div>
-          )}
-          
-          <div className="flex-grow">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="font-medium line-clamp-1">{result.name}</p>
-                
-                <div className="flex items-center gap-2 mt-1 flex-wrap">
-                  {result.category && (
-                    <Badge variant="outline" className="text-xs px-1.5 py-0 h-5">
-                      {getIcon()}
-                      <span className="ml-1">{result.category}</span>
-                    </Badge>
-                  )}
-                  
-                  {result.rating && (
-                    <span className="text-xs text-yellow-500 flex items-center">
-                      ★ {result.rating}
-                    </span>
-                  )}
-                </div>
-              </div>
-              
-              {result.price && (
-                <span className="text-sm font-medium text-gray-700">{result.price.toLocaleString()}₮</span>
-              )}
+    <AnimatePresence>
+      {isVisible && (
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 10 }}
+          transition={{ duration: 0.2 }}
+          className="absolute z-50 top-full mt-1 w-full sm:w-96 bg-white rounded-lg shadow-lg border border-border overflow-hidden"
+        >
+          {/* Header with filters */}
+          <div className="p-3 border-b border-border bg-muted/30">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium">Хайлтын үр дүн</h3>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-6 w-6" 
+                onClick={onClose}
+              >
+                <X className="h-4 w-4" />
+              </Button>
             </div>
             
-            {result.location && (
-              <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
-                <MapPin className="h-3 w-3" />
-                <span>{result.location}</span>
-                {result.distance && (
-                  <span className="flex items-center">
-                    <span className="inline-block h-1 w-1 rounded-full bg-gray-300 mx-1"></span>
-                    {result.distance}
-                  </span>
-                )}
+            {results.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {getUniqueTypes().map(type => (
+                  <Button
+                    key={type}
+                    variant={selectedType === type ? "default" : "outline"}
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => handleTypeFilter(type)}
+                  >
+                    {renderTypeIcon(type)}
+                    {type === 'restaurant' ? 'Рестораны' : 
+                     type === 'product' ? 'Бүтээгдэхүүн' : 
+                     type === 'category' ? 'Ангилал' : type}
+                  </Button>
+                ))}
               </div>
             )}
           </div>
-        </CardContent>
-      </Card>
-    </Link>
+          
+          {/* Results */}
+          <div className="max-h-72 overflow-y-auto">
+            {loading ? (
+              <div className="p-6 flex items-center justify-center">
+                <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full"></div>
+              </div>
+            ) : results.length > 0 ? (
+              <div className="divide-y divide-border">
+                {results.map(result => (
+                  <motion.div
+                    key={result.id}
+                    whileHover={{ backgroundColor: "rgba(0,0,0,0.025)" }}
+                    className="p-3 cursor-pointer"
+                    onClick={() => handleItemClick(result)}
+                  >
+                    <div className="flex items-center gap-3">
+                      {result.imageUrl ? (
+                        <img 
+                          src={result.imageUrl} 
+                          alt={result.name} 
+                          className="w-12 h-12 rounded-md object-cover"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 bg-muted rounded-md flex items-center justify-center">
+                          {result.type === 'restaurant' ? (
+                            <Store className="h-6 w-6 text-muted-foreground" />
+                          ) : (
+                            <Beef className="h-6 w-6 text-muted-foreground" />
+                          )}
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium truncate">{result.name}</div>
+                        <div className="text-sm text-muted-foreground truncate">{result.description}</div>
+                        <Badge variant="outline" className="mt-1">
+                          {result.type === 'restaurant' ? 'Ресторан' : 
+                           result.type === 'product' ? 'Хоол' : 'Ангилал'}
+                        </Badge>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            ) : query ? (
+              <div className="p-6 text-center">
+                <p className="text-muted-foreground">"{query}" хайлтад тохирох үр дүн олдсонгүй</p>
+              </div>
+            ) : (
+              <div className="p-6 text-center">
+                <p className="text-muted-foreground">Хайлтаа эхлүүлнэ үү</p>
+              </div>
+            )}
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

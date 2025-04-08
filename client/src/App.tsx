@@ -4,7 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { useAuth } from "@/contexts/auth-context";
 import { useEffect } from "react";
-import { Header } from "@/components/shared/header";
+import { Header } from "@/components/shared/header-fixed";
 import { OnboardingProvider } from "@/components/onboarding/onboarding-context";
 import OnboardingModal from "@/components/onboarding/OnboardingModal";
 import OnboardingHintButton from "@/components/onboarding/OnboardingHintButton";

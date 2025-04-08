@@ -38,13 +38,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
   Home,
   User,
   Store,
@@ -380,7 +373,7 @@ export function Header() {
             </div>
             
             {/* Cart Popover - only show when user is logged in as customer */}
-            {user && user.role === 'customer' ? (
+            {(user && user.role === 'customer') && (
               <Popover open={isCartOpen} onOpenChange={setIsCartOpen}>
                 <PopoverTrigger asChild>
                   <Button variant="ghost" size="icon" className="relative">
@@ -486,7 +479,7 @@ export function Header() {
                   )}
                 </PopoverContent>
               </Popover>
-            ) : null}
+            )}
             
             {/* User Profile Menu */}
             {user ? (
