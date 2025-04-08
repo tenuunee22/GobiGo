@@ -253,49 +253,62 @@ export function BusinessDashboard() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Бизнес удирдлага</h1>
+      <h1 className="text-2xl font-bold mb-6 slide-in-left flex items-center">
+        <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text">Бизнес удирдлага</span>
+        <span className="ml-3 tada text-xl">🏪</span>
+      </h1>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <Card>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 bounce-in">
+        <Card className="hover:shadow-lg transition-all duration-300 dashboard-card-hover overflow-hidden border-t-4 border-blue-500">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
+              <span className="mr-2 text-blue-500 wiggle">💰</span>
               Нийт борлуулалт
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.earnings.toLocaleString()}₮</div>
-            <p className="text-xs text-muted-foreground">
-              +20.1% өнгөрсөн сараас
+            <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-transparent bg-clip-text">
+              {stats.earnings.toLocaleString()}₮
+            </div>
+            <p className="text-xs text-muted-foreground flex items-center">
+              <span className="text-green-500 mr-1">↑</span>
+              <span className="text-green-500 font-medium">+20.1%</span> өнгөрсөн сараас
             </p>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="hover:shadow-lg transition-all duration-300 dashboard-card-hover overflow-hidden border-t-4 border-purple-500">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
+              <span className="mr-2 text-purple-500 jelly">📦</span>
               Нийт захиалга
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.ordersCount}</div>
-            <p className="text-xs text-muted-foreground">
-              +12 өнгөрсөн долоо хоногоос
+            <div className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 text-transparent bg-clip-text">
+              {stats.ordersCount}
+            </div>
+            <p className="text-xs text-muted-foreground flex items-center">
+              <span className="text-green-500 mr-1">↑</span>
+              <span className="text-green-500 font-medium">+12</span> өнгөрсөн долоо хоногоос
             </p>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="hover:shadow-lg transition-all duration-300 dashboard-card-hover overflow-hidden border-t-4 border-amber-500">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
+              <span className="mr-2 text-amber-500 heartbeat">⭐</span>
               Дундаж захиалга
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold bg-gradient-to-r from-amber-500 to-orange-600 text-transparent bg-clip-text">
               {stats.avgOrder.toLocaleString()}₮
             </div>
-            <p className="text-xs text-muted-foreground">
-              +2.5% өнгөрсөн сараас
+            <p className="text-xs text-muted-foreground flex items-center">
+              <span className="text-green-500 mr-1">↑</span>
+              <span className="text-green-500 font-medium">+2.5%</span> өнгөрсөн сараас
             </p>
           </CardContent>
         </Card>
@@ -1148,10 +1161,11 @@ export function BusinessDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="slide-in-left">
               <h3 className="mb-4 text-lg font-semibold flex items-center">
-                <Navigation className="mr-2 h-5 w-5 text-primary float" />
+                <Navigation className="mr-2 h-5 w-5 text-primary wiggle" />
                 <span className="bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
                   Хүргэлтийн байршил
                 </span>
+                <span className="ml-2 tada">🚚</span>
               </h3>
               <DeliveryLocationTracker
                 origin={user?.location ? 
