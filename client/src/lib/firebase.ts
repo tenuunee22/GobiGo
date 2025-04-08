@@ -482,6 +482,21 @@ export const verifyPhoneCode = async (confirmationResult: any, code: string) => 
   }
 };
 
+// Update business location data
+export const updateBusinessLocation = async (uid: string, location: { lat: number; lng: number; address: string }) => {
+  try {
+    const userRef = doc(db, "users", uid);
+    await updateDoc(userRef, { 
+      location,
+      updatedAt: serverTimestamp() 
+    });
+    return true;
+  } catch (error) {
+    console.error("Error updating business location:", error);
+    throw error;
+  }
+};
+
 export { 
   app, 
   auth, 
