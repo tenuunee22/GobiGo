@@ -12,6 +12,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
 import { 
   Menu, 
@@ -22,7 +23,9 @@ import {
   ShoppingBag,
   Pizza,
   Image,
-  Camera 
+  Camera,
+  ClipboardList,
+  HelpCircle 
 } from "lucide-react";
 
 export function Header() {
@@ -251,17 +254,48 @@ export function Header() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => handleNavigate("/profile/user")}>
+                {user?.role === "customer" || !user ? (
+                  <>
+                    <DropdownMenuItem onClick={() => handleNavigate("/profile/user")}>
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Хувийн мэдээлэл</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleNavigate("/order/history")}>
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Өмнөх захиалгууд</span>
+                    </DropdownMenuItem>
+                  </>
+                ) : user?.role === "business" ? (
+                  <>
+                    <DropdownMenuItem onClick={() => handleNavigate("/profile/business")}>
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Бизнесийн мэдээлэл</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleNavigate("/dashboard/store")}>
+                      <ShoppingBag className="mr-2 h-4 w-4" />
+                      <span>Барааны жагсаалт</span>
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  <>
+                    <DropdownMenuItem onClick={() => handleNavigate("/profile/driver")}>
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Хувийн мэдээлэл</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleNavigate("/dashboard/driver")}>
+                      <Truck className="mr-2 h-4 w-4" />
+                      <span>Хүргэлтүүд</span>
+                    </DropdownMenuItem>
+                  </>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => {
+                  // Reset onboarding to see again
+                  localStorage.removeItem('onboardingComplete');
+                  window.location.reload();
+                }}>
                   <User className="mr-2 h-4 w-4" />
-                  <span>Хэрэглэгч</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleNavigate("/profile/business")}>
-                  <Store className="mr-2 h-4 w-4" />
-                  <span>Бизнес</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleNavigate("/profile/driver")}>
-                  <Truck className="mr-2 h-4 w-4" />
-                  <span>Жолооч</span>
+                  <span>Танилцуулга харах</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleNavigate("/login")}>
                   <LogOut className="mr-2 h-4 w-4" />

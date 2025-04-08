@@ -267,7 +267,7 @@ const OnboardingModal: React.FC = () => {
   } = useOnboarding();
   
   // Only show modal if user is in onboarding process or on first visit
-  const showModal = isFirstVisit || (!isOnboardingDone && !isFirstVisit);
+  const showModal = (isFirstVisit || (!isOnboardingDone && !isFirstVisit)) && window.location.pathname === "/";
   
   if (!showModal) return null;
   
