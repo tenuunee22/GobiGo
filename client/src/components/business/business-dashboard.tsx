@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Phone, Plus, Search, Settings, TrendingUp, Trash2, Navigation, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
+import { DeliveryLocationTracker } from "@/components/shared/delivery-location-tracker";
 import { 
   Select, 
   SelectContent, 
@@ -1145,8 +1145,26 @@ export function BusinessDashboard() {
         </TabsContent>
         
         <TabsContent value="delivery-tracking">
-          <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
-            
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="slide-in-left">
+              <h3 className="mb-4 text-lg font-semibold flex items-center">
+                <Navigation className="mr-2 h-5 w-5 text-primary float" />
+                <span className="bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+                  Хүргэлтийн байршил
+                </span>
+              </h3>
+              <DeliveryLocationTracker
+                origin={user?.location ? 
+                  { 
+                    lat: user.locationLat ? parseFloat(user.locationLat.toString()) : 47.9184676, 
+                    lng: user.locationLng ? parseFloat(user.locationLng.toString()) : 106.917693 
+                  } : 
+                  { lat: 47.9184676, lng: 106.917693 }}
+                destination={{ lat: 47.9234676, lng: 106.9237016 }}
+                estimatedTime="15-20 мин"
+                deliveryPersonName="Батаа"
+              />
+            </div>
             
             <div className="slide-in-right">
               <h3 className="mb-4 text-lg font-semibold flex items-center">
