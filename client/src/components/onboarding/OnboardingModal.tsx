@@ -336,7 +336,11 @@ const OnboardingModal: React.FC = () => {
             <>
               <Button
                 variant="outline"
-                onClick={skipOnboarding}
+                onClick={() => {
+                  skipOnboarding();
+                  // Force reload page to apply changes
+                  window.location.reload();
+                }}
                 className="sm:flex-1"
               >
                 Алгасах
@@ -374,7 +378,14 @@ const OnboardingModal: React.FC = () => {
                 </div>
                 
                 <Button
-                  onClick={currentStep === totalSteps - 1 ? skipOnboarding : nextStep}
+                  onClick={() => {
+                    if (currentStep === totalSteps - 1) {
+                      skipOnboarding();
+                      window.location.reload();
+                    } else {
+                      nextStep();
+                    }
+                  }}
                 >
                   {currentStep === totalSteps - 1 ? 'Дуусгах' : 'Дараах'}
                 </Button>
