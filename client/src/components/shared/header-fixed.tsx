@@ -219,13 +219,6 @@ export function Header() {
           </div>
         </Link>
       </NavigationMenuItem>
-      <NavigationMenuItem>
-        <Link href="/dashboard/store">
-          <div className="px-3 py-2 flex items-center gap-2 hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer">
-            <DollarSign size={18} /> Орлого
-          </div>
-        </Link>
-      </NavigationMenuItem>
     </>
   );
   
