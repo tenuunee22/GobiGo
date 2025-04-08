@@ -6,8 +6,6 @@ import { useAuth } from "@/contexts/auth-context";
 import { useEffect } from "react";
 import { Header } from "@/components/shared/header";
 import { OnboardingProvider } from "@/components/onboarding/onboarding-context";
-import { LoadingProvider } from "@/contexts/loading-context";
-import { FoodLoader } from "@/components/shared/food-loader";
 import OnboardingModal from "@/components/onboarding/OnboardingModal";
 import OnboardingHintButton from "@/components/onboarding/OnboardingHintButton";
 
@@ -44,11 +42,7 @@ function Router() {
   }, [user, loading, location, setLocation]);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <FoodLoader text="Ачааллаж байна..." foodType="random" size="large" />
-      </div>
-    );
+    return <div className="flex items-center justify-center h-screen">Ачааллаж байна...</div>;
   }
 
   return (
@@ -75,19 +69,17 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <LoadingProvider>
-        <OnboardingProvider>
-          <div className="flex flex-col min-h-screen">
-            <Header />
-            <main className="flex-grow">
-              <Router />
-            </main>
-            <OnboardingModal />
-            <OnboardingHintButton position="bottom-right" />
-          </div>
-          <Toaster />
-        </OnboardingProvider>
-      </LoadingProvider>
+      <OnboardingProvider>
+        <div className="flex flex-col min-h-screen">
+          <Header />
+          <main className="flex-grow">
+            <Router />
+          </main>
+          <OnboardingModal />
+          <OnboardingHintButton position="bottom-right" />
+        </div>
+        <Toaster />
+      </OnboardingProvider>
     </QueryClientProvider>
   );
 }
