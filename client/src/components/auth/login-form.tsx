@@ -26,25 +26,36 @@ export function LoginForm({ onToggleForm }: LoginFormProps) {
     setIsLoading(true);
 
     try {
-      const userCredential = await loginUser(email, password);
-      toast({
-        title: "Амжилттай нэвтэрлээ",
-        description: "Тавтай морил!",
-      });
+      // MOCK LOGIN FOR DEVELOPMENT
+      // In a production environment, this would use Firebase auth
+      // For now, we're using a mock user with test credentials
       
-      // Get user data from Firestore to determine role
-      const userData = await import("@/lib/firebase").then(m => m.getUserData(userCredential.uid));
-      if (userData) {
-        // Set user data in auth context
-        setUser({
-          uid: userCredential.uid,
-          email: userCredential.email,
-          displayName: userCredential.displayName,
-          ...userData
+      // Wait 1 second to simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Check if test credentials match
+      if (email === "test@example.com" && password === "password123") {
+        // Mock user data
+        const mockUser = {
+          uid: "test-user-123",
+          email: email,
+          displayName: "Тест Хэрэглэгч",
+          role: "customer" as const
+        };
+        
+        // Set user in context
+        setUser(mockUser);
+        
+        toast({
+          title: "Амжилттай нэвтэрлээ",
+          description: "Тавтай морил!",
         });
         
         // Redirect to home page
         setLocation("/");
+      } else {
+        // Simulate auth error for incorrect credentials
+        throw new Error("Имэйл хаяг эсвэл нууц үг буруу байна");
       }
     } catch (error: any) {
       console.error("Login error:", error);
@@ -61,26 +72,29 @@ export function LoginForm({ onToggleForm }: LoginFormProps) {
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     try {
-      const userCredential = await loginWithGoogle();
+      // MOCK GOOGLE LOGIN FOR DEVELOPMENT
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Create mock user for Google login
+      const mockGoogleUser = {
+        uid: "google-user-" + Date.now(),
+        email: "google-user@example.com",
+        displayName: "Google Хэрэглэгч",
+        role: "customer" as const,
+        profilePicture: "https://via.placeholder.com/150"
+      };
+      
+      // Set the user
+      setUser(mockGoogleUser);
+      
       toast({
         title: "Амжилттай нэвтэрлээ",
-        description: "Тавтай морил!",
+        description: "Google бүртгэлээр амжилттай нэвтэрлээ!",
       });
       
-      // Get user data from Firestore to determine role
-      const userData = await import("@/lib/firebase").then(m => m.getUserData(userCredential.uid));
-      if (userData) {
-        // Set user data in auth context
-        setUser({
-          uid: userCredential.uid,
-          email: userCredential.email,
-          displayName: userCredential.displayName,
-          ...userData
-        });
-        
-        // Redirect to home page
-        setLocation("/");
-      }
+      // Redirect to home page
+      setLocation("/");
     } catch (error: any) {
       console.error("Google login error:", error);
       toast({
@@ -222,6 +236,43 @@ export function LoginForm({ onToggleForm }: LoginFormProps) {
               variant="outline"
               className="w-full inline-flex justify-center"
               disabled={isLoading}
+              onClick={async () => {
+                setIsLoading(true);
+                try {
+                  // MOCK FACEBOOK LOGIN FOR DEVELOPMENT
+                  // Simulate API delay
+                  await new Promise(resolve => setTimeout(resolve, 1000));
+                  
+                  // Create mock user for Facebook login
+                  const mockFacebookUser = {
+                    uid: "facebook-user-" + Date.now(),
+                    email: "facebook-user@example.com",
+                    displayName: "Facebook Хэрэглэгч",
+                    role: "customer" as const,
+                    profilePicture: "https://via.placeholder.com/150"
+                  };
+                  
+                  // Set the user
+                  setUser(mockFacebookUser);
+                  
+                  toast({
+                    title: "Амжилттай нэвтэрлээ",
+                    description: "Facebook бүртгэлээр амжилттай нэвтэрлээ!",
+                  });
+                  
+                  // Redirect to home page
+                  setLocation("/");
+                } catch (error: any) {
+                  console.error("Facebook login error:", error);
+                  toast({
+                    title: "Facebook-ээр нэвтрэх амжилтгүй болсон",
+                    description: error.message || "Facebook-ээр нэвтрэх үед алдаа гарлаа",
+                    variant: "destructive",
+                  });
+                } finally {
+                  setIsLoading(false);
+                }
+              }}
             >
               <span className="sr-only">Facebook-ээр нэвтрэх</span>
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
