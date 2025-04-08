@@ -123,15 +123,31 @@ export default function Cart() {
   
   if (cartItems.length === 0) {
     return (
-      <div className="container py-10">
-        <div className="max-w-2xl mx-auto text-center">
+      <div className="mobile-container py-6 md:py-10">
+        {/* Буцах товч */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="mb-4"
+        >
+          <Link href="/">
+            <Button variant="ghost" className="flex items-center gap-2 h-10 px-3 md:px-4">
+              <ArrowLeft className="h-5 w-5" /> 
+              <span className="hidden sm:inline">Нүүр хуудас руу буцах</span>
+              <span className="sm:hidden">Буцах</span>
+            </Button>
+          </Link>
+        </motion.div>
+        
+        <div className="max-w-md mx-auto text-center px-4">
           <motion.div 
             initial={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", duration: 0.8 }}
             className="mb-6"
           >
-            <div className="w-28 h-28 mx-auto relative">
+            <div className="w-24 h-24 md:w-28 md:h-28 mx-auto relative">
               <motion.div
                 animate={{ 
                   y: [0, -10, 0],
@@ -142,13 +158,13 @@ export default function Cart() {
                   ease: "easeInOut"
                 }}
               >
-                <ShoppingCart className="h-24 w-24 mx-auto text-primary/20" />
+                <ShoppingCart className="h-20 w-20 md:h-24 md:w-24 mx-auto text-primary/20" />
               </motion.div>
               <motion.div
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.5, duration: 0.3 }}
-                className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold"
+                className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-7 h-7 md:w-8 md:h-8 flex items-center justify-center text-sm font-bold"
               >
                 0
               </motion.div>
@@ -159,7 +175,7 @@ export default function Cart() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="text-3xl font-bold mb-3 bg-gradient-to-r from-primary to-indigo-500 bg-clip-text text-transparent"
+            className="text-2xl md:text-3xl font-bold mb-3 bg-gradient-to-r from-primary to-indigo-500 bg-clip-text text-transparent"
           >
             Таны сагс хоосон байна
           </motion.h1>
@@ -168,7 +184,7 @@ export default function Cart() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="text-gray-600 mb-8"
+            className="text-gray-600 mb-6 md:mb-8 text-sm md:text-base"
           >
             Хоолны газар эсвэл дэлгүүрээс дуртай хоол болон бүтээгдэхүүнээ сонгож, сагсандаа нэмнэ үү.
           </motion.p>
@@ -177,8 +193,10 @@ export default function Cart() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7 }}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
           >
-            <Button asChild size="lg" className="rounded-full px-8">
+            <Button asChild size="lg" className="mobile-button px-6 md:px-8 h-12 text-base">
               <Link href="/">
                 <Package className="mr-2 h-5 w-5" /> 
                 Хоол захиалах
@@ -191,21 +209,23 @@ export default function Cart() {
   }
   
   return (
-    <div className="container py-10">
+    <div className="mobile-container py-4 md:py-10">
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
+        initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="mb-6"
+        className="mb-4"
       >
         <Link href="/">
-          <Button variant="ghost" className="flex items-center gap-2">
-            <ArrowLeft className="h-5 w-5" /> Нүүр хуудас руу буцах
+          <Button variant="ghost" className="flex items-center gap-2 h-10 px-3 md:px-4">
+            <ArrowLeft className="h-5 w-5" /> 
+            <span className="hidden sm:inline">Нүүр хуудас руу буцах</span>
+            <span className="sm:hidden">Буцах</span>
           </Button>
         </Link>
       </motion.div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
         {/* Cart items */}
         <motion.div 
           className="lg:col-span-8"
@@ -213,8 +233,8 @@ export default function Cart() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.4 }}
         >
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
+          <Card className="overflow-hidden shadow-sm border-gray-200">
+            <CardHeader className="flex flex-row items-center justify-between p-4 md:p-6">
               <div className="flex items-center gap-3">
                 <div className="relative">
                   <ShoppingCart className="h-6 w-6 text-primary" />
@@ -223,92 +243,143 @@ export default function Cart() {
                   </span>
                 </div>
                 <div>
-                  <CardTitle>Миний сагс</CardTitle>
-                  <CardDescription>
+                  <CardTitle className="text-base md:text-lg">Миний сагс</CardTitle>
+                  <CardDescription className="text-xs md:text-sm">
                     {cartItems.length} төрлийн бүтээгдэхүүн
                   </CardDescription>
                 </div>
               </div>
+              
+              {/* Утасны хэмжээнд харагдах товч */}
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-gray-500 hover:text-red-500 hover:border-red-500 transition-colors md:hidden"
+                onClick={clearCart}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+              
+              {/* Том дэлгэцэнд харагдах товч */}
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="text-gray-500 hover:text-red-500 hover:border-red-500 transition-colors"
+                className="text-gray-500 hover:text-red-500 hover:border-red-500 transition-colors hidden md:flex items-center"
                 onClick={clearCart}
               >
                 <Trash2 className="h-4 w-4 mr-2" /> Сагс цэвэрлэх
               </Button>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
+            
+            <CardContent className="p-0">
+              <div className="divide-y divide-gray-100">
                 {cartItems.map((item, index) => (
                   <motion.div 
                     key={item.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1, duration: 0.3 }}
-                    className="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="p-4 md:p-5 hover:bg-gray-50 transition-colors"
                   >
-                    <div className="w-20 h-20 rounded-md overflow-hidden shadow-sm">
-                      {item.imageUrl ? (
-                        <motion.img 
-                          whileHover={{ scale: 1.1 }}
-                          transition={{ duration: 0.2 }}
-                          src={item.imageUrl} 
-                          alt={item.name} 
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                          <ShoppingBag className="h-8 w-8 text-gray-400" />
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                      {/* Зураг */}
+                      <div className="w-full sm:w-20 h-32 sm:h-20 rounded-md overflow-hidden shadow-sm">
+                        {item.imageUrl ? (
+                          <motion.img 
+                            whileHover={{ scale: 1.05 }}
+                            transition={{ duration: 0.2 }}
+                            src={item.imageUrl} 
+                            alt={item.name} 
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                            <ShoppingBag className="h-8 w-8 text-gray-400" />
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="flex-1">
+                        {/* Нэр, үнэ */}
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <h3 className="font-medium text-base">{item.name}</h3>
+                            <p className="text-gray-600 text-sm">{item.price.toLocaleString()}₮</p>
+                          </div>
+                          
+                          {/* Утасны дэлгэцэнд хасах товч */}
+                          <motion.div 
+                            whileHover={{ scale: 1.1 }} 
+                            whileTap={{ scale: 0.9 }}
+                            className="sm:hidden"
+                          >
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="text-gray-500 hover:text-red-500 hover:bg-red-50 h-8 w-8"
+                              onClick={() => removeFromCart(item.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </motion.div>
                         </div>
-                      )}
+                        
+                        {/* Тоо болон үнийн мэдээлэл */}
+                        <div className="flex justify-between items-center mt-2">
+                          <div className="flex items-center gap-2">
+                            <motion.div whileTap={{ scale: 0.9 }}>
+                              <Button 
+                                variant="outline" 
+                                size="icon" 
+                                className="h-8 w-8 rounded-full"
+                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                              >
+                                -
+                              </Button>
+                            </motion.div>
+                            <Input
+                              type="number"
+                              value={item.quantity}
+                              onChange={(e) => updateQuantity(item.id, parseInt(e.target.value) || 1)}
+                              className="w-12 text-center"
+                              min="1"
+                            />
+                            <motion.div whileTap={{ scale: 0.9 }}>
+                              <Button 
+                                variant="outline" 
+                                size="icon" 
+                                className="h-8 w-8 rounded-full"
+                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                              >
+                                +
+                              </Button>
+                            </motion.div>
+                          </div>
+                          
+                          <div className="flex items-center gap-3">
+                            <div className="text-right font-medium">
+                              {(item.price * item.quantity).toLocaleString()}₮
+                            </div>
+                            
+                            {/* Том дэлгэцэнд хасах товч */}
+                            <motion.div 
+                              whileHover={{ scale: 1.1 }} 
+                              whileTap={{ scale: 0.9 }}
+                              className="hidden sm:block"
+                            >
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="text-gray-500 hover:text-red-500 hover:bg-red-50 h-8 w-8"
+                                onClick={() => removeFromCart(item.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </motion.div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <h3 className="font-medium">{item.name}</h3>
-                      <p className="text-gray-600">{item.price.toLocaleString()}₮</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <motion.div whileTap={{ scale: 0.9 }}>
-                        <Button 
-                          variant="outline" 
-                          size="icon" 
-                          className="h-8 w-8 rounded-full"
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        >
-                          -
-                        </Button>
-                      </motion.div>
-                      <Input
-                        type="number"
-                        value={item.quantity}
-                        onChange={(e) => updateQuantity(item.id, parseInt(e.target.value) || 1)}
-                        className="w-14 text-center"
-                        min="1"
-                      />
-                      <motion.div whileTap={{ scale: 0.9 }}>
-                        <Button 
-                          variant="outline" 
-                          size="icon" 
-                          className="h-8 w-8 rounded-full"
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        >
-                          +
-                        </Button>
-                      </motion.div>
-                    </div>
-                    <div className="text-right min-w-[100px] font-medium">
-                      {(item.price * item.quantity).toLocaleString()}₮
-                    </div>
-                    <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="text-gray-500 hover:text-red-500 hover:bg-red-50 h-8 w-8"
-                        onClick={() => removeFromCart(item.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </motion.div>
                   </motion.div>
                 ))}
               </div>
@@ -323,20 +394,20 @@ export default function Cart() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.4, delay: 0.2 }}
         >
-          <Card className="sticky top-24">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+          <Card className="sticky top-16 shadow-sm border-gray-200">
+            <CardHeader className="p-4 md:p-6">
+              <CardTitle className="flex items-center gap-2 text-base md:text-lg">
                 <PartyPopper className="h-5 w-5 text-primary" />
                 Захиалгын нийлбэр
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 md:p-6 pt-0">
               <div className="space-y-4">
-                <div className="flex justify-between">
+                <div className="flex justify-between text-sm md:text-base">
                   <span className="text-gray-600">Бүтээгдэхүүний дүн</span>
                   <span>{getSubtotal().toLocaleString()}₮</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between text-sm md:text-base">
                   <span className="text-gray-600">Хүргэлтийн хураамж</span>
                   <span>
                     {getDeliveryFee() > 0 ? (
@@ -358,7 +429,7 @@ export default function Cart() {
                 
                 {getSubtotal() < 50000 && (
                   <motion.div 
-                    className="bg-amber-50 border border-amber-200 text-amber-800 rounded-md p-3 text-sm"
+                    className="bg-amber-50 border border-amber-200 text-amber-800 rounded-md p-3 text-xs md:text-sm"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.5 }}
@@ -375,15 +446,14 @@ export default function Cart() {
                 )}
               </div>
             </CardContent>
-            <CardFooter>
+            <CardFooter className="p-4 md:p-6 pt-0">
               <motion.div 
                 className="w-full"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
                 <Button 
-                  className="w-full" 
-                  size="lg"
+                  className="w-full mobile-button h-12 text-base"
                   onClick={handleCheckout}
                   disabled={loading}
                 >
