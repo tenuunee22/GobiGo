@@ -165,6 +165,39 @@
   animation: float 3s ease-in-out infinite;
 }
 
+/* Cute animations */
+.wiggle {
+  animation: wiggle 1s ease-in-out infinite;
+}
+
+.jelly {
+  animation: jelly 1s ease-in-out infinite;
+}
+
+.tada {
+  animation: tada 1.5s ease infinite;
+}
+
+.heartbeat {
+  animation: heartbeat 1.5s ease infinite;
+}
+
+.wobble {
+  animation: wobble 2s ease infinite;
+}
+
+.spin-slow {
+  animation: spin 6s linear infinite;
+}
+
+.blink {
+  animation: blink 1.5s step-end infinite;
+}
+
+.bounce-soft {
+  animation: bounceSoft 2s ease infinite;
+}
+
 /* Delivery tracking animations */
 .delivery-pulse {
   animation: deliveryPulse 1.5s ease-in-out infinite;
@@ -240,4 +273,59 @@
   0% { width: 0%; }
   50% { width: 70%; }
   100% { width: 100%; }
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-7deg); }
+  75% { transform: rotate(7deg); }
+}
+
+@keyframes jelly {
+  0%, 100% { transform: scale(1, 1); }
+  25% { transform: scale(0.95, 1.05); }
+  50% { transform: scale(1.05, 0.95); }
+  75% { transform: scale(0.97, 1.03); }
+}
+
+@keyframes tada {
+  0% { transform: scale(1); }
+  10%, 20% { transform: scale(0.9) rotate(-3deg); }
+  30%, 50%, 70%, 90% { transform: scale(1.1) rotate(3deg); }
+  40%, 60%, 80% { transform: scale(1.1) rotate(-3deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+
+@keyframes heartbeat {
+  0% { transform: scale(1); }
+  14% { transform: scale(1.2); }
+  28% { transform: scale(1); }
+  42% { transform: scale(1.2); }
+  70% { transform: scale(1); }
+}
+
+@keyframes wobble {
+  0%, 100% { transform: translateX(0); }
+  15% { transform: translateX(-8px) rotate(-5deg); }
+  30% { transform: translateX(8px) rotate(5deg); }
+  45% { transform: translateX(-6px) rotate(-3deg); }
+  60% { transform: translateX(6px) rotate(3deg); }
+  75% { transform: translateX(-4px) rotate(-1deg); }
+  90% { transform: translateX(4px) rotate(1deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes bounceSoft {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0); }
 }
