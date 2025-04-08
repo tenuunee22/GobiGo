@@ -396,7 +396,20 @@ export function CustomerDashboard() {
                       className="text-2xl md:text-3xl font-bold flex items-center gap-2"
                     >
                       <span className="bg-gradient-to-r from-blue-300 to-purple-300 text-transparent bg-clip-text">
-                        {user.name ? `Тавтай морил, ${user.name}!` : 'Тавтай морил!'}
+                        {(() => {
+                          const hour = new Date().getHours();
+                          let greeting = '';
+                          if (hour >= 5 && hour < 12) {
+                            greeting = 'Өглөөний мэнд';
+                          } else if (hour >= 12 && hour < 17) {
+                            greeting = 'Өдрийн мэнд';
+                          } else if (hour >= 17 && hour < 22) {
+                            greeting = 'Оройн мэнд';
+                          } else {
+                            greeting = 'Шөнийн мэнд';
+                          }
+                          return user.name ? `${greeting}, ${user.name}!` : `${greeting}!`;
+                        })()}
                       </span>
                       <motion.span 
                         className="text-3xl inline-block"
@@ -410,7 +423,13 @@ export function CustomerDashboard() {
                           repeatDelay: 3
                         }}
                       >
-                        👋
+                        {(() => {
+                          const hour = new Date().getHours();
+                          if (hour >= 5 && hour < 12) return '🌞';
+                          if (hour >= 12 && hour < 17) return '☀️';
+                          if (hour >= 17 && hour < 22) return '🌆';
+                          return '🌙';
+                        })()}
                       </motion.span>
                     </motion.div>
                     <motion.p

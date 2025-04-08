@@ -440,12 +440,16 @@ export function Header() {
                       </div>
                     </>
                   ) : (
-                    <div className="p-8 text-center">
-                      <ShoppingBag className="h-12 w-12 mx-auto text-gray-300 mb-3" />
-                      <div className="text-gray-500">Таны захиалга хоосон байна</div>
+                    <div className="p-8 text-center bg-gradient-to-b from-blue-50 to-indigo-100 rounded-b-lg">
+                      <div className="relative">
+                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-full blur-xl transform scale-150 opacity-30"></div>
+                        <ShoppingBag className="h-12 w-12 mx-auto text-indigo-400 mb-3 relative z-10" />
+                      </div>
+                      <div className="text-indigo-700 font-medium">Таны захиалга хоосон байна</div>
+                      <p className="text-blue-600/70 text-sm mt-1 mb-3">Эхлээд захиалга хийнэ үү</p>
                       <Button 
                         variant="outline" 
-                        className="mt-4"
+                        className="mt-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white border-0 hover:from-blue-600 hover:to-indigo-700 shadow-md"
                         onClick={() => {
                           setIsCartOpen(false);
                           setLocation("/");
