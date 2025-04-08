@@ -43,15 +43,8 @@ export function LoginForm({ onToggleForm }: LoginFormProps) {
           ...userData
         });
         
-        // Redirect based on role
-        const role = userData.role || "customer";
-        if (role === "customer") {
-          setLocation("/profile/user");
-        } else if (role === "business") {
-          setLocation("/dashboard/store");
-        } else if (role === "delivery") {
-          setLocation("/dashboard/driver");
-        }
+        // Redirect to home page
+        setLocation("/");
       }
     } catch (error: any) {
       console.error("Login error:", error);
@@ -85,15 +78,8 @@ export function LoginForm({ onToggleForm }: LoginFormProps) {
           ...userData
         });
         
-        // Redirect based on role
-        const role = userData.role || "customer";
-        if (role === "customer") {
-          setLocation("/profile/user");
-        } else if (role === "business") {
-          setLocation("/dashboard/store");
-        } else if (role === "delivery") {
-          setLocation("/dashboard/driver");
-        }
+        // Redirect to home page
+        setLocation("/");
       }
     } catch (error: any) {
       console.error("Google login error:", error);
