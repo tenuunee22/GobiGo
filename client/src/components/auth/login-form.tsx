@@ -43,8 +43,15 @@ export function LoginForm({ onToggleForm }: LoginFormProps) {
           ...userData
         });
         
-        // Redirect to home page
-        setLocation("/");
+        // Redirect based on role
+        if (userData.role === 'business') {
+          setLocation("/dashboard/store");
+        } else if (userData.role === 'delivery') {
+          setLocation("/dashboard/driver");
+        } else {
+          // Customer or default role
+          setLocation("/dashboard");
+        }
       }
     } catch (error: any) {
       console.error("Login error:", error);

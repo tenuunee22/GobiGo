@@ -1,16 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '@/contexts/auth-context';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Store, Utensils, Truck } from 'lucide-react';
+import { useLocation } from 'wouter';
 
 export function RoleSelection() {
   const { user, completeRoleSelection } = useAuth();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleRoleSelection = async (role: "customer" | "business" | "delivery") => {
+    if (isProcessing) return;
+    
+    setIsProcessing(true);
     try {
       await completeRoleSelection(role);
       
@@ -18,6 +24,21 @@ export function RoleSelection() {
         title: "Хэрэглэгчийн төрөл амжилттай тохируулагдлаа",
         description: "Тавтай морил!",
       });
+      
+      // Redirect based on role selection
+      switch(role) {
+        case 'business':
+          setLocation('/dashboard/store');
+          break;
+        case 'delivery':
+          setLocation('/dashboard/driver');
+          break;
+        case 'customer':
+        default:
+          setLocation('/dashboard');
+          break;
+      }
+      
     } catch (error) {
       console.error("Error setting user role:", error);
       toast({
@@ -25,6 +46,7 @@ export function RoleSelection() {
         description: "Хэрэглэгчийн төрөл тохируулахад алдаа гарлаа. Дахин оролдоно уу.",
         variant: "destructive",
       });
+      setIsProcessing(false);
     }
   };
 
@@ -69,7 +91,7 @@ export function RoleSelection() {
                 key={role.id}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.98 }}
-                className="cursor-pointer"
+                className={`cursor-pointer ${isProcessing ? 'opacity-60 pointer-events-none' : ''}`}
                 onClick={() => handleRoleSelection(role.id as "customer" | "business" | "delivery")}
               >
                 <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-md h-full flex flex-col">

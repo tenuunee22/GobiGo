@@ -61,14 +61,26 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
         };
       }
 
-      await registerUser(email, password, userData);
+      const userCredential = await registerUser(email, password, userData);
       
       toast({
         title: "Бүртгэл амжилттай үүслээ",
         description: "ГобиГоу-д тавтай морил!",
       });
 
-      // Redirect based on role will be handled by auth context
+      // Redirect based on user role
+      switch(userType) {
+        case 'business':
+          setLocation("/dashboard/store");
+          break;
+        case 'delivery':
+          setLocation("/dashboard/driver");
+          break;
+        case 'customer':
+        default:
+          setLocation("/dashboard");
+          break;
+      }
     } catch (error: any) {
       toast({
         title: "Бүртгэл үүсгэхэд алдаа гарлаа",
