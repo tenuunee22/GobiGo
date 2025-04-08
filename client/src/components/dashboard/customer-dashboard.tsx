@@ -236,13 +236,28 @@ export function CustomerDashboard() {
             variants={containerVariants}
             className="text-center md:text-left max-w-2xl mx-auto md:mx-0"
           >
+            {/* Time-based Greeting */}
+            <motion.div
+              initial={{ opacity: 0, y: -30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="mb-4"
+            >
+              <span className="text-xl md:text-2xl text-amber-300 font-medium">
+                {new Date().getHours() < 12 ? "Өглөөний мэнд" : 
+                 new Date().getHours() < 18 ? "Өдрийн мэнд" : "Оройн мэнд"}
+                {user && `, ${user.name || user.displayName || "Хэрэглэгч"}!`}
+                <span className="ml-2 animate-wave inline-block">👋</span>
+              </span>
+            </motion.div>
+            
             <motion.h1 
               className="text-4xl md:text-6xl font-bold mb-4 text-white"
               variants={titleVariants}
             >
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-orange-500">
                 GobiGo
-              </span> <span className="animate-wave inline-block">👋</span>
+              </span> <span className="animate-bounce-gentle inline-block">✨</span>
             </motion.h1>
             
             <motion.p 
@@ -763,64 +778,94 @@ export function CustomerDashboard() {
         </motion.div>
       </section>
 
-      {/* App promotion */}
+      {/* Social Media Links */}
       <section className="bg-gradient-to-r from-amber-100 to-orange-100 py-16 mt-20">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5 }}
-              viewport={{ once: true }}
-            >
-              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-amber-900">
-                GobiGo аппликейшн татаж аваарай! 
-                <span className="ml-2 text-2xl animate-bounce-gentle inline-block">📱</span>
-              </h2>
-              <p className="text-amber-800 text-lg mb-6">
-                Хамгийн хурдан хүргэлт, хамгийн хялбар захиалга, онцгой урамшууллууд танд хүрнэ!
-              </p>
-              <div className="flex flex-wrap gap-4">
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button className="bg-amber-900 hover:bg-amber-950 text-white rounded-full h-14 px-6">
-                    <svg viewBox="0 0 24 24" className="h-6 w-6 mr-2" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M17.5227 7.39069C17.3524 7.47237 15.1281 8.73575 15.1281 11.4252C15.1281 14.5489 17.8907 15.6905 18.0075 15.7347C17.989 15.7871 17.5043 17.3499 16.3214 18.9507C15.2766 20.3333 14.1876 21.7131 12.5933 21.7131C11.0246 21.7131 10.5458 20.8261 8.75245 20.8261C7.01446 20.8261 6.31263 21.7131 4.84762 21.7131C3.20021 21.7131 2.01359 20.211 0.946335 18.8414C-0.352497 17.145 -0.954069 13.8291 0.596928 11.5199C1.36516 10.3777 2.66746 9.65242 4.06121 9.63863C5.64222 9.61653 6.13202 10.5842 8.04455 10.5842C9.92359 10.5842 10.3223 9.61653 12.078 9.61653C12.9768 9.61653 14.4359 9.99488 15.4622 10.898C15.373 10.8346 13.0018 9.47121 12.9817 7.4079C12.9621 5.73967 14.8702 4.55366 14.9836 4.47198C13.905 2.92985 12.2519 2.75391 11.6368 2.73472C9.56542 2.64473 7.66917 4.08268 6.68043 4.08268C5.71303 4.08268 4.1069 2.81999 2.4446 2.81999C2.16496 2.82138 0.0107899 2.89199 0.0107899 5.36475C0.0107899 5.93194 0.0814872 6.69756 0.321331 7.59077C1.12627 10.2729 3.04718 15.3835 5.52347 18.9067C6.68714 20.5901 7.77545 21.6959 8.73105 21.6959C9.80524 21.6959 10.3214 21.1108 11.5823 21.1108C12.8031 21.1108 13.2764 21.6959 14.4261 21.6959C15.6354 21.6959 16.6316 20.6721 17.7027 19.0995C17.9998 18.6878 18.2625 18.2651 18.5005 17.8316C18.1625 17.7049 15.1827 16.284 15.1643 12.6909C15.1519 9.7099 17.6229 8.14778 17.7546 8.06679C16.4538 6.02748 14.3856 5.86333 13.7539 5.83584C13.7243 5.83444 13.6168 5.82892 13.443 5.82892C12.0555 5.82892 10.4802 6.47339 9.50168 6.47339C8.59978 6.47339 7.13199 5.87104 5.89709 5.87104C5.88123 5.86971 5.14087 5.87104 5.14087 5.87104C4.10226 5.88134 1.29471 6.29934 0.229588 9.04465C0.149462 9.23197 0 9.63863 0 10.22V11.4363C0 11.9908 0.122831 12.4142 0.199643 12.5819C0.285233 12.7719 0.405643 12.8813 0.47621 12.9533C1.12627 13.6948 2.7439 15.5884 2.7439 18.4648C2.7439 21.5252 0.900661 23.292 0.457644 23.7285C0.347511 23.8413 0.224229 24 0.224229 24H2.26282C2.26282 24 2.33547 23.8711 2.44024 23.7686C3.07086 23.1038 4.73773 21.3385 4.73773 18.4648C4.73773 15.831 3.26735 14.1241 2.65072 13.3794C2.56353 13.281 2.49891 13.1939 2.49891 13.1349C2.49891 13.0759 2.58074 12.971 2.67613 12.8317C2.99233 12.3738 3.54865 11.4143 3.54865 10.1297V9.33327C3.54865 8.92107 3.69006 8.5516 3.79214 8.35018C3.83498 8.26573 3.87781 8.20171 3.90746 8.16037C3.11057 8.0314 2.07733 7.83551 1.28853 7.44443C1.1838 7.39621 1.0792 7.34246 0.978144 7.28456C0.830736 7.19869 0.6934 7.10867 0.580395 7.01864C0.548878 6.9922 0.518467 6.96576 0.492593 6.93932C0.444845 6.898 0.398778 6.85667 0.360583 6.81535C1.22256 5.04727 3.19191 4.50652 4.44476 4.50652C4.51475 4.50652 4.57937 4.50721 4.64131 4.5079C5.96939 4.51243 7.03821 5.03544 7.84049 5.48411C8.7065 5.97926 9.2629 6.17167 9.80244 6.17167C10.395 6.17167 11.0257 5.93752 11.6368 5.71195C12.5812 5.36475 13.6260 4.97367 14.7899 4.97367C14.9487 4.97367 15.1176 4.97919 15.2959 4.99038C16.4446 5.05993 18.3571 5.45377 19.4896 7.13719C19.2838 7.2543 18.5439 7.69636 17.8242 8.51962C17.7103 8.1306 17.5572 7.73606 17.3339 7.35291C17.3339 7.35291 17.6081 7.33234 17.9059 7.35291C17.7772 7.36617 17.5227 7.39069 17.5227 7.39069Z"/>
-                    </svg>
-                    App Store
-                  </Button>
-                </motion.div>
-                
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button className="bg-amber-900 hover:bg-amber-950 text-white rounded-full h-14 px-6">
-                    <svg viewBox="0 0 24 24" className="h-6 w-6 mr-2" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M17.9366 8.90039C17.9366 8.0664 18.0041 7.3164 18.1473 6.6504H9.9873V9.9814H14.4326C14.3091 10.7764 13.8951 11.5054 13.2261 12.0004V13.8814H15.5521C17.0651 12.5334 17.9366 10.8904 17.9366 8.90039Z"/>
-                      <path d="M9.98731 17.5825C11.9533 17.5825 13.6063 16.8575 14.9043 15.6075L12.5783 13.7255C11.8623 14.1935 11.0063 14.4815 9.98731 14.4815C7.91831 14.4815 6.17131 13.0775 5.59931 11.1855H3.19531V13.1355C4.40431 15.6925 7.02131 17.5825 9.98731 17.5825Z"/>
-                      <path d="M5.59854 11.186C5.48354 10.718 5.42654 10.225 5.42654 9.7189C5.42654 9.21287 5.48954 8.71987 5.59854 8.25287V6.30287H3.1955C2.65754 7.35688 2.35254 8.52488 2.35254 9.7189C2.35254 10.912 2.65754 12.081 3.1955 13.136L5.59854 11.186Z"/>
-                      <path d="M9.9873 4.95641C11.1843 4.95641 12.2723 5.33541 13.1373 6.16341L15.2003 4.10641C13.6003 2.60341 11.9063 1.7334 9.9873 1.7334C7.0213 1.7334 4.4043 3.6244 3.1953 6.3024L5.5983 8.2524C6.1713 6.3604 7.9183 4.95641 9.9873 4.95641Z"/>
-                    </svg>
-                    Google Play
-                  </Button>
-                </motion.div>
-              </div>
-            </motion.div>
-            
-            <motion.div 
-              className="relative"
-              initial={{ opacity: 0, y: 30 }}
+          <div className="text-center mb-10">
+            <motion.h2 
+              className="text-3xl md:text-4xl font-bold mb-4 text-amber-900"
+              initial={{ opacity: 0, y: -20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
+              transition={{ duration: 0.4 }}
               viewport={{ once: true }}
             >
-              <div className="absolute -top-10 -left-10 w-32 h-32 bg-amber-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-              <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-orange-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-              <div className="bg-white rounded-3xl shadow-2xl overflow-hidden relative z-10">
-                <img 
-                  src="https://images.unsplash.com/photo-1622561029875-1f0e947e6407?q=80&w=1587&auto=format&fit=crop&ixlib=rb-4.0.3" 
-                  alt="GobiGo App" 
-                  className="w-full h-auto"
-                />
+              Бидэнтэй холбогдоорой
+              <span className="ml-2 text-2xl wobble inline-block">🤝</span>
+            </motion.h2>
+            <motion.p 
+              className="text-amber-800 text-lg max-w-2xl mx-auto"
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+              viewport={{ once: true }}
+            >
+              Хамгийн сүүлийн үeийн мэдээлэл, онцгой урамшууллыг бидний сошиал хуудсаас аваарай
+            </motion.p>
+          </div>
+          
+          <div className="flex justify-center gap-8">
+            {/* Facebook */}
+            <motion.a 
+              href="https://facebook.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-col items-center"
+              whileHover={{ scale: 1.1, y: -5 }}
+              whileTap={{ scale: 0.95 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.3 }}
+              viewport={{ once: true }}
+            >
+              <div className="w-20 h-20 flex items-center justify-center bg-blue-600 text-white rounded-full shadow-lg mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95z"/>
+                </svg>
               </div>
-            </motion.div>
+              <span className="text-amber-900 font-medium">Facebook</span>
+            </motion.a>
+            
+            {/* Instagram */}
+            <motion.a 
+              href="https://instagram.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-col items-center"
+              whileHover={{ scale: 1.1, y: -5 }}
+              whileTap={{ scale: 0.95 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.4 }}
+              viewport={{ once: true }}
+            >
+              <div className="w-20 h-20 flex items-center justify-center bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 text-white rounded-full shadow-lg mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2c2.717 0 3.056.01 4.122.06 1.065.05 1.79.217 2.428.465.66.254 1.216.598 1.772 1.153.509.5.902 1.105 1.153 1.772.247.637.415 1.363.465 2.428.047 1.066.06 1.405.06 4.122 0 2.717-.01 3.056-.06 4.122-.05 1.065-.218 1.79-.465 2.428a4.883 4.883 0 01-1.153 1.772c-.5.508-1.105.902-1.772 1.153-.637.247-1.363.415-2.428.465-1.066.047-1.405.06-4.122.06-2.717 0-3.056-.01-4.122-.06-1.065-.05-1.79-.218-2.428-.465a4.89 4.89 0 01-1.772-1.153 4.904 4.904 0 01-1.153-1.772c-.247-.637-.415-1.363-.465-2.428C2.013 15.056 2 14.717 2 12c0-2.717.01-3.056.06-4.122.05-1.066.218-1.79.465-2.428.254-.66.598-1.216 1.153-1.772.5-.509 1.105-.902 1.772-1.153.637-.247 1.363-.415 2.428-.465C8.944 2.013 9.283 2 12 2zm0 5a5 5 0 100 10 5 5 0 000-10zm6.5-.25a1.25 1.25 0 10-2.5 0 1.25 1.25 0 002.5 0zM12 9a3 3 0 110 6 3 3 0 010-6z"/>
+                </svg>
+              </div>
+              <span className="text-amber-900 font-medium">Instagram</span>
+            </motion.a>
+            
+            {/* Twitter */}
+            <motion.a 
+              href="https://twitter.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-col items-center"
+              whileHover={{ scale: 1.1, y: -5 }}
+              whileTap={{ scale: 0.95 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.5 }}
+              viewport={{ once: true }}
+            >
+              <div className="w-20 h-20 flex items-center justify-center bg-black text-white rounded-full shadow-lg mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z" />
+                </svg>
+              </div>
+              <span className="text-amber-900 font-medium">Twitter</span>
+            </motion.a>
           </div>
         </div>
       </section>
