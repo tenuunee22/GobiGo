@@ -6,7 +6,7 @@ import { Navigation, MapPin, Clock, Loader2 } from 'lucide-react';
 // Define map container style for the map
 const mapContainerStyle = {
   width: '100%',
-  height: '500px', // Increased height as requested
+  height: '100px', // Decreased height to 100px as requested
 };
 
 // Define marker icons - will be created after Google Maps API is loaded
