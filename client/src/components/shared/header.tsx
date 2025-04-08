@@ -1,4 +1,4 @@
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { logoutUser } from "@/lib/firebase";
@@ -6,6 +6,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,6 +32,18 @@ import {
   NavigationMenuLink,
 } from "@/components/ui/navigation-menu";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
   Home,
   User,
   Store,
@@ -42,15 +56,52 @@ import {
   DollarSign,
   Car,
   Settings,
-  ChevronDown
+  ChevronDown,
+  X
 } from "lucide-react";
+
+// Cart item type
+interface CartItem {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  imageUrl?: string;
+}
+
+// Search result type
+interface SearchResult {
+  id: string;
+  name: string;
+  type: 'restaurant' | 'product';
+  imageUrl?: string;
+  description?: string;
+}
 
 export function Header() {
   const { user } = useAuth();
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const [, setLocation] = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [greeting, setGreeting] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  
+  // Load cart items from localStorage
+  useEffect(() => {
+    const savedCart = localStorage.getItem('cartItems');
+    if (savedCart) {
+      try {
+        setCartItems(JSON.parse(savedCart));
+      } catch (error) {
+        console.error("Error parsing cart items from localStorage", error);
+      }
+    }
+  }, []);
   
   // Set greeting based on time of day
   useEffect(() => {
@@ -221,6 +272,68 @@ export function Header() {
     }
   };
   
+  // Handle search
+  const handleSearch = () => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      return;
+    }
+    
+    // Mock search results - in a real app, this would be an API call
+    setIsSearchOpen(true);
+    
+    // Simulate API call
+    setTimeout(() => {
+      const mockResults = [
+        {
+          id: '1',
+          name: 'Хүслэн Ресторан',
+          type: 'restaurant' as const,
+          imageUrl: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80',
+          description: 'Монгол үндэсний хоолны ресторан'
+        },
+        {
+          id: '2',
+          name: 'Пицца',
+          type: 'product' as const,
+          imageUrl: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80',
+          description: 'Пепперони пицца'
+        },
+        {
+          id: '3',
+          name: 'Монгол Амтат',
+          type: 'restaurant' as const,
+          imageUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80',
+          description: 'Үндэсний хоолны газар'
+        }
+      ];
+      
+      const results: SearchResult[] = mockResults.filter(item => 
+        item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        (item.description && item.description.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
+      
+      setSearchResults(results);
+    }, 300);
+  };
+  
+  // Remove item from cart
+  const removeFromCart = (id: string) => {
+    const updatedCart = cartItems.filter(item => item.id !== id);
+    setCartItems(updatedCart);
+    localStorage.setItem('cartItems', JSON.stringify(updatedCart));
+    
+    toast({
+      title: "Бүтээгдэхүүн хасагдлаа",
+      description: "Сагснаас бүтээгдэхүүн амжилттай хасагдлаа",
+    });
+  };
+  
+  // Calculate total cart price
+  const getTotalPrice = () => {
+    return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+  };
+
   // Desktop navigation content
   const desktopNavItems = () => {
     if (!user) return customerNav();
@@ -262,8 +375,161 @@ export function Header() {
             </NavigationMenu>
           )}
           
-          {/* User Menu */}
+          {/* User Menu and Actions */}
           <div className="flex items-center gap-4">
+            {/* Search Dialog */}
+            <Dialog open={isSearchOpen} onOpenChange={setIsSearchOpen}>
+              <DialogTrigger asChild>
+                <Button variant="ghost" size="icon" onClick={() => setIsSearchOpen(true)}>
+                  <Search className="h-5 w-5" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Хайх</DialogTitle>
+                </DialogHeader>
+                <div className="flex items-center space-x-2 mt-2">
+                  <div className="grid flex-1 gap-2">
+                    <Input
+                      placeholder="Ресторан, хоол, газрын нэр, etc."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSearch();
+                      }}
+                    />
+                  </div>
+                  <Button type="submit" size="sm" className="px-3" onClick={handleSearch}>
+                    <span className="sr-only">Хайх</span>
+                    <Search className="h-4 w-4" />
+                  </Button>
+                </div>
+                
+                {searchResults.length > 0 && (
+                  <div className="mt-4 max-h-72 overflow-y-auto">
+                    <div className="space-y-2">
+                      {searchResults.map((result) => (
+                        <div 
+                          key={result.id} 
+                          className="flex items-center gap-3 p-2 rounded-md hover:bg-accent cursor-pointer transition-colors"
+                          onClick={() => {
+                            setIsSearchOpen(false);
+                            setSearchQuery("");
+                            setSearchResults([]);
+                            setLocation(result.type === 'restaurant' ? `/restaurant/${result.id}` : `/product/${result.id}`);
+                          }}
+                        >
+                          {result.imageUrl && (
+                            <img 
+                              src={result.imageUrl} 
+                              alt={result.name} 
+                              className="w-12 h-12 rounded-md object-cover"
+                            />
+                          )}
+                          <div>
+                            <div className="font-medium">{result.name}</div>
+                            <div className="text-sm text-gray-500">{result.description}</div>
+                            <Badge variant="outline" className="mt-1">
+                              {result.type === 'restaurant' ? 'Ресторан' : 'Хоол'}
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </DialogContent>
+            </Dialog>
+            
+            {/* Cart Popover */}
+            {user && user.role === 'customer' && (
+              <Popover open={isCartOpen} onOpenChange={setIsCartOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="icon" className="relative">
+                    <ShoppingBag className="h-5 w-5" />
+                    {cartItems.length > 0 && (
+                      <Badge className="absolute -top-1 -right-1 px-1 min-w-[18px] h-[18px] flex items-center justify-center text-xs">
+                        {cartItems.length}
+                      </Badge>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-0" align="end">
+                  <div className="p-4 border-b border-border">
+                    <div className="font-medium">Миний сагс</div>
+                    <div className="text-sm text-gray-500">{cartItems.length} бүтээгдэхүүн</div>
+                  </div>
+                  
+                  {cartItems.length > 0 ? (
+                    <>
+                      <div className="max-h-80 overflow-y-auto">
+                        {cartItems.map((item) => (
+                          <div key={item.id} className="flex items-center gap-3 p-3 border-b border-border">
+                            {item.imageUrl ? (
+                              <img 
+                                src={item.imageUrl} 
+                                alt={item.name} 
+                                className="w-12 h-12 rounded-md object-cover"
+                              />
+                            ) : (
+                              <div className="w-12 h-12 bg-gray-100 rounded-md flex items-center justify-center">
+                                <Package className="h-6 w-6 text-gray-400" />
+                              </div>
+                            )}
+                            <div className="flex-1">
+                              <div className="font-medium">{item.name}</div>
+                              <div className="text-sm text-gray-500">
+                                {item.quantity} x {item.price.toLocaleString()}₮
+                              </div>
+                            </div>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-8 w-8 text-gray-500 hover:text-red-500"
+                              onClick={() => removeFromCart(item.id)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="p-4">
+                        <div className="flex justify-between mb-4">
+                          <span className="font-medium">Нийт дүн</span>
+                          <span className="font-bold">{getTotalPrice().toLocaleString()}₮</span>
+                        </div>
+                        <Button 
+                          className="w-full" 
+                          onClick={() => {
+                            setIsCartOpen(false);
+                            setLocation("/cart");
+                          }}
+                        >
+                          Төлбөр хийх
+                        </Button>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="p-8 text-center">
+                      <ShoppingBag className="h-12 w-12 mx-auto text-gray-300 mb-3" />
+                      <div className="text-gray-500">Таны сагс хоосон байна</div>
+                      <Button 
+                        variant="outline" 
+                        className="mt-4"
+                        onClick={() => {
+                          setIsCartOpen(false);
+                          setLocation("/");
+                        }}
+                      >
+                        Захиалга хийх
+                      </Button>
+                    </div>
+                  )}
+                </PopoverContent>
+              </Popover>
+            )}
+            
+            {/* User Profile Menu */}
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -319,6 +585,16 @@ export function Header() {
                     <DrawerTitle>GobiGo</DrawerTitle>
                   </DrawerHeader>
                   <div className="px-4 py-2 space-y-2">
+                    <div className="mb-4">
+                      <Input
+                        placeholder="Хайх..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleSearch();
+                        }}
+                      />
+                    </div>
                     <NavigationMenu className="flex flex-col w-full">
                       <NavigationMenuList className="flex flex-col w-full gap-1">
                         {mobileNavItems()}
