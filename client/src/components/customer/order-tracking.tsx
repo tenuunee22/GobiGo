@@ -205,7 +205,7 @@ export function OrderTracking({
         </div>
         
         {/* Google Maps integration */}
-        <div className="w-full h-64 rounded-lg mb-4 relative overflow-hidden">
+        <div className="w-full h-40 rounded-lg mb-4 relative overflow-hidden">
           {/* Import Google Maps Component */}
           {status === "on-the-way" && currentLocation && destination ? (
             <GoogleMapWithDirections 

@@ -92,6 +92,18 @@ function Router() {
     }
   };
 
+  // Custom route guard to check user roles
+  const ProtectedBusinessRoute = ({ component: Component, ...rest }: { component: React.ComponentType<any>, path: string }) => {
+    const userIsBusinessOwner = user?.role === "business";
+    
+    return (
+      <Route
+        {...rest}
+        component={userIsBusinessOwner ? Component : () => <NotFound />}
+      />
+    );
+  };
+  
   return (
     <div className="page-transition p-1">
       <Switch>
@@ -102,7 +114,7 @@ function Router() {
         <Route path="/profile/user" component={UserProfile} />
         <Route path="/profile/business" component={BusinessProfile} />
         <Route path="/profile/driver" component={DriverProfile} />
-        <Route path="/dashboard/store" component={BusinessDashboard} />
+        <ProtectedBusinessRoute path="/dashboard/store" component={BusinessDashboard} />
         <Route path="/dashboard/driver" component={DeliveryDashboard} />
         <Route path="/restaurant/:id" component={RestaurantDetail} />
         <Route path="/order/:id" component={OrderDetail} />
@@ -112,10 +124,10 @@ function Router() {
         <Route path="/search" component={CustomerDashboard} />
         <Route path="/cart" component={Cart} />
         <Route path="/tooltip-example" component={TooltipExample} />
-        <Route path="/business-orders" component={BusinessDashboard} />
+        <ProtectedBusinessRoute path="/business-orders" component={BusinessDashboard} />
         <Route path="/earnings" component={CustomerDashboard} />
         <Route path="/delivery-history" component={DeliveryDashboard} />
-        <Route path="/products" component={BusinessDashboard} />
+        <ProtectedBusinessRoute path="/products" component={BusinessDashboard} />
         <Route path="/settings" component={Settings} />
         <Route path="/loading-demo" component={LoadingDemo} />
         <Route component={NotFound} />

@@ -206,30 +206,21 @@ export default function BusinessProfile() {
                 <CardHeader>
                   <CardTitle>Бизнесийн лого</CardTitle>
                   <CardDescription>
-                    Таны бизнесийн лого. Админ хэрэглэгч л зургийг өөрчлөх эрхтэй.
+                    Таны бизнесийн лого. Зөвлөмж: 1:1 харьцаатай зураг байвал сайн.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {logoImage ? (
-                      <div className="border rounded-lg p-4 flex justify-center items-center bg-gray-50">
-                        <img 
-                          src={logoImage} 
-                          alt="Бизнесийн лого" 
-                          className="max-h-48 max-w-full rounded-md object-contain"
-                        />
-                      </div>
-                    ) : (
-                      <div className="border rounded-lg p-10 flex justify-center items-center bg-gray-50">
-                        <div className="text-center text-gray-500">
-                          <Store className="h-16 w-16 mx-auto mb-2 opacity-30" />
-                          <p>Лого оруулаагүй байна</p>
-                          <p className="text-xs mt-1">Админ хэрэглэгчтэй холбогдоно уу</p>
-                        </div>
-                      </div>
-                    )}
+                    <FileUpload
+                      onFileSelect={handleLogoUpload}
+                      previewUrl={logoImage}
+                      label="Бизнесийн лого"
+                      acceptedTypes="image/*"
+                      maxSizeMB={2}
+                      disabled={isUploading}
+                    />
                     <div className="text-xs text-gray-500 mt-2">
-                      Санамж: Танд зураг оруулах эрх байхгүй байна.
+                      Зөвлөмж: Лого зураг нь 1:1 харьцаатай (квадрат) байвал сайн. Хамгийн тохиромжтой хэмжээ: 512x512px.
                     </div>
                   </div>
                 </CardContent>
@@ -240,30 +231,21 @@ export default function BusinessProfile() {
                 <CardHeader>
                   <CardTitle>Бизнесийн ковер зураг</CardTitle>
                   <CardDescription>
-                    Таны бизнесийн үндсэн зураг. Админ хэрэглэгч л зургийг өөрчлөх эрхтэй.
+                    Таны бизнесийн үндсэн зураг. Дэлгэцийн хэмжээтэй тохирсон өргөн зураг сонгоорой.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {coverImage ? (
-                      <div className="border rounded-lg p-4 flex justify-center items-center bg-gray-50">
-                        <img 
-                          src={coverImage} 
-                          alt="Бизнесийн ковер зураг" 
-                          className="max-h-64 max-w-full rounded-md object-contain"
-                        />
-                      </div>
-                    ) : (
-                      <div className="border rounded-lg p-10 flex justify-center items-center bg-gray-50">
-                        <div className="text-center text-gray-500">
-                          <ImageIcon className="h-16 w-16 mx-auto mb-2 opacity-30" />
-                          <p>Ковер зураг оруулаагүй байна</p>
-                          <p className="text-xs mt-1">Админ хэрэглэгчтэй холбогдоно уу</p>
-                        </div>
-                      </div>
-                    )}
+                    <FileUpload
+                      onFileSelect={handleCoverUpload}
+                      previewUrl={coverImage}
+                      label="Бизнесийн ковер зураг"
+                      acceptedTypes="image/*"
+                      maxSizeMB={5}
+                      disabled={isUploading}
+                    />
                     <div className="text-xs text-gray-500 mt-2">
-                      Санамж: Танд зураг оруулах эрх байхгүй байна.
+                      Зөвлөмж: Ковер зураг нь 16:9 харьцаатай (өргөн) байвал сайн. Хамгийн тохиромжтой хэмжээ: 1920x1080px.
                     </div>
                   </div>
                 </CardContent>
