@@ -359,29 +359,15 @@ export function BusinessDashboard() {
       <div className="mb-6">
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-bold">Захиалга болон бүтээгдэхүүн</h2>
-          <div className="flex gap-4 items-center">
-            <Button 
-              onClick={() => {
-                // Switch to delivery tracking tab
-                const deliveryTab = document.querySelector('[value="delivery-tracking"]') as HTMLElement;
-                if (deliveryTab) deliveryTab.click();
-              }}
-              className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white flex items-center gap-2 shadow-md"
-            >
-              <Navigation className="h-4 w-4 wobble" />
-              <span>Хүргэлт хянах</span>
-              <span className="text-xs bg-red-500 text-white rounded-full h-5 w-5 flex items-center justify-center animate-pulse">3</span>
-            </Button>
-            <div className="relative">
-              <Input
-                type="text"
-                placeholder="Хайх..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-60"
-              />
-              <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
-            </div>
+          <div className="relative">
+            <Input
+              type="text"
+              placeholder="Хайх..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-60"
+            />
+            <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
           </div>
         </div>
       </div>
@@ -389,16 +375,16 @@ export function BusinessDashboard() {
       <Tabs defaultValue="orders">
         <TabsList className="mb-4">
           <TabsTrigger value="orders">Захиалгууд</TabsTrigger>
-          <TabsTrigger value="products">Бүтээгдэхүүн</TabsTrigger>
           <TabsTrigger value="shop">Дэлгүүр</TabsTrigger>
+          <TabsTrigger value="delivery-tracking" className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700 relative overflow-hidden border-b-4 border-indigo-700">
+            <Navigation className="h-4 w-4 text-white wobble" />
+            <span className="font-medium">Хүргэлт хянах</span>
+            <span className="absolute -right-1 -top-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse">3</span>
+          </TabsTrigger>
+          <TabsTrigger value="products">Бүтээгдэхүүн</TabsTrigger>
           <TabsTrigger value="earnings">Орлого</TabsTrigger>
           <TabsTrigger value="sales">Борлуулалт</TabsTrigger>
           <TabsTrigger value="settings">Тохиргоо</TabsTrigger>
-          <TabsTrigger value="delivery-tracking" className="flex items-center gap-2 bg-gradient-to-r from-blue-100 to-indigo-100 hover:from-blue-200 hover:to-indigo-200 relative overflow-hidden">
-            <Navigation className="h-4 w-4 text-blue-600 wiggle" />
-            <span className="font-medium text-blue-700">Хүргэлт хянах</span>
-            <span className="absolute right-2 top-1 text-xs text-red-500 pulse">🚚</span>
-          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="orders" className="space-y-4">
