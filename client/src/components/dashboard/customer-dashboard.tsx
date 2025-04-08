@@ -223,7 +223,7 @@ export function CustomerDashboard() {
       {/* Hero Section with Parallax */}
       <section 
         ref={heroRef}
-        className="relative bg-cover bg-center h-[500px] md:h-[600px] overflow-hidden flex items-center"
+        className="relative bg-cover bg-center h-[700px] md:h-[800px] overflow-hidden flex items-center"
         style={{
           backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url("https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2070&auto=format&fit=crop")',
           backgroundAttachment: 'fixed'
@@ -828,7 +828,7 @@ export function CustomerDashboard() {
           <div className="flex justify-center gap-8">
             {/* Facebook */}
             <motion.a 
-              href="https://facebook.com"
+              href="https://facebook.com/gobigo_delivery"
               target="_blank"
               rel="noopener noreferrer"
               className="flex flex-col items-center"
@@ -838,18 +838,24 @@ export function CustomerDashboard() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.3 }}
               viewport={{ once: true }}
+              onClick={() => {
+                // Confirm clicking will send them to your own Facebook
+                if (window) {
+                  window.open("https://facebook.com/gobigo_delivery", "_blank");
+                }
+              }}
             >
-              <div className="w-20 h-20 flex items-center justify-center bg-blue-600 text-white rounded-full shadow-lg mb-3">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" viewBox="0 0 24 24" fill="currentColor">
+              <div className="w-24 h-24 flex items-center justify-center bg-blue-600 text-white rounded-full shadow-lg mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95z"/>
                 </svg>
               </div>
-              <span className="text-amber-900 font-medium">Facebook</span>
+              <span className="text-amber-900 font-medium">GobiGo Facebook</span>
             </motion.a>
             
             {/* Instagram */}
             <motion.a 
-              href="https://instagram.com"
+              href="https://instagram.com/gobigo.official"
               target="_blank"
               rel="noopener noreferrer"
               className="flex flex-col items-center"
@@ -859,18 +865,24 @@ export function CustomerDashboard() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.4 }}
               viewport={{ once: true }}
+              onClick={() => {
+                // Confirm clicking will send them to your own Instagram
+                if (window) {
+                  window.open("https://instagram.com/gobigo.official", "_blank");
+                }
+              }}
             >
-              <div className="w-20 h-20 flex items-center justify-center bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 text-white rounded-full shadow-lg mb-3">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" viewBox="0 0 24 24" fill="currentColor">
+              <div className="w-24 h-24 flex items-center justify-center bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 text-white rounded-full shadow-lg mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2c2.717 0 3.056.01 4.122.06 1.065.05 1.79.217 2.428.465.66.254 1.216.598 1.772 1.153.509.5.902 1.105 1.153 1.772.247.637.415 1.363.465 2.428.047 1.066.06 1.405.06 4.122 0 2.717-.01 3.056-.06 4.122-.05 1.065-.218 1.79-.465 2.428a4.883 4.883 0 01-1.153 1.772c-.5.508-1.105.902-1.772 1.153-.637.247-1.363.415-2.428.465-1.066.047-1.405.06-4.122.06-2.717 0-3.056-.01-4.122-.06-1.065-.05-1.79-.218-2.428-.465a4.89 4.89 0 01-1.772-1.153 4.904 4.904 0 01-1.153-1.772c-.247-.637-.415-1.363-.465-2.428C2.013 15.056 2 14.717 2 12c0-2.717.01-3.056.06-4.122.05-1.066.218-1.79.465-2.428.254-.66.598-1.216 1.153-1.772.5-.509 1.105-.902 1.772-1.153.637-.247 1.363-.415 2.428-.465C8.944 2.013 9.283 2 12 2zm0 5a5 5 0 100 10 5 5 0 000-10zm6.5-.25a1.25 1.25 0 10-2.5 0 1.25 1.25 0 002.5 0zM12 9a3 3 0 110 6 3 3 0 010-6z"/>
                 </svg>
               </div>
-              <span className="text-amber-900 font-medium">Instagram</span>
+              <span className="text-amber-900 font-medium">GobiGo Instagram</span>
             </motion.a>
             
             {/* Twitter */}
             <motion.a 
-              href="https://twitter.com"
+              href="https://twitter.com/gobigo_official"
               target="_blank"
               rel="noopener noreferrer"
               className="flex flex-col items-center"
@@ -880,13 +892,19 @@ export function CustomerDashboard() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.5 }}
               viewport={{ once: true }}
+              onClick={() => {
+                // Confirm clicking will send them to your own Twitter/X
+                if (window) {
+                  window.open("https://twitter.com/gobigo_official", "_blank");
+                }
+              }}
             >
-              <div className="w-20 h-20 flex items-center justify-center bg-black text-white rounded-full shadow-lg mb-3">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" viewBox="0 0 24 24" fill="currentColor">
+              <div className="w-24 h-24 flex items-center justify-center bg-black text-white rounded-full shadow-lg mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z" />
                 </svg>
               </div>
-              <span className="text-amber-900 font-medium">Twitter</span>
+              <span className="text-amber-900 font-medium">GobiGo Twitter</span>
             </motion.a>
           </div>
         </div>
