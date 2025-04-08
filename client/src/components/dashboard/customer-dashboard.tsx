@@ -381,7 +381,7 @@ export function CustomerDashboard() {
             transition={{ delay: 0.2 }}
             className="mb-10"
           >
-            <Card className="overflow-hidden border-0 shadow-lg relative bg-gradient-to-r from-blue-900 to-indigo-900">
+            <Card className="overflow-hidden border-0 shadow-lg relative bg-gradient-to-r from-blue-900 to-indigo-900 rounded-3xl">
               <CardContent className="p-6 text-white">
                 <div className="flex flex-col md:flex-row justify-between items-center">
                   <div className="mb-4 md:mb-0 relative">
