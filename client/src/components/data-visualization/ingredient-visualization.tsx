@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-
 interface Ingredient {
   id: string;
   name: string;
@@ -7,58 +6,38 @@ interface Ingredient {
   icon: string;
   color: string;
 }
-
 interface IngredientVisualizationProps {
   data: Ingredient[];
   title?: string;
 }
-
 export function IngredientVisualization({ data, title = "Түгээмэл орц" }: IngredientVisualizationProps) {
   const [sortedData, setSortedData] = useState<Ingredient[]>([]);
   const [activeIngredient, setActiveIngredient] = useState<string | null>(null);
   const [hoveredIngredient, setHoveredIngredient] = useState<string | null>(null);
-
-  // Sort the data by count
   useEffect(() => {
     const sorted = [...data].sort((a, b) => b.count - a.count);
     setSortedData(sorted);
   }, [data]);
-
-  // Calculate the maximum count for scaling
   const maxCount = Math.max(...data.map(item => item.count));
-
-  // Handle clicking on an ingredient
   const handleIngredientClick = (id: string) => {
     setActiveIngredient(activeIngredient === id ? null : id);
   };
-
   return (
     <div className="bg-white rounded-xl shadow-md p-6 overflow-hidden">
       <h3 className="text-xl font-bold mb-6 text-center bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text text-transparent">
         {title}
       </h3>
-
       <div className="flex justify-center mb-6">
         <div className="relative h-[300px] w-full max-w-3xl">
           {sortedData.map((ingredient, index) => {
-            // Calculate size based on count
             const size = 40 + (ingredient.count / maxCount) * 60;
-            
-            // Calculate position - distribute ingredients across the container
             const position = index / (sortedData.length - 1 || 1);
             const left = 10 + position * 80 + '%';
-            
-            // For visual variety, alternate vertical positions
             const isEven = index % 2 === 0;
             const top = isEven ? '30%' : '60%';
-            
-            // Determine animation delay for staggered effect
             const animationDelay = `${index * 0.2}s`;
-            
-            // Apply different effects based on active/hover state
             const isActive = activeIngredient === ingredient.id;
             const isHovered = hoveredIngredient === ingredient.id;
-            
             return (
               <div
                 key={ingredient.id}
@@ -84,7 +63,6 @@ export function IngredientVisualization({ data, title = "Түгээмэл орц
                   style={{ backgroundColor: `${ingredient.color}25`, borderColor: ingredient.color }}
                 >
                   <span className="text-2xl">{ingredient.icon}</span>
-                  
                   <div
                     className={`absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-white px-2 py-1 rounded shadow text-sm whitespace-nowrap transition-opacity duration-200 ${
                       isActive || isHovered ? 'opacity-100' : 'opacity-0'
@@ -99,7 +77,6 @@ export function IngredientVisualization({ data, title = "Түгээмэл орц
           })}
         </div>
       </div>
-
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 mt-4">
         {sortedData.map((ingredient) => (
           <div
@@ -125,8 +102,6 @@ export function IngredientVisualization({ data, title = "Түгээмэл орц
     </div>
   );
 }
-
-// Helper function to get a random color for demonstration
 export function getRandomColor(): string {
   const colors = [
     '#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6',
@@ -134,11 +109,8 @@ export function getRandomColor(): string {
   ];
   return colors[Math.floor(Math.random() * colors.length)];
 }
-
-// Helper to get an icon for an ingredient based on name
 export function getIngredientIcon(name: string): string {
   const nameLower = name.toLowerCase();
-  
   if (nameLower.includes('мах') || nameLower.includes('meat')) return '🥩';
   if (nameLower.includes('төмс') || nameLower.includes('potato')) return '🥔';
   if (nameLower.includes('хулуу') || nameLower.includes('pumpkin')) return '🎃';
@@ -162,7 +134,5 @@ export function getIngredientIcon(name: string): string {
   if (nameLower.includes('амттан') || nameLower.includes('dessert')) return '🍮';
   if (nameLower.includes('жимс') || nameLower.includes('fruit')) return '🍓';
   if (nameLower.includes('ногоо') || nameLower.includes('vegetable')) return '🥦';
-  
-  // Default
   return '🍴';
 }

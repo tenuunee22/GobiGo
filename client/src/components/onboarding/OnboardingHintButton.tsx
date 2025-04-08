@@ -9,17 +9,14 @@ import {
 } from '@/components/ui/tooltip';
 import { useOnboarding } from './onboarding-context';
 import { HelpCircle } from 'lucide-react';
-
 interface OnboardingHintButtonProps {
   position?: 'bottom-right' | 'top-right' | 'bottom-left' | 'top-left';
 }
-
 const OnboardingHintButton: React.FC<OnboardingHintButtonProps> = ({ 
   position = 'bottom-right' 
 }) => {
   const { resetOnboarding, isOnboardingDone } = useOnboarding();
   const [showTooltip, setShowTooltip] = useState(false);
-  
   const getPositionClasses = () => {
     switch (position) {
       case 'top-right':
@@ -33,9 +30,7 @@ const OnboardingHintButton: React.FC<OnboardingHintButtonProps> = ({
         return 'bottom-4 right-4';
     }
   };
-  
   if (!isOnboardingDone) return null;
-  
   return (
     <motion.div
       className={`fixed ${getPositionClasses()} z-50`}
@@ -70,5 +65,4 @@ const OnboardingHintButton: React.FC<OnboardingHintButtonProps> = ({
     </motion.div>
   );
 };
-
 export default OnboardingHintButton;

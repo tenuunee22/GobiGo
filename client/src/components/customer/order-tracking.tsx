@@ -3,20 +3,17 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { GoogleMapComponent } from "@/components/shared/google-map";
 import { GoogleMapWithDirections } from "@/components/shared/google-map-with-directions";
-
 interface OrderItem {
   name: string;
   quantity: number;
   price: number;
 }
-
 interface Driver {
   id: string;
   name: string;
   imageUrl?: string;
   arrivalTime: string;
 }
-
 interface OrderTrackingProps {
   orderId: string;
   status: "placed" | "preparing" | "on-the-way" | "delivered";
@@ -34,7 +31,6 @@ interface OrderTrackingProps {
     lng: number;
   };
 }
-
 export function OrderTracking({
   orderId,
   status,
@@ -46,19 +42,14 @@ export function OrderTracking({
   currentLocation,
   destination,
 }: OrderTrackingProps) {
-  // Animation state management
   const [animating, setAnimating] = useState(false);
   const [prevStatus, setPrevStatus] = useState<string | null>(null);
-  
-  // Status emojis and descriptions
   const statusInfo = {
     placed: { emoji: "📝", label: "Захиалга өгсөн", description: "Таны захиалгыг хүлээн авлаа!" },
     preparing: { emoji: "👨‍🍳", label: "Бэлтгэж байна", description: "Таны хоолыг бэлтгэж байна" },
     "on-the-way": { emoji: "🛵", label: "Замд явж байна", description: "Хоол замдаа явж байна" },
     delivered: { emoji: "🎉", label: "Хүргэгдсэн", description: "Сайхан хооллоорой!" }
   };
-  
-  // Watch for status changes to trigger animation
   useEffect(() => {
     if (prevStatus && prevStatus !== status) {
       setAnimating(true);
@@ -67,7 +58,6 @@ export function OrderTracking({
     }
     setPrevStatus(status);
   }, [status, prevStatus]);
-  
   const getStatusPercentage = () => {
     switch (status) {
       case "placed":
@@ -82,14 +72,12 @@ export function OrderTracking({
         return 0;
     }
   };
-
   return (
     <section className="mb-12">
       <div className="bg-white rounded-lg shadow-md p-6">
         <h2 className="text-xl font-bold text-gray-900 mb-4">
           {statusInfo[status]?.description || "Таны захиалга замд яваа"}
         </h2>
-        
         {driver && (
           <div className="flex items-center mb-6">
             <div className="flex-shrink-0 h-12 w-12 rounded-full overflow-hidden mr-4">
@@ -113,20 +101,14 @@ export function OrderTracking({
             </div>
           </div>
         )}
-        
-        {/* Animated timeline with emojis */}
         <div className="relative mb-10">
-          {/* Progress bar */}
           <div className="h-2 bg-gray-200 rounded-full">
             <div
               className="h-2 bg-primary rounded-full transition-all duration-400 ease-in-out"
               style={{ width: `${getStatusPercentage()}%` }}
             ></div>
           </div>
-          
-          {/* Timeline points with emojis */}
           <div className="absolute top-6 left-0 w-full flex justify-between">
-            {/* Placed */}
             <div className="flex flex-col items-center">
               <div 
                 className={`w-10 h-10 flex items-center justify-center rounded-full mb-1 
@@ -144,8 +126,6 @@ export function OrderTracking({
                 {statusInfo.placed.label}
               </span>
             </div>
-            
-            {/* Preparing */}
             <div className="flex flex-col items-center">
               <div 
                 className={`w-10 h-10 flex items-center justify-center rounded-full mb-1 
@@ -163,8 +143,6 @@ export function OrderTracking({
                 {statusInfo.preparing.label}
               </span>
             </div>
-            
-            {/* On the way */}
             <div className="flex flex-col items-center">
               <div 
                 className={`w-10 h-10 flex items-center justify-center rounded-full mb-1 
@@ -182,8 +160,6 @@ export function OrderTracking({
                 {statusInfo["on-the-way"].label}
               </span>
             </div>
-            
-            {/* Delivered */}
             <div className="flex flex-col items-center">
               <div 
                 className={`w-10 h-10 flex items-center justify-center rounded-full mb-1 
@@ -203,10 +179,7 @@ export function OrderTracking({
             </div>
           </div>
         </div>
-        
-        {/* Google Maps integration */}
         <div className="w-full h-32 rounded-lg mb-4 relative overflow-hidden">
-          {/* Import Google Maps Component */}
           {status === "on-the-way" && currentLocation && destination ? (
             <GoogleMapWithDirections 
               origin={currentLocation} 
@@ -224,22 +197,20 @@ export function OrderTracking({
                 ...(currentLocation ? [{
                   position: currentLocation,
                   title: "Жолоочийн байршил",
-                  icon: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png"
+                  icon: "https:
                 }] : [])
               ]}
               zoom={15}
             />
           )}
-          
           <div className="absolute bottom-2 right-2">
             <button className="p-2 bg-white rounded-full shadow hover:shadow-md focus:outline-none" aria-label="Миний байршил">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-700" viewBox="0 0 20 20" fill="currentColor">
+              <svg xmlns="http:
                 <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
               </svg>
             </button>
           </div>
         </div>
-        
         <div className="border-t border-gray-200 pt-4">
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Захиалгын дэлгэрэнгүй</h3>
           {items.map((item, index) => (

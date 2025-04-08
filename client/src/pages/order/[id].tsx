@@ -10,21 +10,18 @@ import { OrderTracking } from "@/components/customer/order-tracking";
 import { QPayPayment } from "@/components/customer/qpay-payment";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-
 interface OrderItem {
   id: number;
   name: string;
   price: number;
   quantity: number;
 }
-
 interface BusinessInfo {
   id: number;
   name: string;
   address: string;
   imageUrl?: string;
 }
-
 interface OrderDetails {
   id: number;
   customerUid: string;
@@ -48,7 +45,6 @@ interface OrderDetails {
     arrivalTime?: string;
   };
 }
-
 export default function OrderDetails() {
   const [, params] = useLocation();
   const { toast } = useToast();
@@ -56,24 +52,15 @@ export default function OrderDetails() {
   const [loading, setLoading] = useState(true);
   const [order, setOrder] = useState<OrderDetails | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  // Parse the order ID from the URL parameters
   const orderId = params.id;
-
   useEffect(() => {
     if (!orderId) return;
-
     const fetchOrderDetails = async () => {
       try {
         setLoading(true);
         setError(null);
-
-        // Fetch order details from API
         const response = await apiRequest("GET", `/api/orders/${orderId}`);
-        
-        // For demo purposes
-        if (Math.random() > 0.1) { // 90% success rate
-          // Create mock order data for demonstration
+        if (Math.random() > 0.1) {
           const mockOrder: OrderDetails = {
             id: parseInt(orderId),
             customerUid: user?.uid || "",
@@ -91,7 +78,7 @@ export default function OrderDetails() {
               id: 1,
               name: "Пицца Хүслэн",
               address: "Чингисийн өргөн чөлөө, Блү Мон төв",
-              imageUrl: "https://images.unsplash.com/photo-1513104890138-7c749659a591?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
+              imageUrl: "https:
             },
             items: [
               { id: 1, name: "Пепперони Пицца", price: 14990, quantity: 1 },
@@ -105,10 +92,8 @@ export default function OrderDetails() {
               arrivalTime: "10-15 минут"
             }
           };
-          
           setOrder(mockOrder);
         } else {
-          // Simulate an error
           throw new Error("Захиалгын мэдээлэл олдсонгүй");
         }
       } catch (error: any) {
@@ -123,10 +108,8 @@ export default function OrderDetails() {
         setLoading(false);
       }
     };
-
     fetchOrderDetails();
   }, [orderId, toast, user]);
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case "placed": return "bg-blue-500";
@@ -138,7 +121,6 @@ export default function OrderDetails() {
       default: return "bg-gray-500";
     }
   };
-
   const getStatusText = (status: string) => {
     switch (status) {
       case "placed": return "Хүлээн авсан";
@@ -150,7 +132,6 @@ export default function OrderDetails() {
       default: return "Үл мэдэгдэх";
     }
   };
-
   const getPaymentStatusText = (status: string) => {
     switch (status) {
       case "pending": return "Хүлээгдэж байна";
@@ -159,7 +140,6 @@ export default function OrderDetails() {
       default: return "Үл мэдэгдэх";
     }
   };
-
   const getPaymentMethodText = (method: string) => {
     switch (method) {
       case "card": return "Картаар";
@@ -168,13 +148,9 @@ export default function OrderDetails() {
       default: return "Үл мэдэгдэх";
     }
   };
-
-  // Helper function to redirect to Stripe checkout
   const redirectToStripeCheckout = () => {
-    // Redirect to our static Stripe checkout URL
     window.location.href = "/api/stripe-static-checkout";
   };
-
   if (loading) {
     return (
       <div className="container py-10 flex flex-col items-center justify-center min-h-[50vh]">
@@ -183,7 +159,6 @@ export default function OrderDetails() {
       </div>
     );
   }
-
   if (error || !order) {
     return (
       <div className="container py-10">
@@ -210,8 +185,6 @@ export default function OrderDetails() {
       </div>
     );
   }
-
-  // If payment is pending and payment method is card, show stripe payment option
   if (order.paymentStatus === "pending" && order.paymentMethod === "card") {
     return (
       <div className="container py-10">
@@ -222,7 +195,6 @@ export default function OrderDetails() {
             </Button>
           </Link>
         </div>
-        
         <Card className="max-w-3xl mx-auto">
           <CardHeader>
             <CardTitle>Төлбөр төлөх</CardTitle>
@@ -239,7 +211,6 @@ export default function OrderDetails() {
                     <span className="font-medium">{item.price * item.quantity}₮</span>
                   </div>
                 ))}
-                
                 <div className="pt-2 mt-2 border-t">
                   <div className="flex justify-between">
                     <span>Хүргэлтийн хураамж</span>
@@ -265,8 +236,6 @@ export default function OrderDetails() {
       </div>
     );
   }
-  
-  // If payment is pending and payment method is qpay, show qpay payment screen
   if (order.paymentStatus === "pending" && order.paymentMethod === "qpay") {
     return (
       <div className="container py-10">
@@ -277,21 +246,17 @@ export default function OrderDetails() {
             </Button>
           </Link>
         </div>
-        
         <QPayPayment 
           orderId={order.id.toString()}
-          paymentIntentId={`pi_${order.id}_${Date.now()}`} // In a real app, this would be a real payment intent ID
+          paymentIntentId={`pi_${order.id}_${Date.now()}`}
           amount={order.totalAmount}
         />
       </div>
     );
   }
-
-  // Calculate order summary
   const subtotal = order.items.reduce((total, item) => total + (item.price * item.quantity), 0);
-  const deliveryFee = 2490; // Fixed delivery fee
+  const deliveryFee = 2490;
   const total = order.totalAmount;
-
   return (
     <div className="container py-10">
       <div className="mb-6">
@@ -301,9 +266,7 @@ export default function OrderDetails() {
           </Button>
         </Link>
       </div>
-      
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Order tracking section */}
         <div className="lg:col-span-7">
           <Card>
             <CardHeader>
@@ -319,9 +282,7 @@ export default function OrderDetails() {
                 {new Date(order.createdAt).toLocaleString('mn-MN')}
               </CardDescription>
             </CardHeader>
-            
             <CardContent className="space-y-6">
-              {/* Order tracking component */}
               <OrderTracking
                 orderId={order.id.toString()}
                 status={order.status === "completed" ? "delivered" : order.status}
@@ -343,16 +304,12 @@ export default function OrderDetails() {
             </CardContent>
           </Card>
         </div>
-        
-        {/* Order details section */}
         <div className="lg:col-span-5">
           <Card>
             <CardHeader>
               <CardTitle className="text-xl">Захиалгын дэлгэрэнгүй</CardTitle>
             </CardHeader>
-            
             <CardContent className="space-y-6">
-              {/* Restaurant info */}
               {order.business && (
                 <div className="flex items-center gap-4">
                   {order.business.imageUrl && (
@@ -368,10 +325,7 @@ export default function OrderDetails() {
                   </div>
                 </div>
               )}
-              
               <Separator />
-              
-              {/* Order items */}
               <div>
                 <h3 className="font-medium mb-3">Захиалсан хоолнууд</h3>
                 <div className="space-y-2">
@@ -382,7 +336,6 @@ export default function OrderDetails() {
                     </div>
                   ))}
                 </div>
-                
                 <div className="mt-4 pt-4 border-t">
                   <div className="flex justify-between">
                     <span>Дүн</span>
@@ -398,10 +351,7 @@ export default function OrderDetails() {
                   </div>
                 </div>
               </div>
-              
               <Separator />
-              
-              {/* Order details */}
               <div className="space-y-4">
                 <div className="flex items-start gap-2">
                   <MapPin className="w-5 h-5 text-gray-500 mt-0.5" />
@@ -413,7 +363,6 @@ export default function OrderDetails() {
                     )}
                   </div>
                 </div>
-                
                 <div className="flex items-start gap-2">
                   <Clock className="w-5 h-5 text-gray-500 mt-0.5" />
                   <div>
@@ -423,7 +372,6 @@ export default function OrderDetails() {
                     </p>
                   </div>
                 </div>
-                
                 <div className="flex items-start gap-2">
                   <CreditCard className="w-5 h-5 text-gray-500 mt-0.5" />
                   <div>
@@ -435,9 +383,7 @@ export default function OrderDetails() {
                 </div>
               </div>
             </CardContent>
-            
             <CardFooter className="flex-col space-y-3">
-              {/* Show payment button for pending payments */}
               {order.paymentStatus === "pending" && (
                 <Button 
                   className="w-full" 
@@ -447,12 +393,10 @@ export default function OrderDetails() {
                   Төлбөр төлөх
                 </Button>
               )}
-              
               <Button 
                 variant="outline" 
                 className="w-full"
                 onClick={() => {
-                  // In a real app, this would initiate customer support contact
                   toast({
                     title: "Харилцагчийн тусламж",
                     description: "Оператор тантай удахгүй холбогдох болно",

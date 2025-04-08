@@ -1,5 +1,4 @@
 import { Star } from "lucide-react";
-
 interface RestaurantCardProps {
   id: string;
   name: string;
@@ -12,7 +11,6 @@ interface RestaurantCardProps {
   estimatedTime: string;
   onClick: () => void;
 }
-
 export function RestaurantCard({
   id,
   name,
@@ -25,7 +23,6 @@ export function RestaurantCard({
   estimatedTime,
   onClick,
 }: RestaurantCardProps) {
-  // Function to get an appropriate emoji based on category
   const getCategoryEmoji = (cat: string): string => {
     const lowerCat = cat.toLowerCase();
     if (lowerCat.includes('ресторан') || lowerCat.includes('restaurant')) return '🍽️';
@@ -40,7 +37,6 @@ export function RestaurantCard({
     if (lowerCat.includes('pharmacy') || lowerCat.includes('эмийн')) return '💊';
     return '🍴';
   };
-
   return (
     <div 
       className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all cursor-pointer hover:translate-y-[-5px] slide-in-bottom"
@@ -49,7 +45,7 @@ export function RestaurantCard({
       <div className="relative overflow-hidden">
         <img 
           className="w-full h-48 object-cover hover:scale-105 transition-transform duration-700" 
-          src={imageUrl || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80"} 
+          src={imageUrl || "https:
           alt={name} 
         />
         <div className="absolute top-3 right-3 shadow-md rounded-full bg-white p-2 pulse">

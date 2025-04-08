@@ -8,11 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion } from "framer-motion";
 import { ShoppingBag, Bike, Users, Mail, Key, User, Building2, Truck, CreditCard } from "lucide-react";
-
 interface RegisterFormProps {
   onToggleForm: () => void;
 }
-
 export function RegisterForm({ onToggleForm }: RegisterFormProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -26,8 +24,6 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
-
-  // User type icons and info
   const userTypeInfo = {
     customer: {
       icon: <Users className="h-5 w-5" />,
@@ -60,28 +56,21 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
       description: "Хоол хүргэлт хийх",
     },
   };
-
-  // Business type icons and info
   const businessTypeInfo = {
     restaurant: { icon: "🍔", title: "Ресторан", description: "Хоолны газар, цайны газар" },
     grocery: { icon: "🥑", title: "Хүнсний дэлгүүр", description: "Жимс, ногоо, хүнсний бараа" },
     retail: { icon: "👕", title: "Жижиглэн худалдаа", description: "Хувцас, бараа, бүтээгдэхүүн" },
     other: { icon: "🏪", title: "Бусад", description: "Бусад төрлийн бизнес" },
   };
-
-  // Vehicle type icons
   const vehicleTypeInfo = {
     car: { icon: "🚗", title: "Автомашин" },
     motorcycle: { icon: "🏍️", title: "Мотоцикл" },
     bicycle: { icon: "🚲", title: "Унадаг дугуй" },
     scooter: { icon: "🛴", title: "Скүтер" },
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
-    // Validation
     if (password !== confirmPassword) {
       toast({
         title: "Нууц үг таарахгүй байна",
@@ -91,14 +80,11 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
       setIsLoading(false);
       return;
     }
-
     try {
-      // Prepare user data based on role
       let userData: any = {
         name,
         role: userType,
       };
-
       if (userType === "business") {
         userData = {
           ...userData,
@@ -112,15 +98,11 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
           licenseNumber,
         };
       }
-
       const userCredential = await registerUser(email, password, userData);
-      
       toast({
         title: "Бүртгэл амжилттай үүслээ",
         description: "ГобиГоу-д тавтай морил!",
       });
-
-      // Redirect based on user role
       switch(userType) {
         case 'business':
           setLocation("/dashboard/store");
@@ -143,16 +125,10 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
       setIsLoading(false);
     }
   };
-  
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     try {
       await loginWithGoogle();
-      // No need to handle the result here as we now use redirect flow
-      // The redirect will happen automatically and the result will be
-      // processed by the handleAuthRedirect in AuthContext on return
-      
-      // We'll show a toast to indicate the process has started
       toast({
         title: "Google нэвтрэлт эхэллээ",
         description: "Google хуудас руу шилжиж байна...",
@@ -167,16 +143,10 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
       setIsLoading(false);
     }
   };
-  
   const handleFacebookLogin = async () => {
     setIsLoading(true);
     try {
       await loginWithFacebook();
-      // No need to handle the result here as we now use redirect flow
-      // The redirect will happen automatically and the result will be
-      // processed by the handleAuthRedirect in AuthContext on return
-      
-      // We'll show a toast to indicate the process has started
       toast({
         title: "Facebook нэвтрэлт эхэллээ",
         description: "Facebook хуудас руу шилжиж байна...",
@@ -191,9 +161,7 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
       setIsLoading(false);
     }
   };
-
   const selectedUserType = userTypeInfo[userType as keyof typeof userTypeInfo];
-
   return (
     <motion.div 
       className="py-6 px-4 sm:px-6 md:px-8"
@@ -252,7 +220,6 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
             </a>
           </motion.p>
         </motion.div>
-
         <motion.div 
           className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100"
           initial={{ opacity: 0, y: 20 }}
@@ -312,7 +279,6 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
                 ))}
               </div>
             </motion.div>
-
             <motion.div 
               className="space-y-5"
               initial={{ opacity: 0 }}
@@ -325,7 +291,6 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.9 }}
               >
-                {/* Common fields section */}
                 <div className={`
                   p-5 rounded-lg border 
                   bg-gradient-to-r ${selectedUserType.bgColor}
@@ -341,7 +306,6 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
                     <h3 className="font-medium">Үндсэн мэдээлэл</h3>
                     <span className="text-xs wiggle">{selectedUserType.emoji}</span>
                   </div>
-
                   <div className="space-y-4">
                     <div className="relative">
                       <Label htmlFor="name" className="text-sm font-medium mb-1.5 flex items-center gap-1.5">
@@ -364,7 +328,6 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
                         </div>
                       </div>
                     </div>
-
                     <div className="relative">
                       <Label htmlFor="email" className="text-sm font-medium mb-1.5 flex items-center gap-1.5">
                         <span className="text-xs jelly">📧</span> Имэйл хаяг
@@ -387,7 +350,6 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
                         </div>
                       </div>
                     </div>
-
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="relative">
                         <Label htmlFor="password" className="text-sm font-medium mb-1.5 flex items-center gap-1.5">
@@ -411,7 +373,6 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
                           </div>
                         </div>
                       </div>
-
                       <div className="relative">
                         <Label htmlFor="confirm-password" className="text-sm font-medium mb-1.5 flex items-center gap-1.5">
                           <span className="text-xs wiggle">🔐</span> Нууц үг давтах
@@ -437,8 +398,6 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
                     </div>
                   </div>
                 </div>
-
-                {/* Business specific fields */}
                 {userType === "business" && (
                   <motion.div 
                     className="p-5 rounded-lg border border-amber-100 bg-gradient-to-r from-amber-50 to-orange-50"
@@ -453,7 +412,6 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
                       <h3 className="font-medium">Бизнесийн мэдээлэл</h3>
                       <span className="text-xs bounce-soft">🏪</span>
                     </div>
-
                     <div className="space-y-4">
                       <div className="relative">
                         <Label htmlFor="business-name" className="text-sm font-medium mb-1.5 flex items-center gap-1.5">
@@ -476,7 +434,6 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
                           </div>
                         </div>
                       </div>
-
                       <div>
                         <Label htmlFor="business-type" className="text-sm font-medium mb-1.5 flex items-center gap-1.5">
                           <span className="text-xs pulse">🏢</span> Бизнесийн төрөл
@@ -504,8 +461,6 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
                     </div>
                   </motion.div>
                 )}
-
-                {/* Delivery specific fields */}
                 {userType === "delivery" && (
                   <motion.div 
                     className="p-5 rounded-lg border border-green-100 bg-gradient-to-r from-green-50 to-emerald-50"
@@ -520,7 +475,6 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
                       <h3 className="font-medium">Хүргэлтийн мэдээлэл</h3>
                       <span className="text-xs tada">🚚</span>
                     </div>
-
                     <div className="space-y-4">
                       <div>
                         <Label htmlFor="vehicle-type" className="text-sm font-medium mb-1.5 flex items-center gap-1.5">
@@ -545,7 +499,6 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
                           ))}
                         </div>
                       </div>
-
                       <div className="relative">
                         <Label htmlFor="license-number" className="text-sm font-medium mb-1.5 flex items-center gap-1.5">
                           <span className="text-xs jelly">📃</span> Жолооны үнэмлэхийн дугаар
@@ -571,7 +524,6 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
                   </motion.div>
                 )}
               </motion.div>
-
               <motion.div
                 className="pt-2"
                 initial={{ opacity: 0, y: 20 }}
@@ -594,15 +546,12 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
                     </span>
                   </Button>
                 </motion.div>
-
                 <div className="text-center mt-4 text-xs text-gray-500">
                   Бүртгүүлснээр та манай{" "}
                   <a href="#" className="text-primary hover:underline">үйлчилгээний нөхцөл</a>-ийг хүлээн зөвшөөрч байна
                 </div>
               </motion.div>
             </motion.div>
-            
-            {/* Social login buttons */}
             <motion.div className="mt-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }}>
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
@@ -615,7 +564,6 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
                   </span>
                 </div>
               </div>
-
               <div className="mt-6 grid grid-cols-2 gap-4">
                 <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                   <Button
@@ -634,7 +582,6 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
                     <span className="font-medium">Google</span>
                   </Button>
                 </motion.div>
-
                 <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                   <Button
                     type="button"

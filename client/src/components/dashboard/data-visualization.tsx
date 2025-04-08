@@ -4,8 +4,6 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
-// Food ingredient icons with their associated data
 const INGREDIENTS = [
   { name: "Мах", icon: "🥩", count: 56, color: "#FF6B6B" },
   { name: "Будаа", icon: "🍚", count: 42, color: "#F6CD61" },
@@ -14,8 +12,6 @@ const INGREDIENTS = [
   { name: "Жимс", icon: "🍎", count: 24, color: "#FF8C64" },
   { name: "Өндөг", icon: "🥚", count: 18, color: "#F0F3BD" },
 ];
-
-// Sales data for charts
 const DAILY_DATA = [
   { name: 'Даваа', value: 120000, icon: '📊' },
   { name: 'Мягмар', value: 150000, icon: '📈' },
@@ -25,14 +21,12 @@ const DAILY_DATA = [
   { name: 'Бямба', value: 280000, icon: '📈' },
   { name: 'Ням', value: 190000, icon: '📉' },
 ];
-
 const WEEKLY_DATA = [
   { name: '1-р 7 хоног', value: 800000, icon: '📊' },
   { name: '2-р 7 хоног', value: 1200000, icon: '📈' },
   { name: '3-р 7 хоног', value: 950000, icon: '📉' },
   { name: '4-р 7 хоног', value: 1400000, icon: '📈' },
 ];
-
 const MONTHLY_DATA = [
   { name: '1-р сар', value: 3500000, icon: '📊' },
   { name: '2-р сар', value: 4200000, icon: '📈' },
@@ -41,8 +35,6 @@ const MONTHLY_DATA = [
   { name: '5-р сар', value: 5100000, icon: '📈' },
   { name: '6-р сар', value: 4800000, icon: '📉' },
 ];
-
-// Custom tooltip for charts
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
@@ -56,15 +48,9 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   }
   return null;
 };
-
 export function InteractiveIngredients() {
-  // Animation controls for bouncing effect
   const controls = useAnimation();
-  
-  // State to track which ingredient is currently highlighted
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  
-  // Function to start bouncing animation
   const startBouncing = (index: number) => {
     setActiveIndex(index);
     controls.start(i => ({
@@ -77,24 +63,16 @@ export function InteractiveIngredients() {
       }
     }));
   };
-  
-  // Automatically bounce ingredients in sequence
   useEffect(() => {
     let timeout: NodeJS.Timeout;
-    
     const autoBounce = () => {
       const nextIndex = (activeIndex === null ? 0 : (activeIndex + 1) % INGREDIENTS.length);
       startBouncing(nextIndex);
-      
-      // Schedule next bounce
       timeout = setTimeout(autoBounce, 2000);
     };
-    
     autoBounce();
-    
     return () => clearTimeout(timeout);
   }, [activeIndex, INGREDIENTS.length, controls]);
-  
   return (
     <Card className="shadow-lg border-0">
       <CardHeader className="pb-2">
@@ -106,7 +84,6 @@ export function InteractiveIngredients() {
         </CardTitle>
         <CardDescription>Сүүлийн 7 хоногийн захиалгын мэдээлэл</CardDescription>
       </CardHeader>
-      
       <CardContent>
         <div className="grid grid-cols-3 md:grid-cols-6 gap-4 mb-4">
           {INGREDIENTS.map((item, index) => (
@@ -134,7 +111,6 @@ export function InteractiveIngredients() {
             </motion.div>
           ))}
         </div>
-        
         <div className="h-[200px] mt-6">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={INGREDIENTS}>
@@ -162,10 +138,8 @@ export function InteractiveIngredients() {
     </Card>
   );
 }
-
 export function SalesDataVisualization() {
   const [activeTab, setActiveTab] = useState("daily");
-  
   const getDataForTab = () => {
     switch (activeTab) {
       case "daily": return DAILY_DATA;
@@ -174,7 +148,6 @@ export function SalesDataVisualization() {
       default: return DAILY_DATA;
     }
   };
-  
   return (
     <Card className="shadow-lg border-0">
       <CardHeader className="pb-2">
@@ -186,7 +159,6 @@ export function SalesDataVisualization() {
         </CardTitle>
         <CardDescription>Хугацааны хооронд борлуулсан бүтээгдэхүүний мэдээлэл</CardDescription>
       </CardHeader>
-      
       <CardContent>
         <Tabs defaultValue="daily" value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-4 bg-amber-50">
@@ -209,7 +181,6 @@ export function SalesDataVisualization() {
               Сар
             </TabsTrigger>
           </TabsList>
-          
           <div className="h-[250px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={getDataForTab()}>
@@ -226,7 +197,6 @@ export function SalesDataVisualization() {
               </BarChart>
             </ResponsiveContainer>
           </div>
-          
           <div className="flex justify-center gap-6 mt-6">
             {getDataForTab().map((item, index) => (
               <motion.div 

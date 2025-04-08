@@ -16,15 +16,12 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { sendPhoneVerificationCode, verifyPhoneCode } from "@/lib/firebase";
-
-// Define schemas for validation
 const phoneSchema = z.object({
   phoneNumber: z
     .string()
     .length(8, { message: "Утасны дугаар 8 оронтой байх ёстой." })
     .regex(/^[0-9]+$/, { message: "Зөвхөн тоо оруулна уу." }),
 });
-
 const verificationSchema = z.object({
   code: z
     .string()
@@ -32,11 +29,9 @@ const verificationSchema = z.object({
     .max(6, { message: "Баталгаажуулах код 6 оронтой байна." })
     .regex(/^[0-9]+$/, { message: "Зөвхөн тоо оруулна уу." }),
 });
-
 interface PhoneLoginFormProps {
   onToggleForm: () => void;
 }
-
 export function PhoneLoginForm({ onToggleForm }: PhoneLoginFormProps) {
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
@@ -44,52 +39,35 @@ export function PhoneLoginForm({ onToggleForm }: PhoneLoginFormProps) {
   const [loading, setLoading] = useState(false);
   const recaptchaContainerRef = useRef<HTMLDivElement>(null);
   const confirmationResultRef = useRef<any>(null);
-
-  // Form for phone number input
   const phoneForm = useForm<z.infer<typeof phoneSchema>>({
     resolver: zodResolver(phoneSchema),
     defaultValues: {
       phoneNumber: "",
     },
   });
-
-  // Form for verification code input
   const verificationForm = useForm<z.infer<typeof verificationSchema>>({
     resolver: zodResolver(verificationSchema),
     defaultValues: {
       code: "",
     },
   });
-
-  // Format the phone number to always include +976
   const formatPhoneNumber = (phoneNumber: string) => {
-    // Remove any non-digit characters
     let digitsOnly = phoneNumber.replace(/\D/g, "");
-    
-    // Now we're always expecting only the 8 digits 
-    // of the Mongolian phone number without country code
     return `+976${digitsOnly}`;
   };
-
   const onSubmitPhoneNumber = async (values: z.infer<typeof phoneSchema>) => {
     try {
       setLoading(true);
       const formattedPhoneNumber = formatPhoneNumber(values.phoneNumber);
-      
-      // Make sure recaptcha container exists
       if (!recaptchaContainerRef.current) {
         throw new Error("reCAPTCHA container not found");
       }
-
-      // Send verification code
       const confirmationResult = await sendPhoneVerificationCode(
         formattedPhoneNumber,
         "recaptcha-container"
       );
-      
       confirmationResultRef.current = confirmationResult;
       setStep("verification");
-      
       toast({
         title: "Баталгаажуулах код илгээгдлээ",
         description: "Таны утсанд баталгаажуулах код илгээлээ.",
@@ -105,23 +83,17 @@ export function PhoneLoginForm({ onToggleForm }: PhoneLoginFormProps) {
       setLoading(false);
     }
   };
-
   const onSubmitVerificationCode = async (values: z.infer<typeof verificationSchema>) => {
     try {
       setLoading(true);
-      
       if (!confirmationResultRef.current) {
         throw new Error("Баталгаажуулах код илгээгдээгүй байна.");
       }
-      
       await verifyPhoneCode(confirmationResultRef.current, values.code);
-      
       toast({
         title: "Амжилттай нэвтэрлээ",
         description: "Та амжилттай нэвтэрлээ.",
       });
-      
-      // Navigate to home page after successful login
       setLocation("/");
     } catch (error: any) {
       console.error("Error verifying code:", error);
@@ -134,7 +106,6 @@ export function PhoneLoginForm({ onToggleForm }: PhoneLoginFormProps) {
       setLoading(false);
     }
   };
-
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
@@ -165,7 +136,6 @@ export function PhoneLoginForm({ onToggleForm }: PhoneLoginFormProps) {
                             {...field}
                             disabled={loading}
                             onChange={(e) => {
-                              // Only allow digits
                               const value = e.target.value.replace(/\D/g, '');
                               field.onChange(value);
                             }}
@@ -177,16 +147,12 @@ export function PhoneLoginForm({ onToggleForm }: PhoneLoginFormProps) {
                     </FormItem>
                   )}
                 />
-
-                {/* Container for reCAPTCHA */}
                 <div id="recaptcha-container" ref={recaptchaContainerRef}></div>
-
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? "Илгээж байна..." : "Баталгаажуулах код авах"}
                 </Button>
               </form>
             </Form>
-
             <div className="mt-4 text-center">
               <Button
                 variant="link"
@@ -222,13 +188,11 @@ export function PhoneLoginForm({ onToggleForm }: PhoneLoginFormProps) {
                     </FormItem>
                   )}
                 />
-
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? "Шалгаж байна..." : "Нэвтрэх"}
                 </Button>
               </form>
             </Form>
-
             <div className="mt-4 text-center">
               <Button
                 variant="link"

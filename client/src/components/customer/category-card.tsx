@@ -1,5 +1,4 @@
 import { ReactNode } from "react";
-
 interface CategoryCardProps {
   name: string;
   icon: ReactNode;
@@ -7,7 +6,6 @@ interface CategoryCardProps {
   isActive?: boolean;
   emoji?: string;
 }
-
 export function CategoryCard({ name, icon, onClick, isActive = false, emoji }: CategoryCardProps) {
   return (
     <div 

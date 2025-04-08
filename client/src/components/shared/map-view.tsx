@@ -8,26 +8,21 @@ import {
   CardTitle 
 } from '@/components/ui/card';
 import { Loader2, MapPin } from 'lucide-react';
-
 const mapContainerStyle = {
   width: '100%',
   height: '150px',
-  aspectRatio: '1/1', // Make it square (cube-like)
+  aspectRatio: '1/1',
 };
-
-// Default center - Ulaanbaatar
 const defaultCenter = {
   lat: 47.9184676,
   lng: 106.917693,
 };
-
 interface MapViewProps {
   location?: { lat: number; lng: number; address?: string };
   businessName?: string;
   isInteractive?: boolean;
   zoom?: number;
 }
-
 export function MapView({
   location = defaultCenter,
   businessName = "Байршил",
@@ -35,26 +30,21 @@ export function MapView({
   zoom = 15
 }: MapViewProps) {
   const [map, setMap] = useState<google.maps.Map | null>(null);
-
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
     libraries: ["places"],
   });
-
   const onLoad = useCallback((map: google.maps.Map) => {
     setMap(map);
   }, []);
-
   const onUnmount = useCallback(() => {
     setMap(null);
   }, []);
-
   useEffect(() => {
     if (map && location) {
       map.panTo(location);
     }
   }, [map, location]);
-
   if (loadError) {
     return (
       <Card>
@@ -68,7 +58,6 @@ export function MapView({
       </Card>
     );
   }
-
   if (!isLoaded) {
     return (
       <Card>
@@ -82,7 +71,6 @@ export function MapView({
       </Card>
     );
   }
-
   return (
     <Card className="w-full">
       <CardHeader>

@@ -19,7 +19,6 @@ import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useLocation } from "wouter";
-
 import { 
   Select, 
   SelectContent, 
@@ -27,7 +26,6 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-
 import {
   AreaChart,
   Area,
@@ -45,7 +43,6 @@ import {
   Bar,
   Legend
 } from "recharts";
-
 import {
   Dialog,
   DialogContent,
@@ -55,8 +52,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Link } from "wouter";
-
-// Fake data for visualization
 const salesData = [
   { name: 'Даваа', sales: 120000, orders: 14 },
   { name: 'Мягмар', sales: 98000, orders: 12 },
@@ -66,14 +61,12 @@ const salesData = [
   { name: 'Бямба', sales: 210000, orders: 25 },
   { name: 'Ням', sales: 164000, orders: 20 },
 ];
-
 const categoryData = [
   { name: 'Хоол', value: 42 },
   { name: 'Ундаа', value: 28 },
   { name: 'Амттан', value: 18 },
   { name: 'Бусад', value: 12 },
 ];
-
 const timeData = [
   { time: '8:00', orders: 2 },
   { time: '10:00', orders: 5 },
@@ -84,7 +77,6 @@ const timeData = [
   { time: '20:00', orders: 10 },
   { time: '22:00', orders: 3 },
 ];
-
 const topProducts = [
   { name: 'Төмсний зутан', sales: 76, amount: 684000, growth: 12 },
   { name: 'Бүхэлдээ шарсан тахиа', sales: 62, amount: 868000, growth: 8 },
@@ -92,9 +84,7 @@ const topProducts = [
   { name: 'Кола 0.5л', sales: 52, amount: 234000, growth: 5 },
   { name: 'Имбирний цай', sales: 48, amount: 192000, growth: 22 },
 ];
-
 const COLORS = ['#3b82f6', '#6366f1', '#8b5cf6', '#a855f7'];
-
 export function BusinessDashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -117,8 +107,6 @@ export function BusinessDashboard() {
   const [currentDate] = useState(new Date());
   const [deleteDialog, setDeleteDialog] = useState({ open: false, product: null as any });
   const [, setLocation] = useLocation();
-  
-  // Handle logout and redirect to homepage
   const handleLogout = async () => {
     try {
       await logoutUser();
@@ -126,7 +114,6 @@ export function BusinessDashboard() {
         title: "Системээс гарлаа",
         description: "Та амжилттай системээс гарлаа",
       });
-      // Redirect to homepage after logout
       setLocation("/");
     } catch (error: any) {
       toast({
@@ -136,34 +123,25 @@ export function BusinessDashboard() {
       });
     }
   };
-
-  // Get formatted date for display
   const formattedDate = new Intl.DateTimeFormat('mn-MN', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
     day: 'numeric'
   }).format(currentDate);
-
   useEffect(() => {
     const fetchData = async () => {
       if (!user?.uid) return;
-
       try {
         setLoading(true);
         const ordersData = await getBusinessOrders(user.uid);
         const productsData = await getBusinessProducts(user.uid);
-        
-        // Sort orders by time (newest first)
         const sortedOrders = ordersData.sort((a: any, b: any) => 
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
-        
         setOrders(sortedOrders);
         setProducts(productsData);
         setFilteredProducts(productsData);
-        
-        // Calculate stats
         calculateStats(sortedOrders);
       } catch (error: any) {
         console.error("Error fetching business data:", error);
@@ -176,12 +154,9 @@ export function BusinessDashboard() {
         setLoading(false);
       }
     };
-
     fetchData();
   }, [user?.uid, toast]);
-
   useEffect(() => {
-    // Filter products based on search query
     const filtered = products.filter(product => 
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -189,34 +164,24 @@ export function BusinessDashboard() {
     );
     setFilteredProducts(filtered);
   }, [searchQuery, products]);
-
   const calculateStats = (ordersData: any[]) => {
-    // Calculate total earnings
     const totalEarnings = ordersData.reduce((sum, order) => sum + (order.total || 0), 0);
-    
-    // Calculate avg order value
     const avgOrderValue = ordersData.length > 0 ? totalEarnings / ordersData.length : 0;
-    
-    // Create daily sales data for the past week
     const dailySales = Array(7).fill(0).map((_, i) => {
       const date = new Date();
       date.setDate(date.getDate() - i);
       const dayStr = date.toISOString().split('T')[0];
-      
       const dayOrders = ordersData.filter(order => {
         const orderDate = new Date(order.createdAt).toISOString().split('T')[0];
         return orderDate === dayStr;
       });
-      
       const daySales = dayOrders.reduce((sum, order) => sum + (order.total || 0), 0);
-      
       return {
         date: dayStr,
         sales: daySales,
         orders: dayOrders.length
       };
     }).reverse();
-    
     setStats({
       earnings: totalEarnings,
       ordersCount: ordersData.length,
@@ -224,18 +189,14 @@ export function BusinessDashboard() {
       recentSales: dailySales
     });
   };
-
   const handleStatusChange = async (orderId: string, newStatus: string) => {
     try {
       await updateOrderStatus(orderId, newStatus);
-      
-      // Update local state
       setOrders(prevOrders => 
         prevOrders.map(order => 
           order.id === orderId ? { ...order, status: newStatus } : order
         )
       );
-      
       toast({
         title: "Төлөв шинэчлэгдлээ",
         description: `Захиалгын төлөв ${newStatus} болж өөрчлөгдлөө`,
@@ -249,19 +210,15 @@ export function BusinessDashboard() {
       });
     }
   };
-
   const handleAddProduct = async (productData: any) => {
     try {
       if (!user?.uid) throw new Error("User not authenticated");
-      
       await addProduct(user.uid, productData);
       const updatedProducts = await getBusinessProducts(user.uid);
       setProducts(updatedProducts);
       setFilteredProducts(updatedProducts);
-      
       setShowProductForm(false);
       setSelectedProduct(null);
-      
       toast({
         title: "Бүтээгдэхүүн нэмэгдлээ",
         description: "Бүтээгдэхүүн амжилттай нэмэгдлээ",
@@ -274,19 +231,15 @@ export function BusinessDashboard() {
       });
     }
   };
-
   const handleUpdateProduct = async (productData: any) => {
     try {
       if (!selectedProduct?.id) throw new Error("Product ID not found");
-      
       await updateProduct(selectedProduct.id, productData);
       const updatedProducts = await getBusinessProducts(user!.uid);
       setProducts(updatedProducts);
       setFilteredProducts(updatedProducts);
-      
       setShowProductForm(false);
       setSelectedProduct(null);
-      
       toast({
         title: "Бүтээгдэхүүн шинэчлэгдлээ",
         description: "Бүтээгдэхүүний мэдээлэл амжилттай шинэчлэгдлээ",
@@ -299,14 +252,12 @@ export function BusinessDashboard() {
       });
     }
   };
-
   const handleDeleteProduct = async (productId: string) => {
     try {
       await deleteProduct(productId);
       const updatedProducts = await getBusinessProducts(user!.uid);
       setProducts(updatedProducts);
       setFilteredProducts(updatedProducts);
-      
       toast({
         title: "Бүтээгдэхүүн устгагдлаа",
         description: "Бүтээгдэхүүн амжилттай устгагдлаа",
@@ -321,11 +272,9 @@ export function BusinessDashboard() {
       setDeleteDialog({ open: false, product: null });
     }
   };
-
   const handleOpenDeleteDialog = (product: any) => {
     setDeleteDialog({ open: true, product });
   };
-
   const handleSaveProduct = (productData: any) => {
     if (selectedProduct) {
       handleUpdateProduct(productData);
@@ -333,12 +282,9 @@ export function BusinessDashboard() {
       handleAddProduct(productData);
     }
   };
-
-  // Count orders by status
   const pendingOrders = orders.filter(order => order.status === "pending").length;
   const processingOrders = orders.filter(order => order.status === "processing").length;
   const deliveredOrders = orders.filter(order => order.status === "delivered").length;
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -360,7 +306,6 @@ export function BusinessDashboard() {
       </div>
     );
   }
-
   return (
     <div className="container mx-auto px-4 py-6">
       <motion.div
@@ -380,7 +325,6 @@ export function BusinessDashboard() {
               {formattedDate} | <span className="text-amber-600 font-medium">Сайн байна уу, {user?.name || "Дэлгүүрийн эзэн"}!</span>
             </p>
           </div>
-
           <div className="flex items-center gap-3">
             <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
               <Link href="/dashboard/business/analytics">
@@ -398,7 +342,6 @@ export function BusinessDashboard() {
             </motion.div>
           </div>
         </div>
-
         <Tabs
           defaultValue="overview"
           value={currentTab}
@@ -454,16 +397,13 @@ export function BusinessDashboard() {
               </TabsTrigger>
             </TabsList>
           </div>
-
           <TabsContent value="overview" className="space-y-6 mt-4">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.1 }}
             >
-              {/* Stats Overview Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
-                {/* Total Sales */}
                 <motion.div 
                   whileHover={{ scale: 1.02, y: -5 }}
                   className="bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl p-5 text-white shadow-lg relative overflow-hidden"
@@ -486,8 +426,6 @@ export function BusinessDashboard() {
                     transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
                   />
                 </motion.div>
-
-                {/* Total Orders */}
                 <motion.div 
                   whileHover={{ scale: 1.02, y: -5 }}
                   className="bg-white rounded-xl p-5 shadow-md border border-gray-100 relative overflow-hidden"
@@ -512,8 +450,6 @@ export function BusinessDashboard() {
                     <Progress value={78} className="h-1.5 bg-gray-100" />
                   </div>
                 </motion.div>
-
-                {/* Average Order Value */}
                 <motion.div 
                   whileHover={{ scale: 1.02, y: -5 }}
                   className="bg-white rounded-xl p-5 shadow-md border border-gray-100 relative overflow-hidden"
@@ -536,8 +472,6 @@ export function BusinessDashboard() {
                     <div className="h-1.5 bg-amber-500 rounded-full"></div>
                   </div>
                 </motion.div>
-
-                {/* Quick Actions Card */}
                 <motion.div 
                   whileHover={{ scale: 1.02, y: -5 }}
                   className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-5 shadow-md border border-amber-100"
@@ -584,10 +518,7 @@ export function BusinessDashboard() {
                   </div>
                 </motion.div>
               </div>
-
-              {/* Charts Grid */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
-                {/* Sales Chart */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -659,8 +590,6 @@ export function BusinessDashboard() {
                     </div>
                   </div>
                 </motion.div>
-
-                {/* Product Categories Chart */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -717,10 +646,7 @@ export function BusinessDashboard() {
                   </div>
                 </motion.div>
               </div>
-
-              {/* Recent Orders & Top Products */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                {/* Recent Orders */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -794,8 +720,6 @@ export function BusinessDashboard() {
                     </div>
                   </div>
                 </motion.div>
-
-                {/* Top Products */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -831,7 +755,6 @@ export function BusinessDashboard() {
                         <div className="col-span-2 text-right">Орлого</div>
                         <div className="col-span-1 text-right">Өсөлт</div>
                       </div>
-                      
                       {topProducts.map((product, index) => (
                         <motion.div
                           key={product.name}
@@ -862,7 +785,6 @@ export function BusinessDashboard() {
               </div>
             </motion.div>
           </TabsContent>
-
           <TabsContent value="orders" className="space-y-6 mt-4">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -875,7 +797,6 @@ export function BusinessDashboard() {
                   <span>Захиалгууд</span>
                   <Badge className="ml-2 bg-amber-500">{orders.length}</Badge>
                 </h2>
-
                 <div className="flex gap-3">
                   <div className="relative">
                     <Search className="absolute top-2.5 left-3 h-4 w-4 text-gray-400" />
@@ -899,7 +820,6 @@ export function BusinessDashboard() {
                   </Select>
                 </div>
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-8">
                 <Card className="border-l-4 border-l-amber-500 shadow-md">
                   <CardContent className="pt-6">
@@ -914,7 +834,6 @@ export function BusinessDashboard() {
                     </div>
                   </CardContent>
                 </Card>
-                
                 <Card className="border-l-4 border-l-blue-500 shadow-md">
                   <CardContent className="pt-6">
                     <div className="flex justify-between items-center">
@@ -928,7 +847,6 @@ export function BusinessDashboard() {
                     </div>
                   </CardContent>
                 </Card>
-                
                 <Card className="border-l-4 border-l-green-500 shadow-md">
                   <CardContent className="pt-6">
                     <div className="flex justify-between items-center">
@@ -943,13 +861,11 @@ export function BusinessDashboard() {
                   </CardContent>
                 </Card>
               </div>
-
               <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-8">
                 <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
                   <h3 className="font-medium">Сүүлийн захиалгууд</h3>
                   <Button variant="outline" size="sm" className="text-xs">Экспортлох</Button>
                 </div>
-                
                 <div className="divide-y">
                   {orders.slice(0, 8).map((order) => (
                     <OrderItem
@@ -965,7 +881,6 @@ export function BusinessDashboard() {
                       onStatusChange={() => handleStatusChange(order.id, order.status === "pending" ? "processing" : "delivered")}
                     />
                   ))}
-                  
                   {orders.length === 0 && (
                     <div className="py-12 text-center text-gray-500">
                       <div className="mx-auto w-16 h-16 bg-gray-100 flex items-center justify-center rounded-full mb-3">
@@ -978,7 +893,6 @@ export function BusinessDashboard() {
               </div>
             </motion.div>
           </TabsContent>
-
           <TabsContent value="products" className="space-y-6 mt-4">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -991,7 +905,6 @@ export function BusinessDashboard() {
                   <span>Бүтээгдэхүүнүүд</span>
                   <Badge className="ml-2 bg-amber-500">{products.length}</Badge>
                 </h2>
-
                 <div className="flex gap-3">
                   <div className="relative">
                     <Search className="absolute top-2.5 left-3 h-4 w-4 text-gray-400" />
@@ -1032,7 +945,6 @@ export function BusinessDashboard() {
                   </motion.div>
                 </div>
               </div>
-
               <div className="mb-4 flex justify-between items-center">
                 <div>
                   <p className="text-sm text-gray-500">
@@ -1055,7 +967,6 @@ export function BusinessDashboard() {
                   </div>
                 </div>
               </div>
-
               {productViewType === 'grid' ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {filteredProducts.map((product) => (
@@ -1115,7 +1026,6 @@ export function BusinessDashboard() {
                           <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100">{product.price?.toLocaleString()}₮</Badge>
                         </div>
                         <p className="text-sm text-gray-600 mt-2 line-clamp-2">{product.description || "Тайлбаргүй"}</p>
-                        
                         <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100">
                           <div className="text-xs text-gray-500">
                             {product.lastSold ? (
@@ -1145,7 +1055,6 @@ export function BusinessDashboard() {
                     <div className="col-span-2 text-center">Нөөц</div>
                     <div className="col-span-1 text-right">Үйлдэл</div>
                   </div>
-                  
                   {filteredProducts.map((product) => (
                     <motion.div
                       key={product.id}
@@ -1211,7 +1120,6 @@ export function BusinessDashboard() {
                       </div>
                     </motion.div>
                   ))}
-                  
                   {filteredProducts.length === 0 && (
                     <div className="py-12 text-center text-gray-500">
                       <div className="mx-auto w-16 h-16 bg-gray-100 flex items-center justify-center rounded-full mb-3">
@@ -1227,7 +1135,6 @@ export function BusinessDashboard() {
               )}
             </motion.div>
           </TabsContent>
-
           <TabsContent value="delivery" className="space-y-6 mt-4">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -1240,7 +1147,6 @@ export function BusinessDashboard() {
                   <span>Хүргэлтийн хяналт</span>
                 </h2>
               </div>
-
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2">
                   <Card className="overflow-hidden border-amber-100">
@@ -1260,7 +1166,6 @@ export function BusinessDashboard() {
                     </CardContent>
                   </Card>
                 </div>
-                
                 <div>
                   <Card className="overflow-hidden border-amber-100">
                     <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100 p-4">
@@ -1312,7 +1217,6 @@ export function BusinessDashboard() {
                       </div>
                     </CardContent>
                   </Card>
-
                   <Card className="overflow-hidden border-amber-100 mt-5">
                     <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100 p-4">
                       <CardTitle className="text-base flex items-center gap-2">
@@ -1361,7 +1265,6 @@ export function BusinessDashboard() {
               </div>
             </motion.div>
           </TabsContent>
-
           <TabsContent value="settings" className="space-y-6 mt-4">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -1373,7 +1276,6 @@ export function BusinessDashboard() {
                   <Wrench className="h-5 w-5 text-amber-500" />
                   <span>Дэлгүүрийн тохиргоо</span>
                 </h2>
-                
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -1388,7 +1290,6 @@ export function BusinessDashboard() {
                   </Button>
                 </motion.div>
               </div>
-
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <Card className="lg:col-span-2 overflow-hidden border-amber-100">
                   <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100">
@@ -1421,7 +1322,6 @@ export function BusinessDashboard() {
                         </Select>
                       </div>
                     </div>
-
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="business-phone" className="text-sm font-medium">Утасны дугаар</Label>
@@ -1432,7 +1332,6 @@ export function BusinessDashboard() {
                         <Input id="business-email" defaultValue={user?.email} className="mt-1" />
                       </div>
                     </div>
-
                     <div>
                       <Label htmlFor="business-description" className="text-sm font-medium">Дэлгүүрийн тайлбар</Label>
                       <textarea 
@@ -1442,7 +1341,6 @@ export function BusinessDashboard() {
                         defaultValue={user?.description}
                       ></textarea>
                     </div>
-
                     <div>
                       <Label htmlFor="business-address" className="text-sm font-medium">Хаяг</Label>
                       <textarea 
@@ -1461,7 +1359,6 @@ export function BusinessDashboard() {
                     </motion.div>
                   </CardFooter>
                 </Card>
-
                 <div className="space-y-6">
                   <Card className="overflow-hidden border-amber-100">
                     <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100">
@@ -1509,7 +1406,6 @@ export function BusinessDashboard() {
                       </Button>
                     </CardFooter>
                   </Card>
-
                   <Card className="overflow-hidden border-amber-100">
                     <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100">
                       <CardTitle className="flex items-center gap-2 text-base">
@@ -1525,9 +1421,7 @@ export function BusinessDashboard() {
                         </div>
                         <Switch defaultChecked />
                       </div>
-
                       <Separator />
-
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm font-medium">Хүргэлтийн үйлчилгээ</p>
@@ -1535,9 +1429,7 @@ export function BusinessDashboard() {
                         </div>
                         <Switch defaultChecked />
                       </div>
-
                       <Separator />
-
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm font-medium">Захиалга баталгаажуулалт</p>
@@ -1553,8 +1445,6 @@ export function BusinessDashboard() {
           </TabsContent>
         </Tabs>
       </motion.div>
-
-      {/* Product Form Dialog */}
       <AnimatePresence>
         {showProductForm && (
           <Dialog open={showProductForm} onOpenChange={setShowProductForm}>
@@ -1569,7 +1459,6 @@ export function BusinessDashboard() {
                     : "Шинэ бүтээгдэхүүний мэдээллийг оруулна"}
                 </DialogDescription>
               </DialogHeader>
-
               <ProductForm 
                 product={selectedProduct} 
                 onSave={handleSaveProduct}
@@ -1582,8 +1471,6 @@ export function BusinessDashboard() {
           </Dialog>
         )}
       </AnimatePresence>
-
-      {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialog.open} onOpenChange={(open) => setDeleteDialog({ ...deleteDialog, open })}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -1608,7 +1495,6 @@ export function BusinessDashboard() {
     </div>
   );
 }
-
 import {
   LayoutGrid,
   List,

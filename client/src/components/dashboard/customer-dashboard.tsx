@@ -18,7 +18,6 @@ import { InteractiveIngredients, SalesDataVisualization } from "@/components/das
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
-
 export function CustomerDashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -31,26 +30,16 @@ export function CustomerDashboard() {
   const [featuredRestaurants, setFeaturedRestaurants] = useState<any[]>([]);
   const heroRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
-
-  // Add user location state
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
-  
-  // Mock driver location for the OrderTracking component
   const [driverLocation, setDriverLocation] = useState<{lat: number, lng: number}>({
     lat: 47.9184676,
     lng: 106.9177016
   });
-  
-  // Mock destination location (customer address)
   const destinationLocation = {
     lat: 47.9234676,
     lng: 106.9237016
   };
-  
-  // Test animation by changing status
   const [demoStatus, setDemoStatus] = useState<"placed" | "preparing" | "on-the-way" | "delivered">("placed");
-  
-  // Get user location
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -69,11 +58,8 @@ export function CustomerDashboard() {
       );
     }
   }, [toast]);
-  
-  // Simulate driver movement
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    
     if (demoStatus === "on-the-way") {
       interval = setInterval(() => {
         setDriverLocation(prev => ({
@@ -82,13 +68,10 @@ export function CustomerDashboard() {
         }));
       }, 3000);
     }
-    
     return () => {
       if (interval) clearInterval(interval);
     };
   }, [demoStatus, destinationLocation.lat, destinationLocation.lng]);
-  
-  // Advance demo status
   useEffect(() => {
     const timer = setTimeout(() => {
       switch (demoStatus) {
@@ -107,27 +90,18 @@ export function CustomerDashboard() {
           break;
       }
     }, 10000);
-    
     return () => clearTimeout(timer);
   }, [demoStatus]);
-  
-  // Fetch businesses and orders
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        
-        // Fetch businesses
         const businessesData = await getBusinesses();
         setBusinesses(businessesData);
-        
-        // Create a set of featured restaurants
         const featured = businessesData
           .filter((business: any) => business.rating >= 4.5)
           .slice(0, 5);
         setFeaturedRestaurants(featured);
-        
-        // Fetch active orders if user is logged in
         if (user?.uid) {
           const ordersData = await getCustomerOrders(user.uid);
           const active = ordersData.filter((order: any) => 
@@ -146,19 +120,12 @@ export function CustomerDashboard() {
         setLoading(false);
       }
     };
-    
     fetchData();
   }, [user, toast]);
-  
-  // Sort restaurants based on rating
   const sortedRestaurants = [...businesses].sort((a, b) => b.rating - a.rating);
-  
-  // Filter restaurants based on category
   const filteredRestaurants = activeCategory
     ? sortedRestaurants.filter(restaurant => restaurant.category === activeCategory)
     : sortedRestaurants;
-  
-  // Filter restaurants based on search query
   const searchedRestaurants = searchQuery
     ? filteredRestaurants.filter(restaurant => 
         restaurant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -166,8 +133,6 @@ export function CustomerDashboard() {
         restaurant.category?.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : filteredRestaurants;
-
-  // Animation variants for elements
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { 
@@ -178,7 +143,6 @@ export function CustomerDashboard() {
       }
     }
   };
-  
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
     visible: { 
@@ -187,8 +151,6 @@ export function CustomerDashboard() {
       transition: { type: "spring", stiffness: 300, damping: 24 }
     }
   };
-
-  // Animation for welcome elements
   const titleVariants = {
     hidden: { opacity: 0, y: -20 },
     visible: { 
@@ -200,10 +162,7 @@ export function CustomerDashboard() {
       }
     }
   };
-
   const staggerDelay = 0.1;
-
-  // Parallax effect for hero section
   useEffect(() => {
     const handleScroll = () => {
       if (heroRef.current) {
@@ -211,21 +170,18 @@ export function CustomerDashboard() {
         heroRef.current.style.backgroundPosition = `50% ${50 + scrollPosition * 0.05}%`;
       }
     };
-
     window.addEventListener('scroll', handleScroll);
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
-
   return (
     <div className="min-h-screen pt-20 pb-20">
-      {/* Hero Section with Parallax */}
       <section 
         ref={heroRef}
         className="relative bg-cover bg-top h-[700px] md:h-[800px] overflow-hidden flex items-center"
         style={{
-          backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url("https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2070&auto=format&fit=crop")',
+          backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url("https:
           backgroundAttachment: 'fixed',
           backgroundPosition: 'top'
         }}
@@ -238,7 +194,6 @@ export function CustomerDashboard() {
             variants={containerVariants}
             className="text-center md:text-left max-w-2xl mx-auto md:mx-0"
           >
-            {/* Time-based Greeting */}
             <motion.div
               initial={{ opacity: 0, y: -30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -252,7 +207,6 @@ export function CustomerDashboard() {
                 <span className="ml-2 animate-wave inline-block">👋</span>
               </span>
             </motion.div>
-            
             <motion.h1 
               className="text-4xl md:text-6xl font-bold mb-4 text-white"
               variants={titleVariants}
@@ -261,7 +215,6 @@ export function CustomerDashboard() {
                 GobiGo
               </span> <span className="animate-bounce-gentle inline-block">✨</span>
             </motion.h1>
-            
             <motion.p 
               className="text-xl md:text-2xl mb-8 text-gray-200"
               variants={titleVariants}
@@ -270,7 +223,6 @@ export function CustomerDashboard() {
               Хамгийн шилдэг амтыг хаанаас ч <span className="font-semibold text-amber-300">захиалаарай</span> 
               <span className="ml-2 text-2xl animate-bounce-slow inline-block">🍜</span>
             </motion.p>
-            
             <motion.div 
               className="relative max-w-lg mx-auto md:mx-0"
               variants={titleVariants}
@@ -298,7 +250,6 @@ export function CustomerDashboard() {
                 </Button>
               </motion.div>
             </motion.div>
-
             <motion.div 
               className="flex flex-wrap justify-center md:justify-start gap-2 mt-6"
               variants={titleVariants}
@@ -319,8 +270,6 @@ export function CustomerDashboard() {
             </motion.div>
           </motion.div>
         </div>
-
-        {/* Scrolling emojis animation */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {Array.from({ length: 15 }).map((_, i) => (
             <motion.div
@@ -348,9 +297,7 @@ export function CustomerDashboard() {
           ))}
         </div>
       </section>
-
       <section className="container mx-auto px-4 mt-12">
-        {/* Active Order Section */}
         <AnimatePresence>
           {activeOrders.length > 0 && (
             <motion.div 
@@ -365,14 +312,13 @@ export function CustomerDashboard() {
                   Идэвхтэй захиалга
                   <span className="ml-2 animate-bounce-gentle inline-block">⏳</span>
                 </h2>
-                
                 <OrderTracking
                   orderId="123456"
                   status={demoStatus}
                   driver={{
                     id: "driver1",
                     name: "Болд",
-                    imageUrl: "https://randomuser.me/api/portraits/men/32.jpg",
+                    imageUrl: "https:
                     arrivalTime: "10 минутын дотор"
                   }}
                   items={[
@@ -389,8 +335,6 @@ export function CustomerDashboard() {
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* Welcome Card */}
         {user && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -420,7 +364,6 @@ export function CustomerDashboard() {
                       Юу захиалах вэ?
                     </motion.p>
                   </div>
-                  
                   <motion.div
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -436,16 +379,12 @@ export function CustomerDashboard() {
                   </motion.div>
                 </div>
               </CardContent>
-              
-              {/* Decorative elements */}
               <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-white/10 rounded-full"></div>
               <div className="absolute -top-8 -right-8 w-28 h-28 bg-white/10 rounded-full"></div>
               <div className="absolute top-1/2 left-1/4 w-16 h-16 bg-white/10 rounded-full transform -translate-y-1/2"></div>
             </Card>
           </motion.div>
         )}
-
-        {/* Categories Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -464,7 +403,6 @@ export function CustomerDashboard() {
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
-          
           <motion.div 
             className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"
             variants={containerVariants}
@@ -480,7 +418,6 @@ export function CustomerDashboard() {
                 emoji="✨"
               />
             </motion.div>
-            
             <motion.div variants={itemVariants}>
               <CategoryCard
                 name="Ресторан"
@@ -490,7 +427,6 @@ export function CustomerDashboard() {
                 emoji="🍽️"
               />
             </motion.div>
-            
             <motion.div variants={itemVariants}>
               <CategoryCard
                 name="Хүнсний"
@@ -500,7 +436,6 @@ export function CustomerDashboard() {
                 emoji="🛒"
               />
             </motion.div>
-            
             <motion.div variants={itemVariants}>
               <CategoryCard
                 name="Эмийн сан"
@@ -510,7 +445,6 @@ export function CustomerDashboard() {
                 emoji="💊"
               />
             </motion.div>
-            
             <motion.div variants={itemVariants}>
               <CategoryCard
                 name="Амттан"
@@ -520,7 +454,6 @@ export function CustomerDashboard() {
                 emoji="🍰"
               />
             </motion.div>
-            
             <motion.div variants={itemVariants}>
               <CategoryCard
                 name="Кофе шоп"
@@ -532,8 +465,6 @@ export function CustomerDashboard() {
             </motion.div>
           </motion.div>
         </motion.div>
-
-        {/* Featured Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -550,11 +481,9 @@ export function CustomerDashboard() {
               </div>
             </h2>
           </div>
-          
           <div className="relative overflow-hidden">
             <div className="absolute top-0 bottom-0 left-0 w-8 bg-gradient-to-r from-white to-transparent z-10"></div>
             <div className="absolute top-0 bottom-0 right-0 w-8 bg-gradient-to-l from-white to-transparent z-10"></div>
-            
             <motion.div 
               className="flex gap-4 py-2 overflow-x-auto custom-scrollbar px-2"
               initial={{ x: 20, opacity: 0 }}
@@ -602,7 +531,6 @@ export function CustomerDashboard() {
                         </Badge>
                       </div>
                     </div>
-                    
                     <CardContent className="p-4">
                       <div className="flex justify-between items-start mb-2">
                         <h3 className="font-bold text-lg">{restaurant.name}</h3>
@@ -614,18 +542,15 @@ export function CustomerDashboard() {
                           <Bookmark className="h-5 w-5" />
                         </motion.button>
                       </div>
-                      
                       <div className="flex items-center text-sm text-gray-500 mb-3">
                         <MapPin className="h-4 w-4 mr-1 text-amber-500" />
                         <span className="truncate">{restaurant.address || "Хаяг оруулаагүй"}</span>
                       </div>
-                      
                       <div className="flex justify-between items-center mt-2">
                         <div className="flex items-center text-sm">
                           <Clock className="h-4 w-4 mr-1 text-amber-500" />
                           <span>{restaurant.deliveryTime || "30-40 мин"}</span>
                         </div>
-                        
                         <Button 
                           variant="outline" 
                           className="text-sm h-8 border-amber-200 hover:bg-amber-50 hover:text-amber-700"
@@ -638,7 +563,6 @@ export function CustomerDashboard() {
                   </Card>
                 </motion.div>
               ))}
-              
               {loading && Array(5).fill(0).map((_, index) => (
                 <div key={`skeleton-${index}`} className="min-w-[300px] sm:min-w-[320px]">
                   <Card className="overflow-hidden border border-gray-200 h-full">
@@ -657,12 +581,8 @@ export function CustomerDashboard() {
             </motion.div>
           </div>
         </motion.div>
-
-        {/* Recommendation Section */}
         <div className="mb-12">
           <RecipeRecommendationCarousel />
-          
-          {/* Interactive Data Visualization Section */}
           <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-8">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -672,7 +592,6 @@ export function CustomerDashboard() {
             >
               <InteractiveIngredients />
             </motion.div>
-            
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -683,8 +602,6 @@ export function CustomerDashboard() {
             </motion.div>
           </div>
         </div>
-
-        {/* All Restaurants Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -710,7 +627,6 @@ export function CustomerDashboard() {
                 }</span>}
               </p>
             </div>
-            
             <div className="relative w-64 hidden md:block">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Search className="h-4 w-4 text-gray-400" />
@@ -724,7 +640,6 @@ export function CustomerDashboard() {
               />
             </div>
           </div>
-          
           <motion.div 
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
             variants={containerVariants}
@@ -752,7 +667,6 @@ export function CustomerDashboard() {
                 />
               </motion.div>
             ))}
-            
             {loading && Array(8).fill(0).map((_, index) => (
               <div key={`skeleton-list-${index}`}>
                 <Card className="overflow-hidden border border-gray-200 h-full">
@@ -769,7 +683,6 @@ export function CustomerDashboard() {
               </div>
             ))}
           </motion.div>
-          
           {searchedRestaurants.length === 0 && !loading && (
             <div className="text-center py-20">
               <motion.div 
@@ -800,8 +713,6 @@ export function CustomerDashboard() {
           )}
         </motion.div>
       </section>
-
-      {/* Social Media Links */}
       <section className="bg-gradient-to-r from-amber-100 to-orange-100 py-16 mt-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-10">
@@ -825,9 +736,7 @@ export function CustomerDashboard() {
               Хамгийн сүүлийн үeийн мэдээлэл, онцгой урамшууллыг бидний сошиал хуудсаас аваарай
             </motion.p>
           </div>
-          
           <div className="flex justify-center gap-8">
-            {/* Facebook */}
             <motion.div
               className="flex flex-col items-center"
               initial={{ opacity: 0, y: 20 }}
@@ -838,13 +747,10 @@ export function CustomerDashboard() {
             >
               <motion.button
                 onClick={(e) => {
-                  // Add ripple effect at click position
                   const button = e.currentTarget;
                   const rect = button.getBoundingClientRect();
                   const x = e.clientX - rect.left;
                   const y = e.clientY - rect.top;
-                  
-                  // Create ripple element
                   const ripple = document.createElement('span');
                   ripple.style.position = 'absolute';
                   ripple.style.backgroundColor = 'rgba(255, 255, 255, 0.4)';
@@ -856,25 +762,20 @@ export function CustomerDashboard() {
                   ripple.style.transform = 'scale(0)';
                   ripple.style.opacity = '1';
                   ripple.style.transition = 'transform 0.8s, opacity 0.8s';
-                  
-                  // Append and animate
                   button.appendChild(ripple);
                   setTimeout(() => {
                     ripple.style.transform = 'scale(4)';
                     ripple.style.opacity = '0';
                   }, 10);
-                  
-                  // Clean up
                   setTimeout(() => {
                     ripple.remove();
                   }, 800);
-
                   toast({
                     title: "Facebook хуудас руу очиж байна",
                     description: "Шинэ цонхонд нээж байна...",
                     variant: "default",
                   });
-                  window.open("https://www.facebook.com/profile.php?id=100074258054037", "_blank");
+                  window.open("https:
                 }}
                 className="bg-blue-600 text-white w-24 h-24 rounded-full shadow-lg mb-3 flex items-center justify-center relative overflow-hidden"
                 whileHover={{ 
@@ -889,7 +790,7 @@ export function CustomerDashboard() {
                   whileHover={{ scale: 1.1 }}
                   className="relative z-10"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" viewBox="0 0 24 24" fill="currentColor">
+                  <svg xmlns="http:
                     <path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95z"/>
                   </svg>
                 </motion.div>
@@ -907,8 +808,6 @@ export function CustomerDashboard() {
                 GobiGo Facebook
               </motion.span>
             </motion.div>
-            
-            {/* Instagram */}
             <motion.div
               className="flex flex-col items-center"
               initial={{ opacity: 0, y: 20 }}
@@ -919,13 +818,10 @@ export function CustomerDashboard() {
             >
               <motion.button
                 onClick={(e) => {
-                  // Add ripple effect at click position
                   const button = e.currentTarget;
                   const rect = button.getBoundingClientRect();
                   const x = e.clientX - rect.left;
                   const y = e.clientY - rect.top;
-                  
-                  // Create ripple element
                   const ripple = document.createElement('span');
                   ripple.style.position = 'absolute';
                   ripple.style.backgroundColor = 'rgba(255, 255, 255, 0.4)';
@@ -937,25 +833,20 @@ export function CustomerDashboard() {
                   ripple.style.transform = 'scale(0)';
                   ripple.style.opacity = '1';
                   ripple.style.transition = 'transform 0.8s, opacity 0.8s';
-                  
-                  // Append and animate
                   button.appendChild(ripple);
                   setTimeout(() => {
                     ripple.style.transform = 'scale(4)';
                     ripple.style.opacity = '0';
                   }, 10);
-                  
-                  // Clean up
                   setTimeout(() => {
                     ripple.remove();
                   }, 800);
-
                   toast({
                     title: "Instagram хуудас руу очиж байна",
                     description: "Шинэ цонхонд нээж байна...",
                     variant: "default",
                   });
-                  window.open("https://www.instagram.com/te_nuune/", "_blank");
+                  window.open("https:
                 }}
                 className="bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 text-white w-24 h-24 rounded-full shadow-lg mb-3 flex items-center justify-center relative overflow-hidden"
                 whileHover={{ 
@@ -969,7 +860,7 @@ export function CustomerDashboard() {
                   whileHover={{ scale: 1.1 }}
                   className="relative z-10"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" viewBox="0 0 24 24" fill="currentColor">
+                  <svg xmlns="http:
                     <path d="M12 2c2.717 0 3.056.01 4.122.06 1.065.05 1.79.217 2.428.465.66.254 1.216.598 1.772 1.153.509.5.902 1.105 1.153 1.772.247.637.415 1.363.465 2.428.047 1.066.06 1.405.06 4.122 0 2.717-.01 3.056-.06 4.122-.05 1.065-.218 1.79-.465 2.428a4.883 4.883 0 01-1.153 1.772c-.5.508-1.105.902-1.772 1.153-.637.247-1.363.415-2.428.465-1.066.047-1.405.06-4.122.06-2.717 0-3.056-.01-4.122-.06-1.065-.05-1.79-.218-2.428-.465a4.89 4.89 0 01-1.772-1.153 4.904 4.904 0 01-1.153-1.772c-.247-.637-.415-1.363-.465-2.428C2.013 15.056 2 14.717 2 12c0-2.717.01-3.056.06-4.122.05-1.066.218-1.79.465-2.428.254-.66.598-1.216 1.153-1.772.5-.509 1.105-.902 1.772-1.153.637-.247 1.363-.415 2.428-.465C8.944 2.013 9.283 2 12 2zm0 5a5 5 0 100 10 5 5 0 000-10zm6.5-.25a1.25 1.25 0 10-2.5 0 1.25 1.25 0 002.5 0zM12 9a3 3 0 110 6 3 3 0 010-6z"/>
                   </svg>
                 </motion.div>
@@ -987,8 +878,6 @@ export function CustomerDashboard() {
                 GobiGo Instagram
               </motion.span>
             </motion.div>
-            
-            {/* Twitter */}
             <motion.div
               className="flex flex-col items-center"
               initial={{ opacity: 0, y: 20 }}
@@ -999,13 +888,10 @@ export function CustomerDashboard() {
             >
               <motion.button
                 onClick={(e) => {
-                  // Add ripple effect at click position
                   const button = e.currentTarget;
                   const rect = button.getBoundingClientRect();
                   const x = e.clientX - rect.left;
                   const y = e.clientY - rect.top;
-                  
-                  // Create ripple element
                   const ripple = document.createElement('span');
                   ripple.style.position = 'absolute';
                   ripple.style.backgroundColor = 'rgba(255, 255, 255, 0.4)';
@@ -1017,25 +903,20 @@ export function CustomerDashboard() {
                   ripple.style.transform = 'scale(0)';
                   ripple.style.opacity = '1';
                   ripple.style.transition = 'transform 0.8s, opacity 0.8s';
-                  
-                  // Append and animate
                   button.appendChild(ripple);
                   setTimeout(() => {
                     ripple.style.transform = 'scale(4)';
                     ripple.style.opacity = '0';
                   }, 10);
-                  
-                  // Clean up
                   setTimeout(() => {
                     ripple.remove();
                   }, 800);
-
                   toast({
                     title: "Twitter хуудас руу очиж байна",
                     description: "Шинэ цонхонд нээж байна...",
                     variant: "default",
                   });
-                  window.open("https://twitter.com/gobigo_official", "_blank");
+                  window.open("https:
                 }}
                 className="bg-black text-white w-24 h-24 rounded-full shadow-lg mb-3 flex items-center justify-center relative overflow-hidden"
                 whileHover={{ 
@@ -1049,7 +930,7 @@ export function CustomerDashboard() {
                   whileHover={{ scale: 1.1 }}
                   className="relative z-10"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" viewBox="0 0 24 24" fill="currentColor">
+                  <svg xmlns="http:
                     <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z" />
                   </svg>
                 </motion.div>
@@ -1070,8 +951,6 @@ export function CustomerDashboard() {
           </div>
         </div>
       </section>
-
-      {/* Scroll to top button */}
       <motion.button
         className="fixed bottom-6 right-6 bg-amber-500 hover:bg-amber-600 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg z-50"
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
@@ -1081,12 +960,10 @@ export function CustomerDashboard() {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http:
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
         </svg>
       </motion.button>
     </div>
   );
 }
-
-// Add animation styles directly in index.css

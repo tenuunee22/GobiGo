@@ -7,7 +7,6 @@ import { WelcomeBanner } from "@/components/shared/welcome-banner";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Navigation, Phone } from "lucide-react";
-
 export function DeliveryDashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -20,24 +19,17 @@ export function DeliveryDashboard() {
     progress: 65
   });
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     const fetchOrders = async () => {
       if (!user || !user.uid) return;
-      
       try {
         setLoading(true);
-        
-        // Fetch available orders
         const fetchedAvailableOrders = await getAvailableOrders();
         setAvailableOrders(fetchedAvailableOrders);
-        
-        // Fetch driver's current orders
         const driverOrders = await getDriverOrders(user.uid);
         const activeOrder = driverOrders.find(order => 
           order.status === "picked_up" || order.status === "on-the-way"
         );
-        
         if (activeOrder) {
           setCurrentOrder(activeOrder);
         } else {
@@ -54,37 +46,27 @@ export function DeliveryDashboard() {
         setLoading(false);
       }
     };
-    
     fetchOrders();
-    
-    // Poll for new orders every 30 seconds
     const interval = setInterval(fetchOrders, 30000);
-    
     return () => clearInterval(interval);
   }, [user, toast]);
-
   const handleOrderStatusChange = () => {
-    // Refetch orders when status changes
     if (user && user.uid) {
       setLoading(true);
-      
       Promise.all([
         getAvailableOrders(),
         getDriverOrders(user.uid)
       ])
         .then(([available, driverOrders]) => {
           setAvailableOrders(available);
-          
           const activeOrder = driverOrders.find(order => 
             order.status === "picked_up" || order.status === "on-the-way"
           );
-          
           if (activeOrder) {
             setCurrentOrder(activeOrder);
           } else {
             setCurrentOrder(null);
           }
-          
           setLoading(false);
         })
         .catch(error => {
@@ -93,7 +75,6 @@ export function DeliveryDashboard() {
         });
     }
   };
-
   const toggleOnlineStatus = () => {
     setIsOnline(!isOnline);
     toast({
@@ -103,14 +84,10 @@ export function DeliveryDashboard() {
         : "You will not receive new delivery requests",
     });
   };
-
   return (
     <div className="py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Welcome Banner */}
         {user && <WelcomeBanner className="mb-6" />}
-      
-        {/* Delivery overview section */}
         <div className="mb-8 fade-in">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent flex items-center">
             <span className="mr-3 text-indigo-500 tada text-2xl">🚚</span>
@@ -118,8 +95,6 @@ export function DeliveryDashboard() {
           </h1>
           <p className="text-gray-600 mt-2">Хүргэлтийн мэдээлэл, <span className="font-semibold text-indigo-600">{user?.name || "Driver"}</span></p>
         </div>
-        
-        {/* Status toggle switch */}
         <div className="bg-white shadow rounded-lg p-6 mb-8 slide-in-left dashboard-card-hover">
           <div className="flex items-center justify-between">
             <div>
@@ -143,8 +118,6 @@ export function DeliveryDashboard() {
             </div>
           </div>
         </div>
-        
-        {/* Today's earnings */}
         <div className="bg-white shadow rounded-lg p-6 mb-8 slide-in-right dashboard-card-hover">
           <h2 className="text-lg font-medium bg-gradient-to-r from-amber-500 to-yellow-600 bg-clip-text text-transparent flex items-center mb-4">
             <span className="mr-2 wiggle">💰</span>
@@ -172,16 +145,12 @@ export function DeliveryDashboard() {
             </div>
           </div>
         </div>
-        
-        {/* Available orders and current delivery */}
         <div className="grid gap-8 md:grid-cols-2">
-          {/* Available orders */}
           <div className="bg-white shadow rounded-lg p-6 slide-in-left dashboard-card-hover">
             <h2 className="text-lg font-medium bg-gradient-to-r from-blue-600 to-indigo-500 bg-clip-text text-transparent flex items-center mb-4">
               <span className="mr-2 jelly">📋</span>
               Available Orders
             </h2>
-            
             <div className="flow-root">
               {loading ? (
                 <div className="animate-pulse space-y-5">
@@ -215,15 +184,12 @@ export function DeliveryDashboard() {
               )}
             </div>
           </div>
-          
-          {/* Current delivery */}
           {currentOrder ? (
             <div className="bg-white shadow rounded-lg p-6 slide-in-right dashboard-card-hover">
               <h2 className="text-lg font-medium bg-gradient-to-r from-green-600 to-teal-500 bg-clip-text text-transparent flex items-center mb-4">
                 <span className="mr-2 delivery-pulse">🚚</span>
                 Current Delivery
               </h2>
-              
               <div className="mb-4">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-sm font-semibold text-gray-900">Order #{currentOrder.orderNumber || currentOrder.id.slice(-6)} • {currentOrder.items?.length || 2} items</h3>
@@ -231,7 +197,6 @@ export function DeliveryDashboard() {
                     <span className="mr-1 text-xs">🚗</span> On the way
                   </span>
                 </div>
-                
                 <div className="flex items-center mb-4">
                   <div className="flex-shrink-0 h-10 w-10">
                     {currentOrder.businessImageUrl ? (
@@ -247,14 +212,13 @@ export function DeliveryDashboard() {
                     <p className="text-xs text-gray-500">Pickup: {currentOrder.pickupAddress || "123 Restaurant St"}</p>
                   </div>
                 </div>
-                
                 <div className="flex items-center mb-4">
                   <div className="flex-shrink-0 h-10 w-10">
                     <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
                       {currentOrder.customerImageUrl ? (
                         <img className="h-10 w-10 rounded-full" src={currentOrder.customerImageUrl} alt="Customer" />
                       ) : (
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg xmlns="http:
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
                       )}
@@ -266,23 +230,18 @@ export function DeliveryDashboard() {
                   </div>
                 </div>
               </div>
-              
-              {/* Map placeholder */}
               <div className="w-full h-40 bg-gray-200 rounded-lg mb-4 relative overflow-hidden">
                 <div className="absolute inset-0 flex items-center justify-center text-gray-400">
                   Google Maps would be integrated here with the delivery route
                 </div>
               </div>
-              
               <div className="flex space-x-3">
                 <Button 
                   className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-md transition-all duration-300 hover:scale-105"
                   onClick={() => {
-                    // Open Google Maps with the delivery coordinates
                     const customerLat = currentOrder.deliveryLat || 47.9234676;
                     const customerLng = currentOrder.deliveryLng || 106.9237016;
-                    // Create Google Maps URL with the destination coordinates
-                    const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${customerLat},${customerLng}`;
+                    const mapsUrl = `https:
                     window.open(mapsUrl, '_blank');
                   }}
                 >
@@ -301,7 +260,6 @@ export function DeliveryDashboard() {
                   </span>
                 </Button>
               </div>
-              
               <div className="mt-4">
                 <Button 
                   className="w-full bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 shadow-md transition-all duration-300 hover:scale-105"

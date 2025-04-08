@@ -4,7 +4,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { Store, Beef, X } from "lucide-react";
-
 interface SearchResult {
   id: string;
   name: string;
@@ -12,58 +11,50 @@ interface SearchResult {
   imageUrl?: string;
   description?: string;
 }
-
 interface SearchResultsProps {
   query: string;
   isVisible: boolean;
   onClose: () => void;
 }
-
 export function SearchResults({ query, isVisible, onClose }: SearchResultsProps) {
   const [, setLocation] = useLocation();
   const [results, setResults] = useState<SearchResult[]>([]);
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
-  // Mock function to simulate API search
   useEffect(() => {
     if (!query.trim() || !isVisible) {
       setResults([]);
       return;
     }
-
     setLoading(true);
-
-    // Simulate API delay
     const timeoutId = setTimeout(() => {
-      // Mock data
       const mockData: SearchResult[] = [
         {
           id: '1',
           name: 'Хүслэн Ресторан',
           type: 'restaurant',
-          imageUrl: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
+          imageUrl: 'https:
           description: 'Монгол үндэсний хоолны газар'
         },
         {
           id: '2',
           name: 'Пицца',
           type: 'product',
-          imageUrl: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
+          imageUrl: 'https:
           description: 'Пепперони пицца'
         },
         {
           id: '3',
           name: 'Монгол Амтат',
           type: 'restaurant',
-          imageUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
+          imageUrl: 'https:
           description: 'Үндэсний хоолны газар'
         },
         {
           id: '4',
           name: 'Хамбургер',
           type: 'product',
-          imageUrl: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
+          imageUrl: 'https:
           description: 'Тахианы махан бургер'
         },
         {
@@ -73,52 +64,35 @@ export function SearchResults({ query, isVisible, onClose }: SearchResultsProps)
           description: 'Хүнсний барааны дэлгүүрүүд'
         },
       ];
-
-      // Filter by search query
       const filtered = mockData.filter(item => 
         item.name.toLowerCase().includes(query.toLowerCase()) || 
         (item.description && item.description.toLowerCase().includes(query.toLowerCase()))
       );
-
-      // Filter by selected type if any
       const typeFiltered = selectedType 
         ? filtered.filter(item => item.type === selectedType)
         : filtered;
-
       setResults(typeFiltered);
       setLoading(false);
     }, 300);
-
     return () => clearTimeout(timeoutId);
   }, [query, isVisible, selectedType]);
-
-  // Handle type filter
   const handleTypeFilter = (type: string) => {
     setSelectedType(type === selectedType ? null : type);
   };
-
-  // Get unique types for filter buttons
   const getUniqueTypes = () => {
     const types = results.map(result => result.type);
     return Array.from(new Set(types));
   };
-
-  // Handle item click
   const handleItemClick = (result: SearchResult) => {
     const path = result.type === 'restaurant' 
       ? `/restaurant/${result.id}` 
       : result.type === 'product'
       ? `/product/${result.id}`
       : `/category/${result.id}`;
-    
     setLocation(path);
     onClose();
   };
-
-  // Return empty if not visible
   if (!isVisible) return null;
-
-  // Render type icon based on result type
   const renderTypeIcon = (type: string) => {
     switch (type) {
       case 'restaurant':
@@ -129,7 +103,6 @@ export function SearchResults({ query, isVisible, onClose }: SearchResultsProps)
         return null;
     }
   };
-
   return (
     <AnimatePresence>
       {isVisible && (
@@ -140,7 +113,6 @@ export function SearchResults({ query, isVisible, onClose }: SearchResultsProps)
           transition={{ duration: 0.2 }}
           className="absolute z-50 top-full mt-1 w-full sm:w-96 bg-white rounded-lg shadow-lg border border-border overflow-hidden"
         >
-          {/* Header with filters */}
           <div className="p-3 border-b border-border bg-muted/30">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-medium">Хайлтын үр дүн</h3>
@@ -153,7 +125,6 @@ export function SearchResults({ query, isVisible, onClose }: SearchResultsProps)
                 <X className="h-4 w-4" />
               </Button>
             </div>
-            
             {results.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {getUniqueTypes().map(type => (
@@ -173,8 +144,6 @@ export function SearchResults({ query, isVisible, onClose }: SearchResultsProps)
               </div>
             )}
           </div>
-          
-          {/* Results */}
           <div className="max-h-72 overflow-y-auto">
             {loading ? (
               <div className="p-6 flex items-center justify-center">

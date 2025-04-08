@@ -8,13 +8,11 @@ import { FileUpload } from "@/components/shared/file-upload";
 import { X } from "lucide-react";
 import { uploadFile } from "@/lib/firebase";
 import { useAuth } from "@/contexts/auth-context";
-
 interface ProductFormProps {
   product?: any;
   onSave: (productData: any) => void;
   onCancel: () => void;
 }
-
 export function ProductForm({ product, onSave, onCancel }: ProductFormProps) {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -24,11 +22,8 @@ export function ProductForm({ product, onSave, onCancel }: ProductFormProps) {
   const [category, setCategory] = useState(product?.category || "");
   const [imageUrl, setImageUrl] = useState(product?.imageUrl || "");
   const [isUploading, setIsUploading] = useState(false);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validation
     if (!name.trim()) {
       toast({
         title: "Алдаа",
@@ -37,7 +32,6 @@ export function ProductForm({ product, onSave, onCancel }: ProductFormProps) {
       });
       return;
     }
-
     if (!price || isNaN(Number(price)) || Number(price) <= 0) {
       toast({
         title: "Алдаа",
@@ -46,7 +40,6 @@ export function ProductForm({ product, onSave, onCancel }: ProductFormProps) {
       });
       return;
     }
-
     const productData = {
       name,
       description,
@@ -54,10 +47,8 @@ export function ProductForm({ product, onSave, onCancel }: ProductFormProps) {
       category,
       imageUrl,
     };
-
     onSave(productData);
   };
-
   const handleFileSelect = async (file: File) => {
     if (!user || !user.uid) {
       toast({
@@ -67,7 +58,6 @@ export function ProductForm({ product, onSave, onCancel }: ProductFormProps) {
       });
       return;
     }
-
     setIsUploading(true);
     try {
       const url = await uploadFile(user.uid, file, "products");
@@ -87,11 +77,9 @@ export function ProductForm({ product, onSave, onCancel }: ProductFormProps) {
       setIsUploading(false);
     }
   };
-
   const handleFileRemove = () => {
     setImageUrl("");
   };
-
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-4">
@@ -107,7 +95,6 @@ export function ProductForm({ product, onSave, onCancel }: ProductFormProps) {
             />
           </div>
         </div>
-
         <div>
           <Label htmlFor="name">Нэр</Label>
           <div className="mt-1">
@@ -120,7 +107,6 @@ export function ProductForm({ product, onSave, onCancel }: ProductFormProps) {
             />
           </div>
         </div>
-
         <div>
           <Label htmlFor="description">Тайлбар</Label>
           <div className="mt-1">
@@ -133,7 +119,6 @@ export function ProductForm({ product, onSave, onCancel }: ProductFormProps) {
             />
           </div>
         </div>
-
         <div>
           <Label htmlFor="price">Үнэ (₮)</Label>
           <div className="mt-1">
@@ -149,7 +134,6 @@ export function ProductForm({ product, onSave, onCancel }: ProductFormProps) {
             />
           </div>
         </div>
-
         <div>
           <Label htmlFor="category">Ангилал</Label>
           <div className="mt-1">
@@ -163,7 +147,6 @@ export function ProductForm({ product, onSave, onCancel }: ProductFormProps) {
           </div>
         </div>
       </div>
-
       <div className="flex justify-end space-x-4">
         <Button 
           type="button" 

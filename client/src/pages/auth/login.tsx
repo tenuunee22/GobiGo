@@ -1,20 +1,14 @@
 import { useState } from "react";
 import { LoginForm } from "@/components/auth/login-form";
 import { RegisterForm } from "@/components/auth/register-form";
-
 export default function Login() {
   const [showLogin, setShowLogin] = useState(true);
-
   const toggleForm = () => {
     setShowLogin(!showLogin);
   };
-
-  // If showing registration, just show the registration form
   if (!showLogin) {
     return <RegisterForm onToggleForm={toggleForm} />;
   }
-
-  // For login page
   return (
     <div className="h-screen flex flex-col items-center justify-center bg-gray-50">
       <div className="text-center mb-8">

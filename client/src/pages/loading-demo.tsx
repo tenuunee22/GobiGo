@@ -11,7 +11,6 @@ import { CategoryLoader } from "@/components/ui/category-loader";
 import { DeliveryAnimation } from "@/components/ui/delivery-animation";
 import { DeliveryChat } from "@/components/shared/delivery-chat";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
 export default function LoadingDemo() {
   const [showFullscreenLoader, setShowFullscreenLoader] = useState(false);
   const [selectedTheme, setSelectedTheme] = useState<"light" | "dark" | "gradient">("light");
@@ -19,16 +18,12 @@ export default function LoadingDemo() {
   const [showBackground, setShowBackground] = useState(true);
   const [deliveryStatus, setDeliveryStatus] = useState<"preparing" | "on-the-way" | "arriving" | "delivered">("on-the-way");
   const [showDeliveryChat, setShowDeliveryChat] = useState(false);
-  
-  // Helper to toggle the full screen loader with auto-off timer
   const toggleFullscreenLoader = () => {
     setShowFullscreenLoader(true);
-    // Auto-hide after 3 seconds for demo purposes
     setTimeout(() => {
       setShowFullscreenLoader(false);
     }, 3000);
   };
-  
   return (
     <div className="container py-8 max-w-4xl">
       <LoadingOverlay 
@@ -36,14 +31,12 @@ export default function LoadingDemo() {
         theme={selectedTheme}
         message="Хоолны мэдээллийг ачааллаж байна..."
       />
-      
       <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-primary to-indigo-600 bg-clip-text text-transparent">
         Анимэйшн жишээ
       </h1>
       <p className="text-gray-600 mb-6">
         Хүлээх явцад үзүүлэх дүрс хөдөлгөөнт анимэйшн жишээнүүд
       </p>
-      
       <Tabs defaultValue="fullscreen" className="mb-8">
         <TabsList>
           <TabsTrigger value="fullscreen">Бүтэн дэлгэц</TabsTrigger>
@@ -51,7 +44,6 @@ export default function LoadingDemo() {
           <TabsTrigger value="skeletons">Skeleton loader</TabsTrigger>
           <TabsTrigger value="chat">Хүргэлтийн чат</TabsTrigger>
         </TabsList>
-        
         <TabsContent value="fullscreen">
           <Card>
             <CardHeader>
@@ -86,12 +78,10 @@ export default function LoadingDemo() {
                       </Button>
                     </div>
                   </div>
-                  
                   <Button className="w-full" onClick={toggleFullscreenLoader}>
                     Бүтэн дэлгэцийн анимэйшн харах
                   </Button>
                 </div>
-                
                 <div className="border rounded-lg p-4 h-48 relative">
                   <LoadingOverlay 
                     isLoading={true} 
@@ -104,7 +94,6 @@ export default function LoadingDemo() {
             </CardContent>
           </Card>
         </TabsContent>
-        
         <TabsContent value="components">
           <Card>
             <CardHeader>
@@ -139,7 +128,6 @@ export default function LoadingDemo() {
                       </Button>
                     </div>
                   </div>
-                  
                   <div className="flex items-center justify-between">
                     <Label htmlFor="background">Цайвар дэвсгэртэй</Label>
                     <Switch 
@@ -149,21 +137,18 @@ export default function LoadingDemo() {
                     />
                   </div>
                 </div>
-                
                 <div className="border rounded-lg p-4 flex items-center justify-center">
                   <BouncingLoader 
                     size={selectedSize} 
                     showBackground={showBackground} 
                   />
                 </div>
-                
                 <div className="sm:col-span-2 mt-4">
                   <h3 className="text-lg font-medium mb-3">Категори уншиж байна</h3>
                   <div className="border rounded-lg p-4">
                     <CategoryLoader count={8} />
                   </div>
                 </div>
-                
                 <div className="sm:col-span-2 mt-4">
                   <h3 className="text-lg font-medium mb-3">Хүргэлтийн явц</h3>
                   <div className="border rounded-lg p-6">
@@ -184,7 +169,6 @@ export default function LoadingDemo() {
                             <SelectItem value="delivered">Хүргэгдсэн</SelectItem>
                           </SelectContent>
                         </Select>
-                        
                         <div className="flex space-x-2 mt-4">
                           <Button 
                             variant={selectedSize === "sm" ? "default" : "outline"} 
@@ -209,7 +193,6 @@ export default function LoadingDemo() {
                           </Button>
                         </div>
                       </div>
-                      
                       <div className="flex items-center justify-center">
                         <DeliveryAnimation status={deliveryStatus} size={selectedSize} />
                       </div>
@@ -220,7 +203,6 @@ export default function LoadingDemo() {
             </CardContent>
           </Card>
         </TabsContent>
-        
         <TabsContent value="skeletons">
           <Card>
             <CardHeader>
@@ -234,7 +216,6 @@ export default function LoadingDemo() {
             </CardContent>
           </Card>
         </TabsContent>
-
         <TabsContent value="chat">
           <Card>
             <CardHeader>
@@ -245,13 +226,11 @@ export default function LoadingDemo() {
                 <p className="text-sm text-gray-600">
                   Хэрэглэгч хүргэгчтэй холбогдох боломжтой чат систем. Хүргэлтийн явцыг мэдээлэх болон хүргэлт хийгдэх байрлалын талаар харилцах боломжтой.
                 </p>
-                
                 <div className="flex justify-between">
                   <Button onClick={() => setShowDeliveryChat(!showDeliveryChat)}>
                     {showDeliveryChat ? "Хүргэлтийн чат хаах" : "Хүргэлтийн чат харуулах"}
                   </Button>
                 </div>
-
                 <div className="h-96 border rounded-lg p-4 relative">
                   <div className="absolute inset-0 flex items-center justify-center text-gray-400">
                     <p className="text-center">
@@ -262,7 +241,6 @@ export default function LoadingDemo() {
                   </div>
                 </div>
               </div>
-              
               {showDeliveryChat && (
                 <DeliveryChat
                   orderId="12345"

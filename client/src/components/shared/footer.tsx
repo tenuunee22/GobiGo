@@ -1,5 +1,4 @@
 import { Facebook, Instagram, Twitter } from "lucide-react";
-
 export function Footer() {
   return (
     <footer className="bg-white border-t border-gray-200 mt-auto">
