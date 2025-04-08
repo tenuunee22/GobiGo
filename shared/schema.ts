@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, numeric } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, numeric, json } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -12,6 +12,7 @@ export const users = pgTable("users", {
   name: text("name"),
   role: text("role").notNull().default("customer"), // customer, business, delivery
   profileImage: text("profile_image"),
+  preferences: json("preferences").$type<string[]>().default([]),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 
@@ -44,6 +45,9 @@ export const products = pgTable("products", {
   category: text("category"),
   imageUrl: text("image_url"),
   status: text("status").default("active"), // active, out_of_stock, hidden
+  tags: json("tags").$type<string[]>().default([]),
+  rating: numeric("rating").default("0"),
+  ratingCount: integer("rating_count").default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -98,3 +102,19 @@ export type User = typeof users.$inferSelect;
 export type Product = typeof products.$inferSelect;
 export type Order = typeof orders.$inferSelect;
 export type OrderItem = typeof orderItems.$inferSelect;
+
+// Recipe recommendation type
+export const recipeRecommendationSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  imageUrl: z.string(),
+  restaurantName: z.string(),
+  restaurantLogoUrl: z.string().optional(),
+  rating: z.number().default(0),
+  price: z.number(),
+  deliveryTime: z.string(),
+  tags: z.array(z.string()).default([]),
+  isFavorite: z.boolean().default(false),
+});
+
+export type RecipeRecommendation = z.infer<typeof recipeRecommendationSchema>;

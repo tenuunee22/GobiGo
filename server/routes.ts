@@ -412,6 +412,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.redirect(staticCheckoutUrl);
   });
 
+  // Recipe recommendation endpoints
+  app.get("/api/recommendations", async (req, res) => {
+    try {
+      const { userId, limit = 10 } = req.query;
+      const recommendations = await storage.getRecipeRecommendations(
+        userId as string, 
+        parseInt(limit as string) || 10
+      );
+      res.json(recommendations);
+    } catch (error) {
+      console.error("Error fetching recommendations:", error);
+      res.status(500).json({ message: "Error fetching recommendations" });
+    }
+  });
+
+  app.get("/api/favorites/:userId", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const favorites = await storage.getUserFavoriteRecipes(userId);
+      res.json(favorites);
+    } catch (error) {
+      console.error("Error fetching favorite recipes:", error);
+      res.status(500).json({ message: "Error fetching favorite recipes" });
+    }
+  });
+
+  app.post("/api/favorites/toggle", async (req, res) => {
+    try {
+      const { userId, recipeId } = req.body;
+      
+      if (!userId || !recipeId) {
+        return res.status(400).json({ message: "userId and recipeId are required" });
+      }
+      
+      const isFavorite = await storage.toggleFavoriteRecipe(userId, recipeId);
+      res.json({ recipeId, isFavorite });
+    } catch (error) {
+      console.error("Error toggling favorite status:", error);
+      res.status(500).json({ message: "Error toggling favorite status" });
+    }
+  });
+
   // Create the HTTP server
   const httpServer = createServer(app);
 
