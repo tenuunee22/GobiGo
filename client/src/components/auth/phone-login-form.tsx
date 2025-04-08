@@ -50,7 +50,7 @@ export function PhoneLoginForm({ onToggleForm }: PhoneLoginFormProps) {
   const phoneForm = useForm<z.infer<typeof phoneSchema>>({
     resolver: zodResolver(phoneSchema),
     defaultValues: {
-      phoneNumber: "",
+      phoneNumber: "99112233", // Анхнаасаа дээж утасны дугаар байрлуулах
     },
   });
 
@@ -58,7 +58,7 @@ export function PhoneLoginForm({ onToggleForm }: PhoneLoginFormProps) {
   const verificationForm = useForm<z.infer<typeof verificationSchema>>({
     resolver: zodResolver(verificationSchema),
     defaultValues: {
-      code: "",
+      code: "123456", // Анхнаасаа тестийн код байрлуулах
     },
   });
 
