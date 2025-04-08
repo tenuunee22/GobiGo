@@ -4,6 +4,7 @@ import { getBusinessOrders } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { OrderItem } from "@/components/business/order-item";
 import { ProductForm } from "@/components/business/product-form";
+import { WelcomeBanner } from "@/components/shared/welcome-banner";
 import { ClipboardList, DollarSign, Star } from "lucide-react";
 
 export function BusinessDashboard() {
@@ -80,10 +81,13 @@ export function BusinessDashboard() {
   return (
     <div className="py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Welcome Banner */}
+        {user && <WelcomeBanner className="mb-6" />}
+        
         {/* Business overview section */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Бизнесийн хяналтын самбар</h1>
-          <p className="text-gray-600 mt-2">Тавтай морил, {user?.businessName || user?.name || "Дэлгүүрийн эзэн"}</p>
+          <p className="text-gray-600 mt-2">Өнөөдрийн борлуулалт, {user?.businessName || user?.name || "Дэлгүүрийн эзэн"}</p>
         </div>
         
         {/* Stats cards */}
@@ -231,7 +235,20 @@ export function BusinessDashboard() {
             )}
             
             {activeTab === "manage-products" && (
-              <ProductForm />
+              <ProductForm 
+                onSave={(productData) => {
+                  toast({
+                    title: "Бүтээгдэхүүн амжилттай хадгалагдлаа",
+                    description: "Таны мэдээлэл амжилттай шинэчлэгдлээ",
+                  });
+                }}
+                onCancel={() => {
+                  toast({
+                    title: "Цуцлагдлаа",
+                    description: "Бүтээгдэхүүн нэмэх үйлдэл цуцлагдлаа",
+                  });
+                }}
+              />
             )}
           </div>
         </div>

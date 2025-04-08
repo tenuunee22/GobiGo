@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { getAvailableOrders, getDriverOrders } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { OrderCard } from "@/components/delivery/order-card";
+import { WelcomeBanner } from "@/components/shared/welcome-banner";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Navigation, Phone } from "lucide-react";
@@ -106,10 +107,13 @@ export function DeliveryDashboard() {
   return (
     <div className="py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Welcome Banner */}
+        {user && <WelcomeBanner className="mb-6" />}
+      
         {/* Delivery overview section */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Delivery Dashboard</h1>
-          <p className="text-gray-600 mt-2">Welcome back, {user?.name || "Driver"}</p>
+          <p className="text-gray-600 mt-2">Хүргэлтийн мэдээлэл, {user?.name || "Driver"}</p>
         </div>
         
         {/* Status toggle switch */}

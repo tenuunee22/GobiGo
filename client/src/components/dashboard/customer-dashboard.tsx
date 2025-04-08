@@ -4,6 +4,7 @@ import { getBusinesses, getCustomerOrders } from "@/lib/firebase";
 import { CategoryCard } from "@/components/customer/category-card";
 import { RestaurantCard } from "@/components/customer/restaurant-card";
 import { OrderTracking } from "@/components/customer/order-tracking";
+import { WelcomeBanner } from "@/components/shared/welcome-banner";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { Search, Pizza, ShoppingCart, PlusCircle, Pill } from "lucide-react";
@@ -167,6 +168,9 @@ export function CustomerDashboard() {
   return (
     <div className="py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Welcome Banner for logged-in users */}
+        {user && <WelcomeBanner className="mb-6" />}
+
         {/* Hero section */}
         <div className="bg-primary rounded-xl shadow-xl overflow-hidden mb-8">
           <div className="px-6 py-12 md:px-12 text-white md:flex justify-between items-center">
