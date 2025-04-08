@@ -48,8 +48,10 @@ export const orders = pgTable("orders", {
   orderNumber: text("order_number").notNull(),
   customerId: text("customer_id").notNull(), // References users.uid for the customer
   businessId: text("business_id").notNull(), // References users.uid for the business
+  businessType: text("business_type"), // restaurant, grocery, pharmacy - determines order handling flow
   driverId: text("driver_id"), // References users.uid for the driver
-  status: text("status").notNull().default("new"), // new, accepted, ready, picked_up, on-the-way, delivered, declined, cancelled
+  status: text("status").notNull().default("new"), // new, accepted, preparing, ready, picked_up, on-the-way, delivered, completed, declined, cancelled
+  needsPreparation: boolean("needs_preparation").default(true), // true for restaurants, false for grocery/pharmacy
   total: numeric("total").notNull(),
   deliveryFee: numeric("delivery_fee"),
   driverTip: numeric("driver_tip"),

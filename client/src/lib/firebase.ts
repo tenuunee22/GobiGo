@@ -30,6 +30,7 @@ const firebaseConfig = {
   authDomain: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebaseapp.com`,
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
   storageBucket: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.appspot.com`,
+  messagingSenderId: "307246836509", // Default value, can be replaced with actual value if available
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
@@ -202,12 +203,29 @@ export const getBusinessProducts = async (businessId: string) => {
 // Order related functions
 export const createOrder = async (orderData: any) => {
   try {
+    // Get business information to determine order flow
+    const businessDoc = await getDoc(doc(db, "users", orderData.businessId));
+    if (!businessDoc.exists()) {
+      throw new Error("Business not found");
+    }
+    
+    const businessData = businessDoc.data();
+    const businessType = businessData.businessType || "restaurant";
+    
+    // Set preparation needs based on business type
+    // Restaurant orders need preparation by the business
+    // Grocery, pharmacy, etc. are shopped by driver
+    const needsPreparation = businessType === "restaurant";
+    
     const ordersRef = collection(db, "orders");
     const newOrder = await addDoc(ordersRef, {
       ...orderData,
+      businessType,
+      needsPreparation,
       status: "new",
       createdAt: serverTimestamp()
     });
+    
     return newOrder.id;
   } catch (error) {
     console.error("Error creating order:", error);
@@ -254,11 +272,39 @@ export const getBusinessOrders = async (businessId: string) => {
 export const getAvailableOrders = async () => {
   try {
     const ordersRef = collection(db, "orders");
-    const q = query(ordersRef, where("status", "==", "accepted"), where("driverId", "==", null));
-    const querySnapshot = await getDocs(q);
+    
+    // Get orders that need pickup for both preparation types:
+    // 1. For restaurant orders (needsPreparation=true): status is "ready" and no driver assigned
+    // 2. For grocery/pharmacy (needsPreparation=false): status is "new" or "accepted" and no driver assigned
+    const restaurantOrders = query(
+      ordersRef, 
+      where("needsPreparation", "==", true),
+      where("status", "==", "ready"),
+      where("driverId", "==", null)
+    );
+    
+    const otherOrders = query(
+      ordersRef,
+      where("needsPreparation", "==", false),
+      where("status", "in", ["new", "accepted"]),
+      where("driverId", "==", null)
+    );
+    
+    // Execute both queries
+    const [restaurantSnapshot, otherSnapshot] = await Promise.all([
+      getDocs(restaurantOrders),
+      getDocs(otherOrders)
+    ]);
     
     const orders: any[] = [];
-    querySnapshot.forEach((doc) => {
+    
+    // Process restaurant orders (ready for pickup)
+    restaurantSnapshot.forEach((doc) => {
+      orders.push({ id: doc.id, ...doc.data() });
+    });
+    
+    // Process other orders (need shopping/collection by driver)
+    otherSnapshot.forEach((doc) => {
       orders.push({ id: doc.id, ...doc.data() });
     });
     
@@ -287,14 +333,56 @@ export const getDriverOrders = async (driverId: string) => {
   }
 };
 
-export const updateOrderStatus = async (orderId: string, status: string, additionalData = {}) => {
+export const updateOrderStatus = async (orderId: string, status: string, additionalData: any = {}) => {
   try {
     const orderRef = doc(db, "orders", orderId);
+    
+    // First get the order to check business type and preparation needs
+    const orderDoc = await getDoc(orderRef);
+    if (!orderDoc.exists()) {
+      throw new Error("Order not found");
+    }
+    
+    const orderData = orderDoc.data();
+    const needsPreparation = orderData.needsPreparation === undefined ? 
+      (orderData.businessType === "restaurant") : orderData.needsPreparation;
+    
+    // Custom status flow based on business type
+    let updatedStatus = status;
+    
+    // If order is being accepted by a driver
+    if (status === "accepted") {
+      if (!needsPreparation && additionalData.driverId) {
+        // For grocery/pharmacy orders, driver needs to shop for items
+        updatedStatus = "shopping"; // Driver is shopping for items
+      }
+    }
+    // If order is marked as ready and it's a restaurant order
+    else if (status === "ready" && needsPreparation) {
+      // It's ready for pickup by driver
+      updatedStatus = "ready_for_pickup";
+    }
+    // If order is completed by shopper/driver for grocery/pharmacy
+    else if (status === "ready" && !needsPreparation) {
+      // Items have been collected, ready for delivery
+      updatedStatus = "items_collected";
+    }
+    
+    // Update the order
     await updateDoc(orderRef, {
-      status,
+      status: updatedStatus,
       updatedAt: serverTimestamp(),
       ...additionalData
     });
+    
+    // If order is completed, update completedAt timestamp
+    if (status === "completed") {
+      await updateDoc(orderRef, {
+        completedAt: serverTimestamp()
+      });
+    }
+    
+    return { ...orderData, status: updatedStatus, ...additionalData };
   } catch (error) {
     console.error("Error updating order status:", error);
     throw error;

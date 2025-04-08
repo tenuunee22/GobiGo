@@ -25,6 +25,8 @@ interface OrderCardProps {
   estimatedEarnings: number;
   isAvailable?: boolean;
   status?: string;
+  needsPreparation?: boolean; // Is this a restaurant order (true) or grocery/pharmacy (false)
+  businessType?: string; // restaurant, grocery, pharmacy
   customer?: {
     name: string;
     address: string;
@@ -39,20 +41,38 @@ export function OrderCard({
   estimatedEarnings,
   isAvailable = false,
   status,
+  needsPreparation = true,
+  businessType = "restaurant",
   customer,
   onStatusChange
 }: OrderCardProps) {
   
   const getStatusBadge = () => {
-    if (isAvailable) return <Badge variant="secondary">Боломжтой</Badge>;
+    if (isAvailable) {
+      // Show if this order is for pickup (restaurant) or shopping (grocery/pharmacy)
+      if (needsPreparation) {
+        return <Badge variant="secondary">Хоол авах</Badge>;
+      } else {
+        return <Badge variant="secondary">Худалдан авах</Badge>;
+      }
+    }
     
     let variant: "default" | "secondary" | "outline" = "default";
     let label = "";
     
     switch (status) {
       case "ready":
+      case "ready_for_pickup":
         variant = "secondary";
         label = "Бэлэн болсон";
+        break;
+      case "shopping":
+        variant = "secondary";
+        label = "Худалдан авалт";
+        break;
+      case "items_collected":
+        variant = "secondary";
+        label = "Цуглуулсан";
         break;
       case "on-the-way":
         variant = "default";
@@ -76,46 +96,96 @@ export function OrderCard({
   
   const getActionButton = () => {
     if (isAvailable) {
+      // Different button text based on business type
       return (
         <Button onClick={onStatusChange} className="w-full">
-          Хүргэлт авах
+          {needsPreparation ? 'Хоол авах' : 'Худалдан авах'}
         </Button>
       );
     }
     
-    switch (status) {
-      case "ready":
-        return (
-          <Button onClick={onStatusChange} className="w-full">
-            <Navigation className="mr-2 h-4 w-4" />
-            Хүргэлтэнд гарах
-          </Button>
-        );
-      case "on-the-way":
-        return (
-          <Button onClick={onStatusChange} className="w-full">
-            <CheckCircle className="mr-2 h-4 w-4" />
-            Хүргэлт хийсэн
-          </Button>
-        );
-      case "delivered":
-        return (
-          <Button onClick={onStatusChange} className="w-full">
-            Дуусгах
-          </Button>
-        );
-      case "completed":
-        return (
-          <Button disabled className="w-full">
-            Дууссан
-          </Button>
-        );
-      default:
-        return (
-          <Button onClick={onStatusChange} className="w-full">
-            Үргэлжлүүлэх
-          </Button>
-        );
+    // Different flow based on whether this is restaurant or grocery/pharmacy
+    if (needsPreparation) {
+      // Restaurant flow
+      switch (status) {
+        case "ready":
+        case "ready_for_pickup":
+          return (
+            <Button onClick={onStatusChange} className="w-full">
+              <Navigation className="mr-2 h-4 w-4" />
+              Хоол авах
+            </Button>
+          );
+        case "on-the-way":
+          return (
+            <Button onClick={onStatusChange} className="w-full">
+              <CheckCircle className="mr-2 h-4 w-4" />
+              Хүргэлт хийсэн
+            </Button>
+          );
+        case "delivered":
+          return (
+            <Button onClick={onStatusChange} className="w-full">
+              Дуусгах
+            </Button>
+          );
+        case "completed":
+          return (
+            <Button disabled className="w-full">
+              Дууссан
+            </Button>
+          );
+        default:
+          return (
+            <Button onClick={onStatusChange} className="w-full">
+              Үргэлжлүүлэх
+            </Button>
+          );
+      }
+    } else {
+      // Grocery/Pharmacy flow
+      switch (status) {
+        case "new":
+        case "accepted":
+        case "shopping":
+          return (
+            <Button onClick={onStatusChange} className="w-full">
+              Бараа цуглуулсан
+            </Button>
+          );
+        case "items_collected":
+          return (
+            <Button onClick={onStatusChange} className="w-full">
+              <Navigation className="mr-2 h-4 w-4" />
+              Хүргэлтэнд гарах
+            </Button>
+          );
+        case "on-the-way":
+          return (
+            <Button onClick={onStatusChange} className="w-full">
+              <CheckCircle className="mr-2 h-4 w-4" />
+              Хүргэлт хийсэн
+            </Button>
+          );
+        case "delivered":
+          return (
+            <Button onClick={onStatusChange} className="w-full">
+              Дуусгах
+            </Button>
+          );
+        case "completed":
+          return (
+            <Button disabled className="w-full">
+              Дууссан
+            </Button>
+          );
+        default:
+          return (
+            <Button onClick={onStatusChange} className="w-full">
+              Үргэлжлүүлэх
+            </Button>
+          );
+      }
     }
   };
   
@@ -132,6 +202,11 @@ export function OrderCard({
               <div className="flex items-center text-sm text-gray-600">
                 <Building className="mr-1 h-4 w-4" />
                 <span>{restaurant.distance} зайтай</span>
+              </div>
+              {/* Show business type */}
+              <div className="text-xs text-gray-500 mt-1">
+                {businessType === "grocery" ? "Дэлгүүр" : 
+                  businessType === "pharmacy" ? "Эмийн сан" : "Хоолны газар"}
               </div>
             </div>
             <div className="text-right">
