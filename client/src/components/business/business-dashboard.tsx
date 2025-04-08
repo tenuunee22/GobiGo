@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OrderItem } from "@/components/business/order-item";
 import { ProductForm } from "@/components/business/product-form";
 import { Button } from "@/components/ui/button";
-import { BarChart3, Book, Building2, CalendarDays, ChevronRight, GanttChartSquare, LineChart, ListOrdered, Package, PackageCheck, Phone, Plus, Search, Settings, ShoppingBag, Ticket, TrendingUp, Trash2, Truck, Users, Wrench, RefreshCw, Clipboard } from "lucide-react";
+import { BarChart3, Book, Building2, CalendarDays, ChevronRight, GanttChartSquare, LineChart, ListOrdered, MapPin, Package, PackageCheck, Phone, Plus, Search, Settings, ShoppingBag, Ticket, TrendingUp, Trash2, Truck, Users, Wrench, RefreshCw, Clipboard } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { DeliveryLocationTracker } from "@/components/shared/delivery-location-tracker";
@@ -16,6 +16,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 
 import { 
   Select, 
@@ -486,7 +488,7 @@ export function BusinessDashboard() {
                       <span>Гүйцэтгэл</span>
                       <span>78%</span>
                     </div>
-                    <Progress value={78} className="h-1.5 bg-gray-100" indicatorClassName="bg-gradient-to-r from-amber-500 to-amber-600" />
+                    <Progress value={78} className="h-1.5 bg-gray-100" />
                   </div>
                 </motion.div>
 
@@ -1229,7 +1231,10 @@ export function BusinessDashboard() {
                     </CardHeader>
                     <CardContent className="p-0">
                       <div className="h-[400px] relative bg-gray-100">
-                        <DeliveryLocationTracker />
+                        <DeliveryLocationTracker 
+                          origin={{ lat: 47.9184676, lng: 106.9177016 }}
+                          destination={{ lat: 47.9234676, lng: 106.9237016 }}
+                        />
                       </div>
                     </CardContent>
                   </Card>

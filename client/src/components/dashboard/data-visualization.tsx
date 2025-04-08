@@ -93,7 +93,7 @@ export function InteractiveIngredients() {
     autoBounce();
     
     return () => clearTimeout(timeout);
-  }, [activeIndex]);
+  }, [activeIndex, INGREDIENTS.length, controls]);
   
   return (
     <Card className="shadow-lg border-0">
