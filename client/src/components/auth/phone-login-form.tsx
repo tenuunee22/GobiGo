@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { sendPhoneVerificationCode, verifyPhoneCode } from "@/lib/firebase";
+import { useAuth } from "@/contexts/auth-context";
 
 // Define schemas for validation
 const phoneSchema = z.object({
@@ -40,10 +40,11 @@ interface PhoneLoginFormProps {
 export function PhoneLoginForm({ onToggleForm }: PhoneLoginFormProps) {
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
+  const { setUser } = useAuth();
   const [step, setStep] = useState<"phone" | "verification">("phone");
   const [loading, setLoading] = useState(false);
   const recaptchaContainerRef = useRef<HTMLDivElement>(null);
-  const confirmationResultRef = useRef<any>(null);
+  const storedPhoneRef = useRef<string>("");
 
   // Form for phone number input
   const phoneForm = useForm<z.infer<typeof phoneSchema>>({
@@ -76,28 +77,26 @@ export function PhoneLoginForm({ onToggleForm }: PhoneLoginFormProps) {
       setLoading(true);
       const formattedPhoneNumber = formatPhoneNumber(values.phoneNumber);
       
-      // Make sure recaptcha container exists
-      if (!recaptchaContainerRef.current) {
-        throw new Error("reCAPTCHA container not found");
-      }
-
-      // Send verification code
-      const confirmationResult = await sendPhoneVerificationCode(
-        formattedPhoneNumber,
-        "recaptcha-container"
-      );
+      // MOCK IMPLEMENTATION FOR DEVELOPMENT
+      // In real implementation, we would use Firebase Authentication with SMS
+      // But for development without billing, we'll just move to verification step
       
-      confirmationResultRef.current = confirmationResult;
+      // Store the phone number for verification step
+      storedPhoneRef.current = formattedPhoneNumber;
+      
+      // Simulate a delay like a real API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       setStep("verification");
       
       toast({
         title: "Баталгаажуулах код илгээгдлээ",
-        description: "Таны утсанд баталгаажуулах код илгээлээ.",
+        description: "Таны утсанд баталгаажуулах код илгээлээ. Тест код: 123456",
       });
     } catch (error: any) {
       console.error("Error sending verification code:", error);
       toast({
-        title: "Алдаа гарлаа",
+        title: "Алдаа гарлаа", 
         description: error.message || "Баталгаажуулах код илгээхэд алдаа гарлаа.",
         variant: "destructive",
       });
@@ -105,16 +104,37 @@ export function PhoneLoginForm({ onToggleForm }: PhoneLoginFormProps) {
       setLoading(false);
     }
   };
-
+  
   const onSubmitVerificationCode = async (values: z.infer<typeof verificationSchema>) => {
     try {
       setLoading(true);
       
-      if (!confirmationResultRef.current) {
+      if (!storedPhoneRef.current) {
         throw new Error("Баталгаажуулах код илгээгдээгүй байна.");
       }
       
-      await verifyPhoneCode(confirmationResultRef.current, values.code);
+      // MOCK IMPLEMENTATION FOR DEVELOPMENT
+      // In the real implementation, we would verify with Firebase
+      // For testing, we'll accept "123456" as the valid code
+      
+      if (values.code !== "123456") {
+        throw new Error("Баталгаажуулах код буруу байна.");
+      }
+      
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Create a mock user object that would come from Firebase
+      const mockUser = {
+        uid: `phone-${Date.now()}`, // Create a unique ID
+        email: null, // Email can be null in our interface
+        phoneNumber: storedPhoneRef.current,
+        displayName: null,
+        role: "customer" as const
+      };
+      
+      // Set the user in auth context
+      setUser(mockUser);
       
       toast({
         title: "Амжилттай нэвтэрлээ",
@@ -177,9 +197,6 @@ export function PhoneLoginForm({ onToggleForm }: PhoneLoginFormProps) {
                     </FormItem>
                   )}
                 />
-
-                {/* Container for reCAPTCHA */}
-                <div id="recaptcha-container" ref={recaptchaContainerRef}></div>
 
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? "Илгээж байна..." : "Баталгаажуулах код авах"}
