@@ -27,14 +27,14 @@ export default function TooltipExample() {
     id: "1",
     foodId: "food-1",
     userName: "Баттулга",
-    userImage: "https:
+    userImage: "https://randomuser.me/api/portraits/men/32.jpg",
     date: new Date().toISOString(),
     rating: 4,
     content: "Энэ хоол үнэхээр амттай байсан! Өмнө нь хэд хэдэн удаа захиалж байсан ч энэ удаа онцгой амттай санагдлаа. Ялангуяа ногоо нь маш шинэхэн, соус нь гайхалтай амттай байв. Та нар заавал үүнийг захиалаарай.",
     images: [
-      "https:
-      "https:
-      "https:
+      "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=640&q=80",
+      "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8Mnx8fGVufDB8fHx8&auto=format&fit=crop&w=640&q=80",
+      "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8NXx8fGVufDB8fHx8&auto=format&fit=crop&w=640&q=80"
     ],
     reactions: {
       "😋": 3,

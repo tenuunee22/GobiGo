@@ -97,7 +97,7 @@ export default function RestaurantDetail() {
             description: "Орос загварын жигнэмэг",
             price: 7500,
             category: "dessert",
-            imageUrl: "https:
+            imageUrl: "https://images.unsplash.com/photo-1559620192-032c4bc4674e?q=80&w=200",
             available: true
           },
           {
@@ -106,7 +106,7 @@ export default function RestaurantDetail() {
             description: "Дулаан хар цай",
             price: 3500,
             category: "drink",
-            imageUrl: "https:
+            imageUrl: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?q=80&w=200",
             available: true
           },
           {
@@ -115,7 +115,7 @@ export default function RestaurantDetail() {
             description: "10 хинкали, салат, 2 уух зүйл",
             price: 25900,
             category: "combo",
-            imageUrl: "https:
+            imageUrl: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?q=80&w=200",
             available: true
           }
         ];

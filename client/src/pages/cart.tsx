@@ -54,7 +54,7 @@ export default function Cart() {
     };
     localStorage.setItem('currentOrder', JSON.stringify(order));
     try {
-      window.location.href = "https:
+      window.location.href = "/checkout";
     } catch (error) {
       console.error("Error redirecting to Stripe checkout:", error);
       setLoading(false);

@@ -1,187 +1,194 @@
-import React, { useEffect, useState, useRef } from "react";
-import { useAuth } from "@/contexts/auth-context";
-import { getBusinesses, getCustomerOrders } from "@/lib/firebase";
+import React, { useState, useEffect, useRef } from "react";
+import { useLocation } from "wouter";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import { CategoryCard } from "@/components/customer/category-card";
 import { RestaurantCard } from "@/components/customer/restaurant-card";
-import { OrderTracking } from "@/components/customer/order-tracking";
-import { WelcomeBanner } from "@/components/shared/welcome-banner";
-import { useToast } from "@/hooks/use-toast";
-import { useLocation } from "wouter";
-import { Search, ShoppingCart, PlusCircle, Pill, Utensils, Store, Grid3X3, CakeSlice, Coffee, ArrowRight, MapPin, Bookmark, Clock } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SalesDataVisualization } from "@/components/ui/sales-data-visualization";
+import { InteractiveIngredients } from "@/components/ui/interactive-ingredients";
 import { RecipeRecommendationCarousel } from "@/components/customer/recipe-recommendation-carousel";
-import { InteractiveIngredients, SalesDataVisualization } from "@/components/dashboard/data-visualization";
-import { Skeleton } from "@/components/ui/skeleton";
-import { motion, AnimatePresence } from "framer-motion";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { OrderTracking } from "@/components/customer/order-tracking";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/auth-context";
+import {
+  Search,
+  ArrowRight,
+  MapPin,
+  Clock,
+  Utensils,
+  Store,
+  Pill,
+  CakeSlice,
+  Coffee,
+  Grid3X3,
+  Bookmark,
+  Facebook,
+  Instagram,
+  Twitter
+} from "lucide-react";
+
 export function CustomerDashboard() {
+  const [, setLocation] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
-  const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
-  const [businesses, setBusinesses] = useState<any[]>([]);
-  const [activeOrders, setActiveOrders] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [featuredRestaurants, setFeaturedRestaurants] = useState<any[]>([]);
-  const heroRef = useRef<HTMLDivElement>(null);
-  const isMobile = useIsMobile();
-  const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
-  const [driverLocation, setDriverLocation] = useState<{lat: number, lng: number}>({
-    lat: 47.9184676,
-    lng: 106.9177016
-  });
-  const destinationLocation = {
-    lat: 47.9234676,
-    lng: 106.9237016
-  };
+  const [activeOrders, setActiveOrders] = useState<any[]>([{id: "1"}]); // Example active order
   const [demoStatus, setDemoStatus] = useState<"placed" | "preparing" | "on-the-way" | "delivered">("placed");
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setUserLocation({ lat: latitude, lng: longitude });
-        },
-        (error) => {
-          console.error("Байршил авахад алдаа гарлаа:", error);
-          toast({
-            title: "Байршил авах боломжгүй байна",
-            description: "Та байршлаа идэвхжүүлнэ үү",
-            variant: "destructive",
-          });
-        }
-      );
-    }
-  }, [toast]);
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (demoStatus === "on-the-way") {
-      interval = setInterval(() => {
-        setDriverLocation(prev => ({
-          lat: prev.lat + (destinationLocation.lat - prev.lat) * 0.1,
-          lng: prev.lng + (destinationLocation.lng - prev.lng) * 0.1
-        }));
-      }, 3000);
-    }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [demoStatus, destinationLocation.lat, destinationLocation.lng]);
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      switch (demoStatus) {
-        case "placed":
-          setDemoStatus("preparing");
-          break;
-        case "preparing":
-          setDemoStatus("on-the-way");
-          break;
-        case "on-the-way":
-          setTimeout(() => {
-            setDemoStatus("delivered");
-          }, 15000);
-          break;
-        default:
-          break;
-      }
-    }, 10000);
-    return () => clearTimeout(timer);
-  }, [demoStatus]);
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const businessesData = await getBusinesses();
-        setBusinesses(businessesData);
-        const featured = businessesData
-          .filter((business: any) => business.rating >= 4.5)
-          .slice(0, 5);
-        setFeaturedRestaurants(featured);
-        if (user?.uid) {
-          const ordersData = await getCustomerOrders(user.uid);
-          const active = ordersData.filter((order: any) => 
-            order.status !== "delivered" && order.status !== "cancelled"
-          );
-          setActiveOrders(active);
-        }
-      } catch (error: any) {
-        console.error("Error fetching dashboard data:", error);
-        toast({
-          title: "Өгөгдөл авахад алдаа гарлаа",
-          description: error.message,
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [user, toast]);
-  const sortedRestaurants = [...businesses].sort((a, b) => b.rating - a.rating);
-  const filteredRestaurants = activeCategory
-    ? sortedRestaurants.filter(restaurant => restaurant.category === activeCategory)
-    : sortedRestaurants;
-  const searchedRestaurants = searchQuery
-    ? filteredRestaurants.filter(restaurant => 
-        restaurant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        restaurant.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        restaurant.category?.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : filteredRestaurants;
+  const heroRef = useRef<HTMLDivElement>(null);
+  
+  // Demo locations for order tracking
+  const [driverLocation, setDriverLocation] = useState({ lat: 47.9184, lng: 106.9177 });
+  const [destinationLocation] = useState({ lat: 47.9214, lng: 106.9132 });
+
+  // Stagger animation configs
+  const staggerDelay = 0.1;
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: { 
+    visible: {
       opacity: 1,
-      transition: { 
-        staggerChildren: 0.05,
-        delayChildren: 0.1
+      transition: {
+        staggerChildren: 0.1
       }
     }
   };
+  
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
-    visible: { 
-      y: 0, 
-      opacity: 1,
-      transition: { type: "spring", stiffness: 300, damping: 24 }
-    }
-  };
-  const titleVariants = {
-    hidden: { opacity: 0, y: -20 },
-    visible: { 
-      opacity: 1, 
+    visible: (i: number) => ({
       y: 0,
-      transition: { 
-        duration: 0.6, 
+      opacity: 1,
+      transition: {
+        delay: i * 0.05,
+        duration: 0.4,
         ease: "easeOut"
       }
+    })
+  };
+  
+  const titleVariants = {
+    hidden: { y: -20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { duration: 0.6, ease: "easeOut" }
     }
   };
-  const staggerDelay = 0.1;
+
+  // Sample data
+  const featuredRestaurants = [
+    {
+      id: "1",
+      name: "Пицца Хаус",
+      category: "restaurant",
+      rating: 4.8,
+      address: "Сүхбаатар дүүрэг, 5-р хороо",
+      deliveryTime: "20-30 мин",
+      deliveryFee: 1500,
+      imageUrl: "https://images.unsplash.com/photo-1513104890138-7c749659a591?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
+    },
+    {
+      id: "2",
+      name: "Чингис Хотдог",
+      category: "restaurant",
+      rating: 4.5,
+      address: "Баянзүрх дүүрэг, 4-р хороо",
+      deliveryTime: "30-40 мин",
+      deliveryFee: 2000,
+      imageUrl: "https://images.unsplash.com/photo-1596649299486-4cdea56fd59d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
+    },
+    {
+      id: "3",
+      name: "Алтан Говь",
+      category: "restaurant",
+      rating: 4.7,
+      address: "Хан-Уул дүүрэг, 1-р хороо",
+      deliveryTime: "25-35 мин",
+      deliveryFee: 1000,
+      imageUrl: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1074&q=80"
+    },
+    {
+      id: "4",
+      name: "Эм Жей Кофе",
+      category: "coffee",
+      rating: 4.9,
+      address: "Сүхбаатар дүүрэг, 1-р хороо",
+      deliveryTime: "15-25 мин",
+      deliveryFee: 1200,
+      imageUrl: "https://images.unsplash.com/photo-1445116572660-236099ec97a0?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1171&q=80"
+    },
+    {
+      id: "5",
+      name: "Гүн Амттан",
+      category: "dessert",
+      rating: 4.6,
+      address: "Чингэлтэй дүүрэг, 6-р хороо",
+      deliveryTime: "20-30 мин",
+      deliveryFee: 1800,
+      imageUrl: "https://images.unsplash.com/photo-1551024601-bec78aea704b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=764&q=80"
+    },
+    {
+      id: "6",
+      name: "Нарлаг Хүнс",
+      category: "grocery",
+      rating: 4.4,
+      address: "Баянгол дүүрэг, 3-р хороо",
+      deliveryTime: "25-40 мин",
+      deliveryFee: 1500,
+      imageUrl: "https://images.unsplash.com/photo-1578916171728-46686eac8d58?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1074&q=80"
+    }
+  ];
+
+  // Demo status change
   useEffect(() => {
-    const handleScroll = () => {
-      if (heroRef.current) {
-        const scrollPosition = window.scrollY;
-        heroRef.current.style.backgroundPosition = `50% ${50 + scrollPosition * 0.05}%`;
+    const statuses: ("placed" | "preparing" | "on-the-way" | "delivered")[] = [
+      "placed", "preparing", "on-the-way", "delivered"
+    ];
+    let currentIndex = 0;
+    
+    const interval = setInterval(() => {
+      currentIndex = (currentIndex + 1) % statuses.length;
+      setDemoStatus(statuses[currentIndex]);
+      
+      // Animate driver for "on-the-way" status
+      if (statuses[currentIndex] === "on-the-way") {
+        const animateDriver = setInterval(() => {
+          setDriverLocation(prev => ({
+            lat: prev.lat + (destinationLocation.lat - prev.lat) * 0.1,
+            lng: prev.lng + (destinationLocation.lng - prev.lng) * 0.1
+          }));
+        }, 2000);
+        
+        setTimeout(() => clearInterval(animateDriver), 20000);
       }
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
+    }, 30000);
+    
+    return () => clearInterval(interval);
+  }, [destinationLocation]);
+
+  // Filter restaurants based on search and category
+  const searchedRestaurants = featuredRestaurants.filter(restaurant => {
+    const matchesSearch = !searchQuery || 
+      restaurant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      restaurant.address?.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesCategory = !activeCategory || restaurant.category === activeCategory;
+    
+    return matchesSearch && matchesCategory;
+  });
+
   return (
-    <div className="min-h-screen pt-20 pb-20">
+    <div className="pb-20">
       <section 
         ref={heroRef}
         className="relative bg-cover bg-top h-[700px] md:h-[800px] overflow-hidden flex items-center"
         style={{
-          backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url("https:
+          backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url("https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80")',
           backgroundAttachment: 'fixed',
           backgroundPosition: 'top'
         }}
@@ -204,7 +211,7 @@ export function CustomerDashboard() {
                 {new Date().getHours() < 12 ? "Өглөөний мэнд" : 
                  new Date().getHours() < 18 ? "Өдрийн мэнд" : "Оройн мэнд"}
                 {user && `, ${user.name || user.displayName || "Хэрэглэгч"}!`}
-                <span className="ml-2 animate-wave inline-block">👋</span>
+                <span className="ml-2 inline-block">👋</span>
               </span>
             </motion.div>
             <motion.h1 
@@ -213,7 +220,7 @@ export function CustomerDashboard() {
             >
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-orange-500">
                 GobiGo
-              </span> <span className="animate-bounce-gentle inline-block">✨</span>
+              </span> <span className="inline-block">✨</span>
             </motion.h1>
             <motion.p 
               className="text-xl md:text-2xl mb-8 text-gray-200"
@@ -221,7 +228,7 @@ export function CustomerDashboard() {
               transition={{ delay: staggerDelay }}
             >
               Хамгийн шилдэг амтыг хаанаас ч <span className="font-semibold text-amber-300">захиалаарай</span> 
-              <span className="ml-2 text-2xl animate-bounce-slow inline-block">🍜</span>
+              <span className="ml-2 text-2xl inline-block">🍜</span>
             </motion.p>
             <motion.div 
               className="relative max-w-lg mx-auto md:mx-0"
@@ -270,71 +277,44 @@ export function CustomerDashboard() {
             </motion.div>
           </motion.div>
         </div>
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {Array.from({ length: 15 }).map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute text-3xl"
-              initial={{ 
-                x: Math.random() * 100 - 50 + '%', 
-                y: -30, 
-                opacity: 0.7 
-              }}
-              animate={{ 
-                y: '120%', 
-                rotate: Math.random() * 360,
-                opacity: [0.7, 0.9, 0.7, 0]
-              }}
-              transition={{ 
-                duration: Math.random() * 15 + 15, 
-                repeat: Infinity, 
-                ease: 'linear',
-                delay: Math.random() * 10
-              }}
-            >
-              {['🍔', '🍕', '🍣', '🍜', '🍦', '🥗', '🍗', '🍱', '🥘', '🍹'][Math.floor(Math.random() * 10)]}
-            </motion.div>
-          ))}
-        </div>
       </section>
+
       <section className="container mx-auto px-4 mt-12">
-        <AnimatePresence>
-          {activeOrders.length > 0 && (
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="mb-8"
-            >
-              <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-4 border border-amber-200 shadow-md overflow-hidden">
-                <h2 className="text-xl font-bold mb-4 flex items-center text-amber-800">
-                  <Clock className="h-5 w-5 mr-2 text-amber-600" />
-                  Идэвхтэй захиалга
-                  <span className="ml-2 animate-bounce-gentle inline-block">⏳</span>
-                </h2>
-                <OrderTracking
-                  orderId="123456"
-                  status={demoStatus}
-                  driver={{
-                    id: "driver1",
-                    name: "Болд",
-                    imageUrl: "https:
-                    arrivalTime: "10 минутын дотор"
-                  }}
-                  items={[
-                    { name: "Өндөгтэй Пицца", quantity: 1, price: 25000 },
-                    { name: "Кола 0.5л", quantity: 2, price: 3000 }
-                  ]}
-                  subtotal={31000}
-                  deliveryFee={1500}
-                  total={32500}
-                  currentLocation={driverLocation}
-                  destination={destinationLocation}
-                />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {activeOrders.length > 0 && (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-4 border border-amber-200 shadow-md overflow-hidden">
+              <h2 className="text-xl font-bold mb-4 flex items-center text-amber-800">
+                <Clock className="h-5 w-5 mr-2 text-amber-600" />
+                Идэвхтэй захиалга
+                <span className="ml-2 inline-block">⏳</span>
+              </h2>
+              <OrderTracking
+                orderId="123456"
+                status={demoStatus}
+                driver={{
+                  id: "driver1",
+                  name: "Болд",
+                  imageUrl: "https://randomuser.me/api/portraits/men/32.jpg",
+                  arrivalTime: "10 минутын дотор"
+                }}
+                items={[
+                  { name: "Өндөгтэй Пицца", quantity: 1, price: 25000 },
+                  { name: "Кола 0.5л", quantity: 2, price: 3000 }
+                ]}
+                subtotal={31000}
+                deliveryFee={1500}
+                total={32500}
+                currentLocation={driverLocation}
+                destination={destinationLocation}
+              />
+            </div>
+          </motion.div>
+        )}
+
         {user && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -353,7 +333,7 @@ export function CustomerDashboard() {
                       className="text-2xl font-bold flex items-center gap-2"
                     >
                       <span>{user.name ? `Сайн байна уу, ${user.name}!` : 'Сайн байна уу!'}</span>
-                      <span className="text-3xl animate-wave">👋</span>
+                      <span className="text-3xl">👋</span>
                     </motion.div>
                     <motion.p
                       initial={{ opacity: 0, x: -20 }}
@@ -385,6 +365,7 @@ export function CustomerDashboard() {
             </Card>
           </motion.div>
         )}
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -465,6 +446,7 @@ export function CustomerDashboard() {
             </motion.div>
           </motion.div>
         </motion.div>
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -477,7 +459,7 @@ export function CustomerDashboard() {
                 <span className="bg-gradient-to-r from-amber-600 to-orange-600 text-transparent bg-clip-text">
                   Онцлох газрууд
                 </span>
-                <span className="tada text-xl">⭐</span>
+                <span className="text-xl">⭐</span>
               </div>
             </h2>
           </div>
@@ -485,7 +467,7 @@ export function CustomerDashboard() {
             <div className="absolute top-0 bottom-0 left-0 w-8 bg-gradient-to-r from-white to-transparent z-10"></div>
             <div className="absolute top-0 bottom-0 right-0 w-8 bg-gradient-to-l from-white to-transparent z-10"></div>
             <motion.div 
-              className="flex gap-4 py-2 overflow-x-auto custom-scrollbar px-2"
+              className="flex gap-4 py-2 overflow-x-auto px-2"
               initial={{ x: 20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ delay: 0.5, duration: 0.5 }}
@@ -563,24 +545,62 @@ export function CustomerDashboard() {
                   </Card>
                 </motion.div>
               ))}
-              {loading && Array(5).fill(0).map((_, index) => (
-                <div key={`skeleton-${index}`} className="min-w-[300px] sm:min-w-[320px]">
-                  <Card className="overflow-hidden border border-gray-200 h-full">
-                    <Skeleton className="h-40 w-full" />
-                    <CardContent className="p-4">
-                      <Skeleton className="h-6 w-3/4 mb-2" />
-                      <Skeleton className="h-4 w-full mb-3" />
-                      <div className="flex justify-between">
-                        <Skeleton className="h-4 w-1/4" />
-                        <Skeleton className="h-8 w-16" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              ))}
             </motion.div>
           </div>
         </motion.div>
+
+        <div className="mb-10 mt-20">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <motion.div
+              className="flex flex-col items-center bg-amber-50 p-6 rounded-xl border border-amber-200"
+              whileHover={{ y: -5 }}
+              onClick={() => window.open("https://www.facebook.com/profile.php?id=100074258054037", "_blank")}
+            >
+              <Button 
+                className="bg-blue-600 text-white w-24 h-24 rounded-full shadow-lg mb-3 flex items-center justify-center relative overflow-hidden"
+              >
+                <Facebook className="h-12 w-12" />
+              </Button>
+              <h3 className="font-bold text-lg">Фэйсбүүк</h3>
+              <p className="text-gray-500 text-sm text-center mt-1">
+                Манай фэйсбүүк хуудсаар зочилж, шинэ мэдээллийг хүлээн аваарай
+              </p>
+            </motion.div>
+            
+            <motion.div
+              className="flex flex-col items-center bg-pink-50 p-6 rounded-xl border border-pink-200"
+              whileHover={{ y: -5 }}
+              onClick={() => window.open("https://www.instagram.com/te_nuune", "_blank")}
+            >
+              <Button 
+                className="bg-gradient-to-br from-pink-500 via-red-500 to-yellow-500 text-white w-24 h-24 rounded-full shadow-lg mb-3 flex items-center justify-center"
+              >
+                <Instagram className="h-12 w-12" />
+              </Button>
+              <h3 className="font-bold text-lg">Инстаграм</h3>
+              <p className="text-gray-500 text-sm text-center mt-1">
+                Инстаграм хуудас дээрх шинэ зургууд, хоолны санаанууд
+              </p>
+            </motion.div>
+            
+            <motion.div
+              className="flex flex-col items-center bg-blue-50 p-6 rounded-xl border border-blue-200"
+              whileHover={{ y: -5 }}
+              onClick={() => window.open("https://twitter.com", "_blank")}
+            >
+              <Button 
+                className="bg-sky-500 text-white w-24 h-24 rounded-full shadow-lg mb-3 flex items-center justify-center"
+              >
+                <Twitter className="h-12 w-12" />
+              </Button>
+              <h3 className="font-bold text-lg">Твиттер</h3>
+              <p className="text-gray-500 text-sm text-center mt-1">
+                Манай твиттер хуудсаар дамжуулан шуурхай мэдээлэл аваарай
+              </p>
+            </motion.div>
+          </div>
+        </div>
+
         <div className="mb-12">
           <RecipeRecommendationCarousel />
           <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -602,6 +622,7 @@ export function CustomerDashboard() {
             </motion.div>
           </div>
         </div>
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -675,295 +696,16 @@ export function CustomerDashboard() {
                     <Skeleton className="h-6 w-3/4 mb-2" />
                     <Skeleton className="h-4 w-full mb-3" />
                     <div className="flex justify-between">
-                      <Skeleton className="h-4 w-1/3" />
                       <Skeleton className="h-4 w-1/4" />
+                      <Skeleton className="h-8 w-16" />
                     </div>
                   </CardContent>
                 </Card>
               </div>
             ))}
           </motion.div>
-          {searchedRestaurants.length === 0 && !loading && (
-            <div className="text-center py-20">
-              <motion.div 
-                className="text-5xl mb-4 inline-block"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1, rotate: [0, 10, -10, 0] }}
-                transition={{ duration: 0.5 }}
-              >
-                🔍
-              </motion.div>
-              <h3 className="text-xl font-semibold text-gray-700 mb-2">Хайлтад тохирох газар олдсонгүй</h3>
-              <p className="text-gray-500 max-w-md mx-auto">
-                Өөр түлхүүр үг ашиглан дахин хайна уу эсвэл ангилалаа өөрчилнө үү.
-              </p>
-              {searchQuery && (
-                <Button 
-                  variant="outline" 
-                  className="mt-4 border-amber-200 hover:bg-amber-50 text-amber-700"
-                  onClick={() => {
-                    setSearchQuery("");
-                    setActiveCategory(null);
-                  }}
-                >
-                  Хайлтыг арилгах
-                </Button>
-              )}
-            </div>
-          )}
         </motion.div>
       </section>
-      <section className="bg-gradient-to-r from-amber-100 to-orange-100 py-16 mt-20">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-10">
-            <motion.h2 
-              className="text-3xl md:text-4xl font-bold mb-4 text-amber-900"
-              initial={{ opacity: 0, y: -20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-              viewport={{ once: true }}
-            >
-              Бидэнтэй холбогдоорой
-              <span className="ml-2 text-2xl wobble inline-block">🤝</span>
-            </motion.h2>
-            <motion.p 
-              className="text-amber-800 text-lg max-w-2xl mx-auto"
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              transition={{ duration: 0.4, delay: 0.2 }}
-              viewport={{ once: true }}
-            >
-              Хамгийн сүүлийн үeийн мэдээлэл, онцгой урамшууллыг бидний сошиал хуудсаас аваарай
-            </motion.p>
-          </div>
-          <div className="flex justify-center gap-8">
-            <motion.div
-              className="flex flex-col items-center"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.3 }}
-              viewport={{ once: true }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <motion.button
-                onClick={(e) => {
-                  const button = e.currentTarget;
-                  const rect = button.getBoundingClientRect();
-                  const x = e.clientX - rect.left;
-                  const y = e.clientY - rect.top;
-                  const ripple = document.createElement('span');
-                  ripple.style.position = 'absolute';
-                  ripple.style.backgroundColor = 'rgba(255, 255, 255, 0.4)';
-                  ripple.style.borderRadius = '50%';
-                  ripple.style.width = '100px';
-                  ripple.style.height = '100px';
-                  ripple.style.left = `${x - 50}px`;
-                  ripple.style.top = `${y - 50}px`;
-                  ripple.style.transform = 'scale(0)';
-                  ripple.style.opacity = '1';
-                  ripple.style.transition = 'transform 0.8s, opacity 0.8s';
-                  button.appendChild(ripple);
-                  setTimeout(() => {
-                    ripple.style.transform = 'scale(4)';
-                    ripple.style.opacity = '0';
-                  }, 10);
-                  setTimeout(() => {
-                    ripple.remove();
-                  }, 800);
-                  toast({
-                    title: "Facebook хуудас руу очиж байна",
-                    description: "Шинэ цонхонд нээж байна...",
-                    variant: "default",
-                  });
-                  window.open("https:
-                }}
-                className="bg-blue-600 text-white w-24 h-24 rounded-full shadow-lg mb-3 flex items-center justify-center relative overflow-hidden"
-                whileHover={{ 
-                  scale: 1.1, 
-                  y: -5,
-                  backgroundColor: "#4267B2",
-                  boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)" 
-                }}
-                transition={{ type: "spring", stiffness: 400, damping: 15 }}
-              >
-                <motion.div
-                  whileHover={{ scale: 1.1 }}
-                  className="relative z-10"
-                >
-                  <svg xmlns="http:
-                    <path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95z"/>
-                  </svg>
-                </motion.div>
-                <motion.div
-                  className="absolute inset-0 bg-white opacity-0 rounded-full"
-                  animate={{ opacity: 0.2 }}
-                  transition={{ duration: 0.3 }}
-                />
-              </motion.button>
-              <motion.span 
-                className="text-amber-900 font-medium"
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: "spring", stiffness: 400, damping: 10 }}
-              >
-                GobiGo Facebook
-              </motion.span>
-            </motion.div>
-            <motion.div
-              className="flex flex-col items-center"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.4 }}
-              viewport={{ once: true }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <motion.button
-                onClick={(e) => {
-                  const button = e.currentTarget;
-                  const rect = button.getBoundingClientRect();
-                  const x = e.clientX - rect.left;
-                  const y = e.clientY - rect.top;
-                  const ripple = document.createElement('span');
-                  ripple.style.position = 'absolute';
-                  ripple.style.backgroundColor = 'rgba(255, 255, 255, 0.4)';
-                  ripple.style.borderRadius = '50%';
-                  ripple.style.width = '100px';
-                  ripple.style.height = '100px';
-                  ripple.style.left = `${x - 50}px`;
-                  ripple.style.top = `${y - 50}px`;
-                  ripple.style.transform = 'scale(0)';
-                  ripple.style.opacity = '1';
-                  ripple.style.transition = 'transform 0.8s, opacity 0.8s';
-                  button.appendChild(ripple);
-                  setTimeout(() => {
-                    ripple.style.transform = 'scale(4)';
-                    ripple.style.opacity = '0';
-                  }, 10);
-                  setTimeout(() => {
-                    ripple.remove();
-                  }, 800);
-                  toast({
-                    title: "Instagram хуудас руу очиж байна",
-                    description: "Шинэ цонхонд нээж байна...",
-                    variant: "default",
-                  });
-                  window.open("https:
-                }}
-                className="bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 text-white w-24 h-24 rounded-full shadow-lg mb-3 flex items-center justify-center relative overflow-hidden"
-                whileHover={{ 
-                  scale: 1.1, 
-                  y: -5,
-                  boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)" 
-                }}
-                transition={{ type: "spring", stiffness: 400, damping: 15 }}
-              >
-                <motion.div
-                  whileHover={{ scale: 1.1 }}
-                  className="relative z-10"
-                >
-                  <svg xmlns="http:
-                    <path d="M12 2c2.717 0 3.056.01 4.122.06 1.065.05 1.79.217 2.428.465.66.254 1.216.598 1.772 1.153.509.5.902 1.105 1.153 1.772.247.637.415 1.363.465 2.428.047 1.066.06 1.405.06 4.122 0 2.717-.01 3.056-.06 4.122-.05 1.065-.218 1.79-.465 2.428a4.883 4.883 0 01-1.153 1.772c-.5.508-1.105.902-1.772 1.153-.637.247-1.363.415-2.428.465-1.066.047-1.405.06-4.122.06-2.717 0-3.056-.01-4.122-.06-1.065-.05-1.79-.218-2.428-.465a4.89 4.89 0 01-1.772-1.153 4.904 4.904 0 01-1.153-1.772c-.247-.637-.415-1.363-.465-2.428C2.013 15.056 2 14.717 2 12c0-2.717.01-3.056.06-4.122.05-1.066.218-1.79.465-2.428.254-.66.598-1.216 1.153-1.772.5-.509 1.105-.902 1.772-1.153.637-.247 1.363-.415 2.428-.465C8.944 2.013 9.283 2 12 2zm0 5a5 5 0 100 10 5 5 0 000-10zm6.5-.25a1.25 1.25 0 10-2.5 0 1.25 1.25 0 002.5 0zM12 9a3 3 0 110 6 3 3 0 010-6z"/>
-                  </svg>
-                </motion.div>
-                <motion.div
-                  className="absolute inset-0 bg-white opacity-0 rounded-full"
-                  animate={{ opacity: 0.2 }}
-                  transition={{ duration: 0.3 }}
-                />
-              </motion.button>
-              <motion.span 
-                className="text-amber-900 font-medium"
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: "spring", stiffness: 400, damping: 10 }}
-              >
-                GobiGo Instagram
-              </motion.span>
-            </motion.div>
-            <motion.div
-              className="flex flex-col items-center"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.5 }}
-              viewport={{ once: true }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <motion.button
-                onClick={(e) => {
-                  const button = e.currentTarget;
-                  const rect = button.getBoundingClientRect();
-                  const x = e.clientX - rect.left;
-                  const y = e.clientY - rect.top;
-                  const ripple = document.createElement('span');
-                  ripple.style.position = 'absolute';
-                  ripple.style.backgroundColor = 'rgba(255, 255, 255, 0.4)';
-                  ripple.style.borderRadius = '50%';
-                  ripple.style.width = '100px';
-                  ripple.style.height = '100px';
-                  ripple.style.left = `${x - 50}px`;
-                  ripple.style.top = `${y - 50}px`;
-                  ripple.style.transform = 'scale(0)';
-                  ripple.style.opacity = '1';
-                  ripple.style.transition = 'transform 0.8s, opacity 0.8s';
-                  button.appendChild(ripple);
-                  setTimeout(() => {
-                    ripple.style.transform = 'scale(4)';
-                    ripple.style.opacity = '0';
-                  }, 10);
-                  setTimeout(() => {
-                    ripple.remove();
-                  }, 800);
-                  toast({
-                    title: "Twitter хуудас руу очиж байна",
-                    description: "Шинэ цонхонд нээж байна...",
-                    variant: "default",
-                  });
-                  window.open("https:
-                }}
-                className="bg-black text-white w-24 h-24 rounded-full shadow-lg mb-3 flex items-center justify-center relative overflow-hidden"
-                whileHover={{ 
-                  scale: 1.1, 
-                  y: -5,
-                  boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)" 
-                }}
-                transition={{ type: "spring", stiffness: 400, damping: 15 }}
-              >
-                <motion.div
-                  whileHover={{ scale: 1.1 }}
-                  className="relative z-10"
-                >
-                  <svg xmlns="http:
-                    <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z" />
-                  </svg>
-                </motion.div>
-                <motion.div
-                  className="absolute inset-0 bg-white opacity-0 rounded-full"
-                  animate={{ opacity: 0.2 }}
-                  transition={{ duration: 0.3 }}
-                />
-              </motion.button>
-              <motion.span 
-                className="text-amber-900 font-medium"
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: "spring", stiffness: 400, damping: 10 }}
-              >
-                GobiGo Twitter
-              </motion.span>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-      <motion.button
-        className="fixed bottom-6 right-6 bg-amber-500 hover:bg-amber-600 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg z-50"
-        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        initial={{ opacity: 0, scale: 0 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.3 }}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-      >
-        <svg xmlns="http:
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-        </svg>
-      </motion.button>
     </div>
   );
 }

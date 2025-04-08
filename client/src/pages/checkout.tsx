@@ -222,7 +222,7 @@ export default function Checkout() {
                 Карт
               </TabsTrigger>
               <TabsTrigger value="qpay" className="flex items-center gap-2">
-                <img src="https:
+                <img src="https://qpay.mn/img/qpay.png" alt="QPay" className="h-4 w-4" />
                 QPay
               </TabsTrigger>
             </TabsList>
