@@ -149,7 +149,7 @@ export function Header() {
   const businessNav = () => (
     <>
       <NavigationMenuItem>
-        <Link href="/dashboard/store">
+        <Link href="/">
           <div className="px-3 py-2 flex items-center gap-2 hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer">
             <Store size={18} /> Дэлгүүр
           </div>
@@ -170,7 +170,7 @@ export function Header() {
         </Link>
       </NavigationMenuItem>
       <NavigationMenuItem>
-        <Link href="/earnings">
+        <Link href="/dashboard/store">
           <div className="px-3 py-2 flex items-center gap-2 hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer">
             <DollarSign size={18} /> Орлого
           </div>
@@ -197,7 +197,7 @@ export function Header() {
         </Link>
       </NavigationMenuItem>
       <NavigationMenuItem>
-        <Link href="/earnings">
+        <Link href="/dashboard/store">
           <div className="px-3 py-2 flex items-center gap-2 hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer">
             <DollarSign size={18} /> Орлого
           </div>
