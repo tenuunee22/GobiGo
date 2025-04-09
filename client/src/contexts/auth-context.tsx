@@ -59,9 +59,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const handleAuthRedirect = async () => {
     try {
       const result = await getRedirectResult(auth);
-      if (result) {
+      if (result && result.user) {
         // User successfully signed in after redirect
         const user = result.user;
+        
+        // Determine provider
+        let provider = "unknown";
+        if (result.providerId) {
+          provider = result.providerId;
+        } else {
+          // Try to determine from credential if available
+          const credential = (result as any).credential;
+          if (credential && credential.providerId) {
+            provider = credential.providerId;
+          }
+        }
         
         // Check if we need to create a new user document in Firestore
         const userDoc = await getDoc(doc(db, "users", user.uid));

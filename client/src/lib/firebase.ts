@@ -67,7 +67,14 @@ const db = getFirestore();
 
 // Initialize providers
 const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({
+  prompt: 'select_account'
+});
+
 const facebookProvider = new FacebookAuthProvider();
+// Add additional permissions if needed (e.g., email, public_profile)
+facebookProvider.addScope('email');
+facebookProvider.addScope('public_profile');
 let recaptchaVerifier: RecaptchaVerifier | null = null;
 
 // User related functions
@@ -600,6 +607,19 @@ export const handleAuthRedirect = async () => {
     const result = await getRedirectResult(auth);
     
     if (result && result.user) {
+      // Determine provider
+      let provider = "unknown";
+      if (result.providerId) {
+        provider = result.providerId;
+      } else if (GoogleAuthProvider.credentialFromResult(result)) {
+        provider = "google.com";
+      } else if (FacebookAuthProvider.credentialFromResult(result)) {
+        provider = "facebook.com";
+      }
+      
+      // Check if this is a new user (may not be available in all cases)
+      const tokenResponse = (result as any)._tokenResponse;
+      
       // Check if user data exists in Firestore
       const userDoc = await getDoc(doc(db, "users", result.user.uid));
       
@@ -609,6 +629,8 @@ export const handleAuthRedirect = async () => {
           uid: result.user.uid,
           email: result.user.email,
           name: result.user.displayName,
+          photoURL: result.user.photoURL,
+          authProvider: provider,
           role: "customer", // Default role for new users
           createdAt: serverTimestamp()
         });

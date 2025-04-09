@@ -81,9 +81,23 @@ export function LoginForm({ onToggleForm }: LoginFormProps) {
       });
     } catch (error: any) {
       console.error("Google login error:", error);
+      
+      // Handle specific Firebase errors with user-friendly messages
+      let errorMessage = "Google-ээр нэвтрэх үед алдаа гарлаа";
+      
+      if (error.code === 'auth/popup-closed-by-user') {
+        errorMessage = "Нэвтрэх цонхыг хаасан байна. Дахин оролдоно уу.";
+      } else if (error.code === 'auth/cancelled-popup-request') {
+        errorMessage = "Өөр нэвтрэх цонх нээлттэй байна.";
+      } else if (error.code === 'auth/popup-blocked') {
+        errorMessage = "Popup цонх хаагдсан байна. Popup зөвшөөрлийг нээнэ үү.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: "Google-ээр нэвтрэх амжилтгүй болсон",
-        description: error.message || "Google-ээр нэвтрэх үед алдаа гарлаа",
+        description: errorMessage,
         variant: "destructive",
       });
       setIsLoading(false);
@@ -105,9 +119,23 @@ export function LoginForm({ onToggleForm }: LoginFormProps) {
       });
     } catch (error: any) {
       console.error("Facebook login error:", error);
+      
+      // Handle specific Firebase errors with user-friendly messages
+      let errorMessage = "Facebook-ээр нэвтрэх үед алдаа гарлаа";
+      
+      if (error.code === 'auth/popup-closed-by-user') {
+        errorMessage = "Нэвтрэх цонхыг хаасан байна. Дахин оролдоно уу.";
+      } else if (error.code === 'auth/cancelled-popup-request') {
+        errorMessage = "Өөр нэвтрэх цонх нээлттэй байна.";
+      } else if (error.code === 'auth/popup-blocked') {
+        errorMessage = "Popup цонх хаагдсан байна. Popup зөвшөөрлийг нээнэ үү.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: "Facebook-ээр нэвтрэх амжилтгүй болсон",
-        description: error.message || "Facebook-ээр нэвтрэх үед алдаа гарлаа",
+        description: errorMessage,
         variant: "destructive",
       });
       setIsLoading(false);

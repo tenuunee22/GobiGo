@@ -1404,7 +1404,7 @@ export function BusinessDashboard() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="business-name" className="text-sm font-medium">Дэлгүүрийн нэр</Label>
-                        <Input id="business-name" defaultValue={user?.businessName} className="mt-1" />
+                        <Input id="business-name" defaultValue={user?.businessName || ''} className="mt-1" />
                       </div>
                       <div>
                         <Label htmlFor="business-type" className="text-sm font-medium">Дэлгүүрийн төрөл</Label>
@@ -1425,11 +1425,11 @@ export function BusinessDashboard() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="business-phone" className="text-sm font-medium">Утасны дугаар</Label>
-                        <Input id="business-phone" defaultValue={user?.phone} className="mt-1" />
+                        <Input id="business-phone" defaultValue={user?.phone || ''} className="mt-1" />
                       </div>
                       <div>
                         <Label htmlFor="business-email" className="text-sm font-medium">Имэйл хаяг</Label>
-                        <Input id="business-email" defaultValue={user?.email} className="mt-1" />
+                        <Input id="business-email" defaultValue={user?.email || ''} className="mt-1" />
                       </div>
                     </div>
 
@@ -1439,7 +1439,7 @@ export function BusinessDashboard() {
                         id="business-description" 
                         className="w-full mt-1 p-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-transparent"
                         rows={3}
-                        defaultValue={user?.description}
+                        defaultValue={user?.description || ''}
                       ></textarea>
                     </div>
 
@@ -1449,7 +1449,7 @@ export function BusinessDashboard() {
                         id="business-address" 
                         className="w-full mt-1 p-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-transparent"
                         rows={2}
-                        defaultValue={user?.address}
+                        defaultValue={user?.address || ''}
                       ></textarea>
                     </div>
                   </CardContent>

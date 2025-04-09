@@ -457,7 +457,14 @@ export function DeliveryDashboard() {
               <Button 
                 variant="outline" 
                 className="mt-2 bg-white border-indigo-200 text-indigo-700 hover:bg-indigo-50"
-                onClick={() => document.querySelector("[value='available-orders']")?.click()}
+                onClick={() => {
+                // Switch to available orders tab programmatically
+                const tabs = document.querySelectorAll("button[role='tab']");
+                // Find the second tab (Available Orders) and click it
+                if (tabs.length > 1) {
+                  (tabs[1] as HTMLElement).click();
+                }
+              }}
               >
                 <span className="flex items-center">
                   <span className="mr-2 text-xs jelly">🔎</span>
