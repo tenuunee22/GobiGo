@@ -8,10 +8,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ThumbsUp, Heart, Star, MessageCircle } from "lucide-react";
 import { motion } from "framer-motion";
+
 export default function TooltipExample() {
   const [selectedEmoji, setSelectedEmoji] = useState<FoodEmojiType | null>(null);
   const [selectedVariant, setSelectedVariant] = useState<"horizontal" | "grid" | "compact">("horizontal");
   const [selectedSize, setSelectedSize] = useState<"sm" | "md" | "lg">("md");
+  
+  // Жишээ дата
   const exampleFoodReactions: Record<FoodEmojiType, number> = {
     "🍕": 5,
     "🍔": 3,
@@ -23,18 +26,20 @@ export default function TooltipExample() {
     "👍": 8,
     "❤️": 4
   };
+  
+  // Жишээ сэтгэгдэл
   const exampleReview = {
     id: "1",
     foodId: "food-1",
     userName: "Баттулга",
-    userImage: "https://randomuser.me/api/portraits/men/32.jpg",
+    userImage: "https://i.pravatar.cc/150?img=32",
     date: new Date().toISOString(),
     rating: 4,
     content: "Энэ хоол үнэхээр амттай байсан! Өмнө нь хэд хэдэн удаа захиалж байсан ч энэ удаа онцгой амттай санагдлаа. Ялангуяа ногоо нь маш шинэхэн, соус нь гайхалтай амттай байв. Та нар заавал үүнийг захиалаарай.",
     images: [
-      "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=640&q=80",
-      "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8Mnx8fGVufDB8fHx8&auto=format&fit=crop&w=640&q=80",
-      "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8NXx8fGVufDB8fHx8&auto=format&fit=crop&w=640&q=80"
+      "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=300&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?q=80&w=300&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1565958011703-44f9829ba187?q=80&w=300&auto=format&fit=crop"
     ],
     reactions: {
       "😋": 3,
@@ -45,6 +50,7 @@ export default function TooltipExample() {
     likes: 12,
     comments: 3
   };
+
   return (
     <div className="container py-10">
       <motion.h1 
@@ -54,12 +60,14 @@ export default function TooltipExample() {
       >
         Хоолны эможи реакц жишээ
       </motion.h1>
+
       <Tabs defaultValue="reactions" className="w-full">
         <TabsList className="grid w-full grid-cols-3 mb-8">
           <TabsTrigger value="reactions">Эможи реакц</TabsTrigger>
           <TabsTrigger value="tooltip">Эможи огтолцуур</TabsTrigger>
           <TabsTrigger value="review">Сэтгэгдэл</TabsTrigger>
         </TabsList>
+
         <TabsContent value="reactions">
           <div className="grid gap-8 md:grid-cols-2">
             <Card>
@@ -70,6 +78,7 @@ export default function TooltipExample() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
+                {/* Хэлбэр сонгох */}
                 <div>
                   <h3 className="text-sm font-medium mb-2">Харагдах байдал:</h3>
                   <div className="flex flex-wrap gap-2">
@@ -96,6 +105,8 @@ export default function TooltipExample() {
                     </Button>
                   </div>
                 </div>
+                
+                {/* Хэмжээ сонгох */}
                 <div>
                   <h3 className="text-sm font-medium mb-2">Хэмжээ:</h3>
                   <div className="flex flex-wrap gap-2">
@@ -122,6 +133,8 @@ export default function TooltipExample() {
                     </Button>
                   </div>
                 </div>
+                
+                {/* Үр дүн харах */}
                 <div className="border rounded-lg p-4">
                   <h3 className="text-sm font-medium mb-4">Үр дүн:</h3>
                   <div>
@@ -134,6 +147,7 @@ export default function TooltipExample() {
                       size={selectedSize}
                     />
                   </div>
+                  
                   <div className="mt-4 text-sm text-muted-foreground">
                     {selectedEmoji ? (
                       <p>Сонгосон эможи: <span className="text-xl">{selectedEmoji}</span></p>
@@ -144,6 +158,7 @@ export default function TooltipExample() {
                 </div>
               </CardContent>
             </Card>
+            
             <Card>
               <CardHeader>
                 <CardTitle>Эможи реакцийн тоглоом</CardTitle>
@@ -161,11 +176,13 @@ export default function TooltipExample() {
                     >
                       {selectedEmoji || "🍽️"}
                     </motion.div>
+                    
                     <div className="text-center">
                       <h3 className="font-medium mb-2">Та өөрийн дуртай хоолны төрлийг сонгоно уу</h3>
                       <p className="text-sm text-muted-foreground mb-4">
                         Эможи дээр дарж хоолны төрлөөр шүүх
                       </p>
+                      
                       <FoodEmojiReaction 
                         foodId="example-2" 
                         userReaction={selectedEmoji}
@@ -173,6 +190,7 @@ export default function TooltipExample() {
                         variant="grid"
                         size="md"
                       />
+                      
                       {selectedEmoji && (
                         <motion.div 
                           className="mt-6 p-3 bg-green-50 rounded-lg text-green-700 text-sm"
@@ -189,6 +207,7 @@ export default function TooltipExample() {
             </Card>
           </div>
         </TabsContent>
+
         <TabsContent value="tooltip">
           <div className="grid gap-8 md:grid-cols-2">
             <Card>
@@ -212,6 +231,7 @@ export default function TooltipExample() {
                       </Button>
                     </FoodTooltip>
                   </div>
+                  
                   <div className="p-4 border rounded-lg flex justify-center">
                     <FoodTooltip
                       onEmojiSelect={setSelectedEmoji}
@@ -231,6 +251,7 @@ export default function TooltipExample() {
                 </div>
               </CardContent>
             </Card>
+            
             <Card>
               <CardHeader>
                 <CardTitle>Дэлгэрэнгүй огтолцуур</CardTitle>
@@ -252,6 +273,7 @@ export default function TooltipExample() {
                       </div>
                     </DetailedFoodTooltip>
                   </div>
+                  
                   <div className="mt-8">
                     <h3 className="text-sm font-medium mb-4">Сонгогдсон эможи:</h3>
                     <div className="p-8 border rounded-lg flex flex-col items-center justify-center bg-gray-50">
@@ -266,6 +288,7 @@ export default function TooltipExample() {
                       ) : (
                         <p className="text-muted-foreground">Эможи сонгоогүй байна</p>
                       )}
+                      
                       <p className="mt-4 text-sm text-center">
                         Дээрх огтолцуураас эможи сонгоорой
                       </p>
@@ -276,6 +299,7 @@ export default function TooltipExample() {
             </Card>
           </div>
         </TabsContent>
+
         <TabsContent value="review">
           <div className="max-w-2xl mx-auto">
             <Card>
@@ -296,11 +320,13 @@ export default function TooltipExample() {
                   onComment={() => console.log("Сэтгэгдэл дарсан")}
                   onShare={() => console.log("Хуваалцах дарсан")}
                 />
+                
                 <div className="mt-8 p-4 border rounded-lg">
                   <h3 className="text-sm font-medium mb-4 flex items-center gap-2">
                     <MessageCircle className="h-4 w-4" />
                     Сэтгэгдэл бичих
                   </h3>
+                  
                   <div className="flex gap-2">
                     <FoodTooltip
                       onEmojiSelect={setSelectedEmoji}
@@ -315,6 +341,7 @@ export default function TooltipExample() {
                         <span>{selectedEmoji || "Эможи"}</span>
                       </Button>
                     </FoodTooltip>
+                    
                     <Button variant="default" size="sm" className="h-9">Хадгалах</Button>
                   </div>
                 </div>

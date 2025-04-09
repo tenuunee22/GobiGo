@@ -8,6 +8,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+
 interface FeatureTooltipProps {
   title: string;
   description: string;
@@ -17,6 +18,7 @@ interface FeatureTooltipProps {
   showDetailedView?: boolean;
   emoji?: string;
 }
+
 export function FeatureTooltip({
   title,
   description,
@@ -27,6 +29,7 @@ export function FeatureTooltip({
   emoji,
 }: FeatureTooltipProps) {
   const [showDetail, setShowDetail] = useState(false);
+
   return (
     <TooltipProvider>
       <Tooltip delayDuration={300}>
@@ -70,6 +73,8 @@ export function FeatureTooltip({
           )}
         </TooltipContent>
       </Tooltip>
+
+      {/* Detailed popup view */}
       <AnimatePresence>
         {showDetailedView && showDetail && (
           <motion.div
@@ -101,9 +106,11 @@ export function FeatureTooltip({
                   <X className="h-5 w-5" />
                 </Button>
               </div>
+              
               <div className="prose prose-amber">
                 {children ? children : <p>{description}</p>}
               </div>
+              
               <div className="mt-6 flex justify-end">
                 <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                   <Button 

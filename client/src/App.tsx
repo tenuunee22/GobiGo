@@ -10,6 +10,8 @@ import { OnboardingProvider } from "@/components/onboarding/onboarding-context";
 import OnboardingModal from "@/components/onboarding/OnboardingModal";
 import OnboardingHintButton from "@/components/onboarding/OnboardingHintButton";
 import { BouncingLoader } from "@/components/ui/bouncing-loader";
+
+// Pages
 import NotFound from "@/pages/not-found";
 import Login from "@/pages/auth/login";
 import Register from "@/pages/auth/register";
@@ -25,15 +27,27 @@ import TooltipExample from "@/pages/tooltip-example";
 import Settings from "@/pages/settings";
 import LoadingDemo from "@/pages/loading-demo";
 import BusinessAnalytics from "@/pages/dashboard/business/analytics";
+
+// Customer components
 import { CustomerDashboard } from "@/components/dashboard/customer-dashboard";
+
+// Business components
 import { BusinessDashboard } from "@/components/business/business-dashboard"; 
+
+// Delivery components
 import { DeliveryDashboard } from "@/components/delivery/delivery-dashboard";
+
+// Auth components
 import { RoleSelection } from "@/components/auth/role-selection";
+
 function Router() {
   const { user, loading } = useAuth();
   const [location, setLocation] = useLocation();
+
   useEffect(() => {
     if (loading) return;
+
+    // Redirect based on user role
     if (user && location === "/") {
       switch(user.role) {
         case "business":
@@ -46,10 +60,12 @@ function Router() {
           setLocation("/dashboard");
           break;
         default:
+          // Default dashboard for customers or users with unspecified roles
           setLocation("/dashboard");
       }
     }
   }, [user, loading, location, setLocation]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -61,8 +77,11 @@ function Router() {
       </div>
     );
   }
+
+  // Determine which dashboard to show based on user role
   const DashboardComponent = () => {
-    if (!user) return <CustomerDashboard />;
+    if (!user) return <CustomerDashboard />; // Non-authenticated users see customer view
+    
     switch(user.role) {
       case "business":
         return <BusinessDashboard />;
@@ -73,8 +92,11 @@ function Router() {
         return <CustomerDashboard />;
     }
   };
+
+  // Custom route guard to check user roles
   const ProtectedBusinessRoute = ({ component: Component, ...rest }: { component: React.ComponentType<any>, path: string }) => {
     const userIsBusinessOwner = user?.role === "business";
+    
     return (
       <Route
         {...rest}
@@ -82,6 +104,7 @@ function Router() {
       />
     );
   };
+  
   return (
     <div className="page-transition p-1">
       <Switch>
@@ -114,10 +137,12 @@ function Router() {
     </div>
   );
 }
+
 function App() {
   const [location] = useLocation();
   const { needsRoleSelection, loading } = useAuth();
   const isLoginPage = location === "/login" || location === "/register";
+  
   return (
     <QueryClientProvider client={queryClient}>
       <CartProvider>
@@ -136,4 +161,5 @@ function App() {
     </QueryClientProvider>
   );
 }
+
 export default App;

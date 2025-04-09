@@ -1,17 +1,20 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { BouncingLoader } from "./bouncing-loader";
+
 interface LoadingOverlayProps {
   isLoading: boolean;
   message?: string;
   fullScreen?: boolean;
   theme?: "light" | "dark" | "gradient";
 }
+
 export function LoadingOverlay({
   isLoading,
   message = "Түр хүлээнэ үү...",
   fullScreen = true,
   theme = "light",
 }: LoadingOverlayProps) {
+  // Theme configurations
   const themeConfig = {
     light: {
       bg: "bg-white/95",
@@ -26,7 +29,9 @@ export function LoadingOverlay({
       text: "text-white",
     },
   };
+
   const selectedTheme = themeConfig[theme];
+
   return (
     <AnimatePresence>
       {isLoading && (
@@ -61,6 +66,8 @@ export function LoadingOverlay({
                 { emoji: "🍦", delay: 0.8 },
               ]}
             />
+            
+            {/* Additional animation for extra playfulness */}
             <div className="mt-6 flex justify-center">
               <motion.div
                 animate={{

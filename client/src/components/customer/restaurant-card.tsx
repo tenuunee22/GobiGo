@@ -1,19 +1,15 @@
-import React from "react";
-import { motion } from "framer-motion";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { MapPin, Clock, Star } from "lucide-react";
+import { Star } from "lucide-react";
 
 interface RestaurantCardProps {
   id: string;
   name: string;
-  imageUrl?: string;
+  imageUrl: string;
   category: string;
-  distance?: string;
+  subCategory?: string;
+  distance: string;
   rating: number;
-  deliveryFee?: number;
-  estimatedTime?: string;
+  deliveryFee: number;
+  estimatedTime: string;
   onClick: () => void;
 }
 
@@ -22,109 +18,70 @@ export function RestaurantCard({
   name,
   imageUrl,
   category,
+  subCategory,
   distance,
   rating,
   deliveryFee,
   estimatedTime,
-  onClick
+  onClick,
 }: RestaurantCardProps) {
-  // Helper function to get category emoji
-  const getCategoryEmoji = (category: string) => {
-    switch (category.toLowerCase()) {
-      case "restaurant":
-        return "🍽️";
-      case "grocery":
-        return "🛒";
-      case "pharmacy":
-        return "💊";
-      case "dessert":
-        return "🍰";
-      case "coffee":
-        return "☕";
-      default:
-        return "🍴";
-    }
-  };
-
-  // Helper function to get category name in Mongolian
-  const getCategoryName = (category: string) => {
-    switch (category.toLowerCase()) {
-      case "restaurant":
-        return "Ресторан";
-      case "grocery":
-        return "Хүнсний";
-      case "pharmacy":
-        return "Эмийн сан";
-      case "dessert":
-        return "Амттан";
-      case "coffee":
-        return "Кофе";
-      default:
-        return "Бусад";
-    }
+  // Function to get an appropriate emoji based on category
+  const getCategoryEmoji = (cat: string): string => {
+    const lowerCat = cat.toLowerCase();
+    if (lowerCat.includes('ресторан') || lowerCat.includes('restaurant')) return '🍽️';
+    if (lowerCat.includes('хоол') || lowerCat.includes('food')) return '🍲';
+    if (lowerCat.includes('бургер') || lowerCat.includes('burger')) return '🍔';
+    if (lowerCat.includes('пицца') || lowerCat.includes('pizza')) return '🍕';
+    if (lowerCat.includes('солонгос') || lowerCat.includes('korean')) return '🍜';
+    if (lowerCat.includes('сүши') || lowerCat.includes('sushi')) return '🍣';
+    if (lowerCat.includes('хинкали')) return '🥟';
+    if (lowerCat.includes('кофе') || lowerCat.includes('coffee')) return '☕';
+    if (lowerCat.includes('grocery') || lowerCat.includes('дэлгүүр')) return '🛒';
+    if (lowerCat.includes('pharmacy') || lowerCat.includes('эмийн')) return '💊';
+    return '🍴';
   };
 
   return (
-    <Card className="overflow-hidden border border-gray-200 shadow-md h-full transition-all">
-      <div className="relative h-40">
-        {imageUrl ? (
-          <img 
-            src={imageUrl} 
-            alt={name} 
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-r from-amber-200 to-orange-200 flex items-center justify-center">
-            <div className="text-5xl">{getCategoryEmoji(category)}</div>
-          </div>
-        )}
-        <div className="absolute top-2 right-2">
-          <Badge className="bg-amber-500/90 text-white">
-            ⭐ {rating.toFixed(1)}
-          </Badge>
-        </div>
-        <div className="absolute top-2 left-2">
-          <Badge className="bg-white/90 text-amber-700 border border-amber-200">
-            {getCategoryName(category)} {getCategoryEmoji(category)}
-          </Badge>
+    <div 
+      className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all cursor-pointer hover:translate-y-[-5px] slide-in-bottom"
+      onClick={onClick}
+    >
+      <div className="relative overflow-hidden">
+        <img 
+          className="w-full h-48 object-cover hover:scale-105 transition-transform duration-700" 
+          src={imageUrl || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80"} 
+          alt={name} 
+        />
+        <div className="absolute top-3 right-3 shadow-md rounded-full bg-white p-2 pulse">
+          <span className="wiggle inline-block">{getCategoryEmoji(category)}</span>
         </div>
       </div>
-      <CardContent className="p-4">
-        <div className="flex justify-between items-start mb-2">
-          <h3 className="font-bold text-lg">{name}</h3>
-          <motion.button 
-            whileHover={{ scale: 1.2 }}
-            whileTap={{ scale: 0.9 }}
-            className="text-gray-400 hover:text-amber-500"
-          >
-            <Star className="h-5 w-5" />
-          </motion.button>
+      <div className="p-4">
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className="text-lg font-semibold bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text text-transparent">{name}</h3>
+            <p className="text-sm text-gray-500 fade-in-delayed">
+              {category} {subCategory ? `• ${subCategory}` : ''} • <span className="inline-flex items-center">{distance} <span className="ml-1 jelly inline-block text-xs">📍</span></span>
+            </p>
+          </div>
+          <div className="flex items-center bg-yellow-50 border border-yellow-100 rounded-full px-2 py-1 bounce-soft">
+            <Star className="h-4 w-4 text-yellow-500 fill-current" />
+            <span className="text-sm font-medium text-yellow-700 ml-1">{rating.toFixed(1)}</span>
+          </div>
         </div>
-        {distance && (
-          <div className="flex items-center text-sm text-gray-500 mb-2">
-            <MapPin className="h-4 w-4 mr-1 text-amber-500" />
-            <span>{distance}</span>
-          </div>
-        )}
-        <div className="flex justify-between items-center mt-3">
-          <div className="flex items-center text-sm">
-            <Clock className="h-4 w-4 mr-1 text-amber-500" />
-            <span>{estimatedTime || "30-40 мин"}</span>
-          </div>
-          <Button 
-            variant="outline" 
-            className="text-sm h-8 border-amber-200 hover:bg-amber-50 hover:text-amber-700"
-            onClick={onClick}
-          >
-            Үзэх
-          </Button>
+        <div className="mt-4 flex items-center justify-between text-sm">
+          <span className={deliveryFee === 0 ? "text-green-600 font-medium flex items-center" : "text-gray-500 flex items-center"}>
+            {deliveryFee === 0 ? (
+              <>Үнэгүй хүргэлт <span className="ml-1 tada inline-block">🎁</span></>
+            ) : (
+              <>{deliveryFee.toFixed(0)}₮ хүргэлт <span className="ml-1 wiggle inline-block">🚚</span></>
+            )}
+          </span>
+          <span className="text-gray-500 flex items-center">
+            {estimatedTime} <span className="ml-1 pulse inline-block">⏱️</span>
+          </span>
         </div>
-        {deliveryFee !== undefined && (
-          <div className="mt-2 text-sm text-gray-500">
-            Хүргэлтийн төлбөр: {deliveryFee === 0 ? "Үнэгүй" : `${deliveryFee.toLocaleString()}₮`}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

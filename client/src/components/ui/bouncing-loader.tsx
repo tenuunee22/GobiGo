@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+
 interface FoodIcon {
   emoji: string;
   delay: number;
 }
+
 interface BouncingLoaderProps {
   text?: string;
   size?: "sm" | "md" | "lg";
@@ -11,6 +13,7 @@ interface BouncingLoaderProps {
   duration?: number;
   foodIcons?: FoodIcon[];
 }
+
 export function BouncingLoader({
   text = "Түр хүлээнэ үү...",
   size = "md",
@@ -19,13 +22,19 @@ export function BouncingLoader({
   foodIcons,
 }: BouncingLoaderProps) {
   const [isVisible, setIsVisible] = useState(true);
+  
   useEffect(() => {
+    // This is just to ensure the animation keeps running
+    // even if React tries to optimize and stop animations
     const interval = setInterval(() => {
       setIsVisible(false);
       setTimeout(() => setIsVisible(true), 50);
-    }, 10000);
+    }, 10000); // Refresh animation every 10 seconds
+    
     return () => clearInterval(interval);
   }, []);
+  
+  // Default food icons if none provided
   const defaultFoodIcons: FoodIcon[] = [
     { emoji: "🍔", delay: 0 },
     { emoji: "🍕", delay: 0.15 },
@@ -33,7 +42,10 @@ export function BouncingLoader({
     { emoji: "🍱", delay: 0.45 },
     { emoji: "🥗", delay: 0.6 },
   ];
+  
   const icons = foodIcons || defaultFoodIcons;
+  
+  // Size configurations
   const sizeConfig = {
     sm: {
       container: "h-16",
@@ -51,7 +63,9 @@ export function BouncingLoader({
       text: "text-base mt-3",
     },
   };
+  
   const selectedSize = sizeConfig[size];
+  
   return (
     <div className={`w-full flex flex-col items-center justify-center ${selectedSize.container}`}>
       <AnimatePresence>
@@ -65,6 +79,7 @@ export function BouncingLoader({
                 style={{ left: "calc(50% - 2rem)" }}
               />
             )}
+            
             <div className="flex items-center justify-center gap-1 md:gap-2">
               {icons.map((icon, index) => (
                 <motion.div
@@ -91,6 +106,7 @@ export function BouncingLoader({
           </div>
         )}
       </AnimatePresence>
+      
       {text && (
         <motion.p
           initial={{ opacity: 0 }}

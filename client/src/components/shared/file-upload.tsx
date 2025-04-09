@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { AlertCircle, FileUp, FileImage, X } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { AlertCircle, ImagePlus, X, Camera, FileUp, FileImage } from "lucide-react";
 
 interface FileUploadProps {
   onFileSelect: (file: File) => void;
@@ -21,48 +22,56 @@ export function FileUpload({
   previewUrl,
   maxSizeMB = 5,
   acceptedTypes = "image/*",
-  disabled = false
+  disabled = false,
 }: FileUploadProps) {
-  const [isDragging, setIsDragging] = useState(false);
   const [preview, setPreview] = useState<string | undefined>(previewUrl);
+  const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
+  const maxSize = maxSizeMB * 1024 * 1024; // Convert MB to bytes
+  
+  // Update preview if previewUrl changes
   useEffect(() => {
     setPreview(previewUrl);
   }, [previewUrl]);
-
+  
+  // Handle file selection from input
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    handleFile(file);
+  };
+  
+  // Handle file drop
   const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
-    event.stopPropagation();
     setIsDragging(false);
-
+    
     if (disabled) return;
-
-    if (event.dataTransfer.files && event.dataTransfer.files.length > 0) {
-      handleFile(event.dataTransfer.files[0]);
-    }
+    
+    const file = event.dataTransfer.files?.[0];
+    handleFile(file);
   };
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files.length > 0) {
-      handleFile(event.target.files[0]);
-    }
-  };
-
-  const handleFile = (file: File) => {
-    // Check file size
-    if (file.size > maxSizeMB * 1024 * 1024) {
-      setError(`Файлын хэмжээ хэт том байна. Дээд хэмжээ: ${maxSizeMB}MB`);
+  
+  // Validate and process file
+  const handleFile = (file?: File) => {
+    if (!file) {
+      setError("Файл сонгогдоогүй байна");
       return;
     }
-
-    // Check file type
-    if (acceptedTypes && !file.type.match(acceptedTypes.replace(/\*/g, ".*"))) {
+    
+    // Validate file size
+    if (file.size > maxSize) {
+      setError(`Файлын хэмжээ хэтэрсэн байна. Дээд хэмжээ: ${maxSizeMB}MB`);
+      return;
+    }
+    
+    // Validate file type
+    if (acceptedTypes !== "*" && !file.type.match(acceptedTypes.replace(/\*/g, ".*"))) {
       setError(`Зөвшөөрөгдөөгүй файлын төрөл. Зөвшөөрөгдсөн төрлүүд: ${acceptedTypes}`);
       return;
     }
-
+    
+    // Create preview for image files
     if (file.type.startsWith("image/")) {
       const reader = new FileReader();
       reader.onload = () => {
@@ -70,44 +79,50 @@ export function FileUpload({
       };
       reader.readAsDataURL(file);
     } else {
+      // For non-image files, use a placeholder or clear preview
       setPreview(undefined);
     }
-
+    
     setError(null);
     onFileSelect(file);
   };
-
+  
+  // Handle drag events
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     if (!disabled) {
       setIsDragging(true);
     }
   };
-
+  
   const handleDragLeave = () => {
     setIsDragging(false);
   };
-
+  
+  // Handle browse button click
   const handleBrowseClick = () => {
     if (fileInputRef.current && !disabled) {
       fileInputRef.current.click();
     }
   };
-
+  
+  // Clear selected file and preview
   const handleClear = () => {
     setPreview(undefined);
     setError(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+    // Call onFileRemove if provided
     if (onFileRemove) {
       onFileRemove();
     }
   };
-
+  
   return (
     <div className="space-y-2">
       <Label htmlFor="file-upload">{label}</Label>
+      
       <div
         className={`relative border-2 border-dashed rounded-lg p-4 transition-colors
           ${isDragging ? "border-primary bg-primary/5" : "border-gray-200 hover:border-primary/50"}
@@ -126,6 +141,7 @@ export function FileUpload({
           className="hidden"
           disabled={disabled}
         />
+        
         {preview ? (
           <div className="relative">
             <img
@@ -165,12 +181,14 @@ export function FileUpload({
           </div>
         )}
       </div>
+      
       {error && (
         <div className="flex items-center text-sm text-red-500 mt-1">
           <AlertCircle className="h-4 w-4 mr-1 flex-shrink-0" />
           <span>{error}</span>
         </div>
       )}
+      
       <div className="flex space-x-2">
         <Button
           type="button"

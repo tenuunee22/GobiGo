@@ -6,20 +6,26 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useToast } from '@/hooks/use-toast';
 import { Store, Utensils, Truck } from 'lucide-react';
 import { useLocation } from 'wouter';
+
 export function RoleSelection() {
   const { user, completeRoleSelection } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [isProcessing, setIsProcessing] = useState(false);
+
   const handleRoleSelection = async (role: "customer" | "business" | "delivery") => {
     if (isProcessing) return;
+    
     setIsProcessing(true);
     try {
       await completeRoleSelection(role);
+      
       toast({
         title: "Хэрэглэгчийн төрөл амжилттай тохируулагдлаа",
         description: "Тавтай морил!",
       });
+      
+      // Redirect based on role selection
       switch(role) {
         case 'business':
           setLocation('/dashboard/store');
@@ -32,6 +38,7 @@ export function RoleSelection() {
           setLocation('/dashboard');
           break;
       }
+      
     } catch (error) {
       console.error("Error setting user role:", error);
       toast({
@@ -42,6 +49,7 @@ export function RoleSelection() {
       setIsProcessing(false);
     }
   };
+
   const roleOptions = [
     { 
       id: "customer", 
@@ -65,6 +73,7 @@ export function RoleSelection() {
       color: "from-green-400 to-green-600"
     }
   ];
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <Card className="w-full max-w-3xl shadow-lg overflow-hidden bg-white">
@@ -74,6 +83,7 @@ export function RoleSelection() {
             GobiGo-д ашиглах хэрэглэгчийн төрлөө сонгоно уу
           </CardDescription>
         </CardHeader>
+        
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-6">
             {roleOptions.map((role) => (
@@ -97,6 +107,7 @@ export function RoleSelection() {
             ))}
           </div>
         </CardContent>
+        
         <CardFooter className="bg-gray-50 px-6 py-4 border-t border-gray-200">
           <p className="text-gray-500 text-sm">
             Та хэдийд ч хэрэглэгчийн төрлөө профайл хэсэгт очиж өөрчлөх боломжтой.

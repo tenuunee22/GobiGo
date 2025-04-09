@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useCart } from '@/contexts/cart-context';
+
 interface Recipe {
   id: string;
   name: string;
@@ -21,6 +22,7 @@ interface Recipe {
   tags: string[];
   isFavorite: boolean;
 }
+
 export function RecipeRecommendationCarousel() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -35,17 +37,22 @@ export function RecipeRecommendationCarousel() {
   const [nextBtnEnabled, setNextBtnEnabled] = useState(false);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Fetch recommended recipes data
   useEffect(() => {
     setLoading(true);
+    
+    // Simulated data fetch - replace with actual API call
     setTimeout(() => {
+      // Use user preferences to tailor recommendations
       const userPreferences = user?.preferences || [];
       const mockRecipes: Recipe[] = [
         {
           id: '1',
           name: 'Ногоотой Хуушуур',
-          imageUrl: 'https:
+          imageUrl: 'https://images.unsplash.com/photo-1529042410759-befb1204b468?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80',
           restaurantName: 'Хүслэн Ресторан',
-          restaurantLogoUrl: 'https:
+          restaurantLogoUrl: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80',
           rating: 4.8,
           price: 8000,
           deliveryTime: '20-30 мин',
@@ -55,9 +62,9 @@ export function RecipeRecommendationCarousel() {
         {
           id: '2',
           name: 'Өндөгтэй будаа',
-          imageUrl: 'https:
+          imageUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80',
           restaurantName: 'Garden Cafe',
-          restaurantLogoUrl: 'https:
+          restaurantLogoUrl: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80',
           rating: 4.5,
           price: 9500,
           deliveryTime: '15-25 мин',
@@ -67,9 +74,9 @@ export function RecipeRecommendationCarousel() {
         {
           id: '3',
           name: 'Том Бургер',
-          imageUrl: 'https:
+          imageUrl: 'https://images.unsplash.com/photo-1572802419224-296b0aeee0d9?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80',
           restaurantName: 'Big Burger',
-          restaurantLogoUrl: 'https:
+          restaurantLogoUrl: 'https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80',
           rating: 4.7,
           price: 12000,
           deliveryTime: '25-35 мин',
@@ -79,9 +86,9 @@ export function RecipeRecommendationCarousel() {
         {
           id: '4',
           name: 'Пепперони Пицца',
-          imageUrl: 'https:
+          imageUrl: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80',
           restaurantName: 'Pizza Hub',
-          restaurantLogoUrl: 'https:
+          restaurantLogoUrl: 'https://images.unsplash.com/photo-1590947132387-155cc02f3212?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80',
           rating: 4.6,
           price: 24000,
           deliveryTime: '30-40 мин',
@@ -91,9 +98,9 @@ export function RecipeRecommendationCarousel() {
         {
           id: '5',
           name: 'Буузны цуглаан',
-          imageUrl: 'https:
+          imageUrl: 'https://images.unsplash.com/photo-1626776876729-bab4369a5a5a?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80',
           restaurantName: 'Монгол Гуанз',
-          restaurantLogoUrl: 'https:
+          restaurantLogoUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80',
           rating: 4.9,
           price: 15000,
           deliveryTime: '20-30 мин',
@@ -101,33 +108,40 @@ export function RecipeRecommendationCarousel() {
           isFavorite: true
         }
       ];
+      
       setRecipes(mockRecipes);
       setLoading(false);
     }, 1000);
   }, [user]);
+
   const scrollPrev = useCallback(() => {
     if (emblaApi) emblaApi.scrollPrev();
   }, [emblaApi]);
+
   const scrollNext = useCallback(() => {
     if (emblaApi) emblaApi.scrollNext();
   }, [emblaApi]);
+
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
     setPrevBtnEnabled(emblaApi.canScrollPrev());
     setNextBtnEnabled(emblaApi.canScrollNext());
   }, [emblaApi]);
+
   useEffect(() => {
     if (!emblaApi) return;
     onSelect();
     emblaApi.on('select', onSelect);
     emblaApi.on('reInit', onSelect);
   }, [emblaApi, onSelect]);
+
   const toggleFavorite = (id: string) => {
     setRecipes(recipes.map(recipe => 
       recipe.id === id 
         ? { ...recipe, isFavorite: !recipe.isFavorite } 
         : recipe
     ));
+    
     const recipe = recipes.find(r => r.id === id);
     if (recipe) {
       toast({
@@ -140,6 +154,7 @@ export function RecipeRecommendationCarousel() {
       });
     }
   };
+
   const addToCart = (recipe: Recipe) => {
     addItem({
       id: recipe.id,
@@ -150,11 +165,14 @@ export function RecipeRecommendationCarousel() {
       businessId: `business-${recipe.restaurantName.toLowerCase().replace(/\s+/g, '-')}`,
       businessName: recipe.restaurantName
     });
+    
     toast({
       title: "Сагсанд нэмэгдлээ",
       description: `${recipe.name} сагсанд нэмэгдлээ`,
     });
   };
+
+  // Skeleton loader while fetching data
   if (loading) {
     return (
       <div className="pb-6">
@@ -169,6 +187,7 @@ export function RecipeRecommendationCarousel() {
             </Button>
           </div>
         </div>
+        
         <div className="flex gap-4 overflow-hidden">
           {[1, 2, 3].map((item) => (
             <div 
@@ -193,9 +212,11 @@ export function RecipeRecommendationCarousel() {
       </div>
     );
   }
+
   if (recipes.length === 0) {
     return null;
   }
+
   return (
     <div className="pb-6">
       <div className="flex justify-between items-center mb-4">
@@ -219,6 +240,7 @@ export function RecipeRecommendationCarousel() {
           </Button>
         </div>
       </div>
+      
       <div className="overflow-hidden" ref={viewportRef}>
         <div className="flex">
           {recipes.map((recipe) => (
@@ -247,6 +269,7 @@ export function RecipeRecommendationCarousel() {
                       size={18} 
                     />
                   </Button>
+                  
                   <div className="absolute bottom-2 left-2 flex items-center">
                     <Avatar className="h-6 w-6 border border-white">
                       <img 
@@ -259,6 +282,7 @@ export function RecipeRecommendationCarousel() {
                     </span>
                   </div>
                 </div>
+                
                 <CardContent className="p-3">
                   <h3 className="font-semibold mb-1">{recipe.name}</h3>
                   <div className="flex items-center text-sm text-gray-500 mb-2">
@@ -271,6 +295,7 @@ export function RecipeRecommendationCarousel() {
                     <span className="mx-2">•</span>
                     <span>{recipe.deliveryTime}</span>
                   </div>
+                  
                   <div className="flex flex-wrap gap-1 mb-3">
                     {recipe.tags.slice(0, 2).map((tag, index) => (
                       <Badge key={index} variant="secondary" className="text-xs font-normal">
@@ -283,6 +308,7 @@ export function RecipeRecommendationCarousel() {
                       </Badge>
                     )}
                   </div>
+                  
                   <div className="flex justify-between items-center">
                     <div className="font-semibold">
                       {recipe.price.toLocaleString()}₮

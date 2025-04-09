@@ -30,9 +30,12 @@ import {
   DollarSign,
   ListOrdered
 } from "lucide-react";
+
 const staggerDelay = 0.1;
+
 export default function Help() {
   const [activeTab, setActiveTab] = useState("customer");
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -42,6 +45,7 @@ export default function Help() {
       },
     },
   };
+
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
@@ -54,6 +58,7 @@ export default function Help() {
       },
     },
   };
+
   return (
     <div className="container mx-auto px-4 py-10">
       <motion.div
@@ -72,6 +77,7 @@ export default function Help() {
           туршлагыг санал болгодог.
         </p>
       </motion.div>
+
       <Tabs
         defaultValue="customer"
         value={activeTab}
@@ -103,6 +109,7 @@ export default function Help() {
             </TabsTrigger>
           </TabsList>
         </div>
+
         <TabsContent value="customer">
           <motion.div
             variants={containerVariants}
@@ -110,6 +117,7 @@ export default function Help() {
             animate="visible"
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           >
+            {/* Order Tracking */}
             <motion.div variants={itemVariants}>
               <Card className="overflow-hidden border-amber-100 h-full">
                 <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100">
@@ -168,6 +176,8 @@ export default function Help() {
                 </CardFooter>
               </Card>
             </motion.div>
+
+            {/* Smart Recommendations */}
             <motion.div variants={itemVariants}>
               <Card className="overflow-hidden border-amber-100 h-full">
                 <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100">
@@ -226,6 +236,8 @@ export default function Help() {
                 </CardFooter>
               </Card>
             </motion.div>
+
+            {/* Easy Payment */}
             <motion.div variants={itemVariants}>
               <Card className="overflow-hidden border-amber-100 h-full">
                 <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100">
@@ -285,6 +297,8 @@ export default function Help() {
                 </CardFooter>
               </Card>
             </motion.div>
+
+            {/* Map & Location */}
             <motion.div variants={itemVariants}>
               <Card className="overflow-hidden border-amber-100 h-full">
                 <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100">
@@ -344,6 +358,8 @@ export default function Help() {
                 </CardFooter>
               </Card>
             </motion.div>
+
+            {/* Notifications */}
             <motion.div variants={itemVariants}>
               <Card className="overflow-hidden border-amber-100 h-full">
                 <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100">
@@ -403,6 +419,8 @@ export default function Help() {
                 </CardFooter>
               </Card>
             </motion.div>
+
+            {/* Loyalty Program */}
             <motion.div variants={itemVariants}>
               <Card className="overflow-hidden border-amber-100 h-full">
                 <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100">
@@ -464,6 +482,7 @@ export default function Help() {
             </motion.div>
           </motion.div>
         </TabsContent>
+
         <TabsContent value="business">
           <motion.div
             variants={containerVariants}
@@ -471,6 +490,7 @@ export default function Help() {
             animate="visible"
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           >
+            {/* Add more business features here similar to the pattern above */}
             <motion.div variants={itemVariants}>
               <Card className="overflow-hidden border-amber-100 h-full">
                 <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100">
@@ -530,6 +550,8 @@ export default function Help() {
                 </CardFooter>
               </Card>
             </motion.div>
+            
+            {/* Menu Management */}
             <motion.div variants={itemVariants}>
               <Card className="overflow-hidden border-amber-100 h-full">
                 <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100">
@@ -589,6 +611,8 @@ export default function Help() {
                 </CardFooter>
               </Card>
             </motion.div>
+            
+            {/* Order Management */}
             <motion.div variants={itemVariants}>
               <Card className="overflow-hidden border-amber-100 h-full">
                 <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100">
@@ -650,6 +674,7 @@ export default function Help() {
             </motion.div>
           </motion.div>
         </TabsContent>
+
         <TabsContent value="driver">
           <motion.div
             variants={containerVariants}
@@ -657,6 +682,7 @@ export default function Help() {
             animate="visible"
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           >
+            {/* Add driver features here similar to the pattern above */}
             <motion.div variants={itemVariants}>
               <Card className="overflow-hidden border-amber-100 h-full">
                 <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100">
@@ -716,6 +742,8 @@ export default function Help() {
                 </CardFooter>
               </Card>
             </motion.div>
+            
+            {/* Flexible Schedule */}
             <motion.div variants={itemVariants}>
               <Card className="overflow-hidden border-amber-100 h-full">
                 <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100">
@@ -776,6 +804,8 @@ export default function Help() {
                 </CardFooter>
               </Card>
             </motion.div>
+            
+            {/* Live Earnings */}
             <motion.div variants={itemVariants}>
               <Card className="overflow-hidden border-amber-100 h-full">
                 <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100">
@@ -838,6 +868,7 @@ export default function Help() {
           </motion.div>
         </TabsContent>
       </Tabs>
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -863,11 +894,13 @@ export default function Help() {
     </div>
   );
 }
+
+// Additional UI components used
 function Shield(props: any) {
   return (
     <svg
       {...props}
-      xmlns="http:
+      xmlns="http://www.w3.org/2000/svg"
       width="24"
       height="24"
       viewBox="0 0 24 24"
@@ -881,11 +914,12 @@ function Shield(props: any) {
     </svg>
   );
 }
+
 function CheckCircle(props: any) {
   return (
     <svg
       {...props}
-      xmlns="http:
+      xmlns="http://www.w3.org/2000/svg"
       width="24"
       height="24"
       viewBox="0 0 24 24"
@@ -900,11 +934,12 @@ function CheckCircle(props: any) {
     </svg>
   );
 }
+
 function Lightning(props: any) {
   return (
     <svg
       {...props}
-      xmlns="http:
+      xmlns="http://www.w3.org/2000/svg"
       width="24"
       height="24"
       viewBox="0 0 24 24"
@@ -919,11 +954,12 @@ function Lightning(props: any) {
     </svg>
   );
 }
+
 function Zap(props: any) {
   return (
     <svg
       {...props}
-      xmlns="http:
+      xmlns="http://www.w3.org/2000/svg"
       width="24"
       height="24"
       viewBox="0 0 24 24"
@@ -937,11 +973,12 @@ function Zap(props: any) {
     </svg>
   );
 }
+
 function Award(props: any) {
   return (
     <svg
       {...props}
-      xmlns="http:
+      xmlns="http://www.w3.org/2000/svg"
       width="24"
       height="24"
       viewBox="0 0 24 24"
@@ -956,11 +993,12 @@ function Award(props: any) {
     </svg>
   );
 }
+
 function Repeat(props: any) {
   return (
     <svg
       {...props}
-      xmlns="http:
+      xmlns="http://www.w3.org/2000/svg"
       width="24"
       height="24"
       viewBox="0 0 24 24"
@@ -977,11 +1015,12 @@ function Repeat(props: any) {
     </svg>
   );
 }
+
 function Settings(props: any) {
   return (
     <svg
       {...props}
-      xmlns="http:
+      xmlns="http://www.w3.org/2000/svg"
       width="24"
       height="24"
       viewBox="0 0 24 24"
@@ -996,11 +1035,12 @@ function Settings(props: any) {
     </svg>
   );
 }
+
 function Layout(props: any) {
   return (
     <svg
       {...props}
-      xmlns="http:
+      xmlns="http://www.w3.org/2000/svg"
       width="24"
       height="24"
       viewBox="0 0 24 24"
@@ -1016,11 +1056,12 @@ function Layout(props: any) {
     </svg>
   );
 }
+
 function Navigation(props: any) {
   return (
     <svg
       {...props}
-      xmlns="http:
+      xmlns="http://www.w3.org/2000/svg"
       width="24"
       height="24"
       viewBox="0 0 24 24"
@@ -1034,11 +1075,12 @@ function Navigation(props: any) {
     </svg>
   );
 }
+
 function Calendar(props: any) {
   return (
     <svg
       {...props}
-      xmlns="http:
+      xmlns="http://www.w3.org/2000/svg"
       width="24"
       height="24"
       viewBox="0 0 24 24"
@@ -1055,11 +1097,12 @@ function Calendar(props: any) {
     </svg>
   );
 }
+
 function PieChart(props: any) {
   return (
     <svg
       {...props}
-      xmlns="http:
+      xmlns="http://www.w3.org/2000/svg"
       width="24"
       height="24"
       viewBox="0 0 24 24"
@@ -1074,11 +1117,12 @@ function PieChart(props: any) {
     </svg>
   );
 }
+
 function ChartBarIcon(props: any) {
   return (
     <svg
       {...props}
-      xmlns="http:
+      xmlns="http://www.w3.org/2000/svg"
       width="24"
       height="24"
       viewBox="0 0 24 24"
@@ -1094,11 +1138,12 @@ function ChartBarIcon(props: any) {
     </svg>
   );
 }
+
 function Smile(props: any) {
   return (
     <svg
       {...props}
-      xmlns="http:
+      xmlns="http://www.w3.org/2000/svg"
       width="24"
       height="24"
       viewBox="0 0 24 24"
@@ -1115,11 +1160,12 @@ function Smile(props: any) {
     </svg>
   );
 }
+
 function MapPin(props: any) {
   return (
     <svg
       {...props}
-      xmlns="http:
+      xmlns="http://www.w3.org/2000/svg"
       width="24"
       height="24"
       viewBox="0 0 24 24"

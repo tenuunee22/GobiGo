@@ -4,11 +4,17 @@ import { storage } from "./storage";
 import { insertUserSchema, insertProductSchema, insertOrderSchema, insertOrderItemSchema } from "@shared/schema";
 import { z } from "zod";
 import Stripe from "stripe";
+
 if (!process.env.STRIPE_SECRET_KEY) {
   console.warn("Missing Stripe secret key! Payment functionality will not work.");
 }
+
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  // All routes are prefixed with /api
+  
+  // User routes
   app.get("/api/users/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -21,6 +27,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Internal server error" });
     }
   });
+
   app.get("/api/users/uid/:uid", async (req, res) => {
     try {
       const { uid } = req.params;
@@ -33,6 +40,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Internal server error" });
     }
   });
+
   app.post("/api/users", async (req, res) => {
     try {
       const validatedUser = insertUserSchema.parse(req.body);
@@ -45,6 +53,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Internal server error" });
     }
   });
+
   app.patch("/api/users/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -61,6 +70,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Internal server error" });
     }
   });
+
+  // Product routes
   app.get("/api/products/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -73,6 +84,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Internal server error" });
     }
   });
+
   app.get("/api/products/business/:businessUid", async (req, res) => {
     try {
       const { businessUid } = req.params;
@@ -82,6 +94,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Internal server error" });
     }
   });
+
   app.post("/api/products", async (req, res) => {
     try {
       const validatedProduct = insertProductSchema.parse(req.body);
@@ -94,6 +107,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Internal server error" });
     }
   });
+
   app.patch("/api/products/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -110,6 +124,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Internal server error" });
     }
   });
+
   app.delete("/api/products/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -122,6 +137,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Internal server error" });
     }
   });
+
+  // Order routes
   app.get("/api/orders/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -134,6 +151,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Internal server error" });
     }
   });
+
   app.get("/api/orders/customer/:customerUid", async (req, res) => {
     try {
       const { customerUid } = req.params;
@@ -143,6 +161,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Internal server error" });
     }
   });
+
   app.get("/api/orders/business/:businessUid", async (req, res) => {
     try {
       const { businessUid } = req.params;
@@ -152,6 +171,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Internal server error" });
     }
   });
+
   app.get("/api/orders/driver/:driverUid", async (req, res) => {
     try {
       const { driverUid } = req.params;
@@ -161,6 +181,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Internal server error" });
     }
   });
+
   app.get("/api/orders/available", async (req, res) => {
     try {
       const orders = await storage.getAvailableOrders();
@@ -169,11 +190,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Internal server error" });
     }
   });
+
   app.post("/api/orders", async (req, res) => {
     try {
       const { order, items } = req.body;
       const validatedOrder = insertOrderSchema.parse(order);
       const validatedItems = items.map((item: any) => insertOrderItemSchema.parse(item));
+      
       const newOrder = await storage.createOrder(validatedOrder, validatedItems);
       res.status(201).json(newOrder);
     } catch (error) {
@@ -183,22 +206,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Internal server error" });
     }
   });
+
   app.patch("/api/orders/:id/status", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const { status, driverId } = req.body;
+      
       if (!status) {
         return res.status(400).json({ message: "Status is required" });
       }
+      
       const updatedOrder = await storage.updateOrderStatus(id, status, driverId);
       if (!updatedOrder) {
         return res.status(404).json({ message: "Order not found" });
       }
+      
       res.json(updatedOrder);
     } catch (error) {
       res.status(500).json({ message: "Internal server error" });
     }
   });
+
+  // Stripe payment endpoints
   app.post("/api/create-payment-intent", async (req, res) => {
     try {
       if (!stripe) {
@@ -206,13 +235,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: "Payment service not available. Please check server configuration." 
         });
       }
+
       const { amount, orderId, customerName, customerEmail } = req.body;
+      
       if (!amount || amount < 1) {
         return res.status(400).json({ message: "Valid amount is required" });
       }
+
+      // Create a PaymentIntent with the order amount and currency
       const paymentIntent = await stripe.paymentIntents.create({
-        amount: Math.round(amount * 100),
-        currency: "mnt",
+        amount: Math.round(amount * 100), // Convert to smallest currency unit (cents/tögrög)
+        currency: "mnt", // Mongolian tögrög
+        // Store order information in the metadata
         metadata: {
           orderId: orderId || '',
           customerName: customerName || 'Guest',
@@ -221,6 +255,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: `GobiGo Order #${orderId || 'New'}`,
         payment_method_types: ['card'],
       });
+
+      // Return the client secret to the client
       res.json({
         clientSecret: paymentIntent.client_secret,
         paymentIntentId: paymentIntent.id
@@ -233,6 +269,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+  
+  // QPay integration endpoint (simulate QPay for demonstration purposes)
   app.post("/api/create-qpay-payment", async (req, res) => {
     try {
       if (!stripe) {
@@ -240,10 +278,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: "Payment service not available. Please check server configuration." 
         });
       }
+
       const { amount, orderId, customerName, customerPhone } = req.body;
+      
       if (!amount || amount < 1) {
         return res.status(400).json({ message: "Valid amount is required" });
       }
+
+      // In a real implementation, this would call the QPay API
+      // For demonstration purposes, we'll use Stripe as the backend
       const paymentIntent = await stripe.paymentIntents.create({
         amount: Math.round(amount * 100),
         currency: "mnt",
@@ -254,18 +297,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
           paymentMethod: 'QPay'
         },
         description: `GobiGo QPay Payment for Order #${orderId || 'New'}`,
-        payment_method_types: ['card'],
+        payment_method_types: ['card'], // In a real QPay integration, this would be different
       });
+
+      // Simulate QPay callback URL and payment information
       res.json({
         success: true,
         qpayInvoiceId: `QPAY-${Date.now()}`,
-        qrCodeUrl: "https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=" + 
-                  encodeURIComponent(`https://payment.qpay.mn/invoice/${Date.now()}`),
+        qrCodeUrl: "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" + 
+                  encodeURIComponent(`https://qpay.mn/payment/${paymentIntent.id}`),
         paymentIntentId: paymentIntent.id,
         amount: amount,
         deepLink: {
-          qPay: `qpay://invoice?id=${Date.now()}`,
-          eBarimt: `ebarimt://invoice?id=${Date.now()}`
+          qPay: `qpay://payment/invoice?invoiceId=${paymentIntent.id}&callback=gobigo://order/callback`,
+          eBarimt: `ebarimt://payment?amount=${amount}&orderId=${orderId || 'New'}`
         }
       });
     } catch (error: any) {
@@ -276,6 +321,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+
+  // Check payment status endpoint
   app.get("/api/check-payment/:paymentIntentId", async (req, res) => {
     try {
       if (!stripe) {
@@ -283,12 +330,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: "Payment service not available. Please check server configuration." 
         });
       }
+
       const { paymentIntentId } = req.params;
       const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+      
       res.json({
         id: paymentIntent.id,
         status: paymentIntent.status,
-        amount: paymentIntent.amount / 100,
+        amount: paymentIntent.amount / 100, // Convert back from smallest currency unit
         currency: paymentIntent.currency,
         metadata: paymentIntent.metadata,
       });
@@ -300,6 +349,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+
+  // Direct Stripe Checkout endpoint
   app.post("/api/stripe-checkout", async (req, res) => {
     try {
       if (!stripe) {
@@ -307,10 +358,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: "Payment service not available. Please check server configuration." 
         });
       }
+
       const { amount, orderId, customerName, customerEmail, successUrl, cancelUrl } = req.body;
+      
       if (!amount || amount < 1) {
         return res.status(400).json({ message: "Valid amount is required" });
       }
+
+      // Create a Stripe Checkout Session
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
         line_items: [
@@ -321,7 +376,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 name: `GobiGo Order #${orderId || 'New'}`,
                 description: `Food delivery from GobiGo`,
               },
-              unit_amount: Math.round(amount * 100),
+              unit_amount: Math.round(amount * 100), // Convert to smallest currency unit
             },
             quantity: 1,
           },
@@ -332,9 +387,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           customerEmail: customerEmail || ''
         },
         mode: 'payment',
-        success_url: successUrl || `${req.protocol}://${req.get('host')}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: cancelUrl || `${req.protocol}://${req.get('host')}/checkout/cancel`
+        success_url: successUrl || `${req.protocol}://${req.get('host')}/order/${orderId || ''}?success=true`,
+        cancel_url: cancelUrl || `${req.protocol}://${req.get('host')}/order/${orderId || ''}?canceled=true`,
       });
+
+      // Return the URL to the client
       res.json({
         url: session.url,
         sessionId: session.id
@@ -347,10 +404,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+  
+  // Stripe Static Checkout Redirect
   app.get("/api/stripe-static-checkout", (req, res) => {
-    const staticCheckoutUrl = "https://checkout.stripe.com/c/pay/cs_test_gobigo1234567";
+    // Redirect to the provided static Stripe checkout link
+    const staticCheckoutUrl = "https://buy.stripe.com/test_8wM15p4kW8886cw000";
     res.redirect(staticCheckoutUrl);
   });
+
+  // Recipe recommendation endpoints
   app.get("/api/recommendations", async (req, res) => {
     try {
       const { userId, limit = 10 } = req.query;
@@ -364,6 +426,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Error fetching recommendations" });
     }
   });
+
   app.get("/api/favorites/:userId", async (req, res) => {
     try {
       const { userId } = req.params;
@@ -374,12 +437,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Error fetching favorite recipes" });
     }
   });
+
   app.post("/api/favorites/toggle", async (req, res) => {
     try {
       const { userId, recipeId } = req.body;
+      
       if (!userId || !recipeId) {
         return res.status(400).json({ message: "userId and recipeId are required" });
       }
+      
       const isFavorite = await storage.toggleFavoriteRecipe(userId, recipeId);
       res.json({ recipeId, isFavorite });
     } catch (error) {
@@ -387,6 +453,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Error toggling favorite status" });
     }
   });
+
+  // Create the HTTP server
   const httpServer = createServer(app);
+
   return httpServer;
 }

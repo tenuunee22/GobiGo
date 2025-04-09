@@ -13,10 +13,12 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+
 interface ReviewFormProps {
   businessId: string;
   onReviewSubmit?: (rating: number, comment: string) => void;
 }
+
 export function ReviewForm({ businessId, onReviewSubmit }: ReviewFormProps) {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -25,6 +27,7 @@ export function ReviewForm({ businessId, onReviewSubmit }: ReviewFormProps) {
   const [hoveredRating, setHoveredRating] = useState(0);
   const [comment, setComment] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  
   const handleSubmitReview = () => {
     if (!rating) {
       toast({
@@ -34,16 +37,24 @@ export function ReviewForm({ businessId, onReviewSubmit }: ReviewFormProps) {
       });
       return;
     }
+    
+    // In a real app, this would be an API call
+    // to store the review in the database
     if (onReviewSubmit) {
       onReviewSubmit(rating, comment);
     }
+    
     toast({
       title: "Үнэлгээ амжилттай",
       description: "Таны үнэлгээг хүлээн авлаа, баярлалаа!",
     });
+    
     setSubmitted(true);
+    
+    // Close the dialog after a success message display time
     setTimeout(() => {
       setOpen(false);
+      // Reset form after dialog closes
       setTimeout(() => {
         setRating(0);
         setComment("");
@@ -51,8 +62,10 @@ export function ReviewForm({ businessId, onReviewSubmit }: ReviewFormProps) {
       }, 300);
     }, 1500);
   };
+  
   const StarRating = () => {
     const stars = [];
+    
     for (let i = 1; i <= 5; i++) {
       stars.push(
         <Star
@@ -66,8 +79,10 @@ export function ReviewForm({ businessId, onReviewSubmit }: ReviewFormProps) {
         />
       );
     }
+    
     return <div className="flex gap-1 justify-center py-4">{stars}</div>;
   };
+  
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -79,6 +94,7 @@ export function ReviewForm({ businessId, onReviewSubmit }: ReviewFormProps) {
         <DialogHeader>
           <DialogTitle>Үнэлгээ өгөх</DialogTitle>
         </DialogHeader>
+        
         {!user ? (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
@@ -96,7 +112,9 @@ export function ReviewForm({ businessId, onReviewSubmit }: ReviewFormProps) {
             <div className="text-center text-sm text-gray-600 mb-2">
               Дэлгүүрт таны үнэлгээг өгнө үү
             </div>
+            
             <StarRating />
+            
             <div className="my-2">
               <Textarea
                 placeholder="Таны сэтгэгдэл (заавал биш)"
@@ -106,6 +124,7 @@ export function ReviewForm({ businessId, onReviewSubmit }: ReviewFormProps) {
                 rows={4}
               />
             </div>
+            
             <DialogFooter>
               <Button onClick={handleSubmitReview}>Илгээх</Button>
             </DialogFooter>

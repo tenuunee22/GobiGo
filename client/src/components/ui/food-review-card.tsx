@@ -7,14 +7,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FoodEmojiReaction, type FoodEmojiType } from "./food-emoji-reaction";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+
 interface FoodReviewCardProps {
   review: {
     id: string;
     foodId: string;
     userName: string;
     userImage?: string;
-    date: string;
-    rating: number;
+    date: string; // ISO string format
+    rating: number; // 1-5
     content: string;
     images?: string[];
     reactions?: Record<FoodEmojiType, number>;
@@ -28,6 +29,7 @@ interface FoodReviewCardProps {
   onShare?: () => void;
   className?: string;
 }
+
 export function FoodReviewCard({
   review,
   onReaction,
@@ -42,15 +44,19 @@ export function FoodReviewCard({
   const [currentReactions, setCurrentReactions] = 
     useState<Record<FoodEmojiType, number>>(review.reactions || {} as Record<FoodEmojiType, number>);
   const [userReaction, setUserReaction] = useState<FoodEmojiType | null>(review.userReaction || null);
+
   const handleLike = () => {
     setLiked(!liked);
     setLikeCount(prev => liked ? prev - 1 : prev + 1);
     onLike && onLike();
   };
+
   const handleReaction = (emoji: FoodEmojiType) => {
     setUserReaction(emoji);
     onReaction && onReaction(emoji);
   };
+
+  // Огноог форматлах: "March 15, 2023" гэх мэт
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = { 
       year: 'numeric', 
@@ -59,6 +65,8 @@ export function FoodReviewCard({
     };
     return new Date(dateString).toLocaleDateString('mn-MN', options);
   };
+
+  // Одны үнэлгээг харуулах
   const renderStars = (rating: number) => {
     return (
       <div className="flex">
@@ -77,10 +85,13 @@ export function FoodReviewCard({
       </div>
     );
   };
+
+  // Текстийг богиносгож харуулах
   const truncateText = (text: string, maxLength: number = 150) => {
     if (text.length <= maxLength) return text;
     return showAllText ? text : `${text.substring(0, maxLength)}...`;
   };
+
   return (
     <Card className={cn("overflow-hidden", className)}>
       <CardContent className="p-4 md:p-6">
@@ -89,6 +100,7 @@ export function FoodReviewCard({
             <AvatarImage src={review.userImage} alt={review.userName} />
             <AvatarFallback>{review.userName.charAt(0)}</AvatarFallback>
           </Avatar>
+          
           <div className="flex-1">
             <div className="flex justify-between items-start">
               <div>
@@ -99,10 +111,12 @@ export function FoodReviewCard({
                   {renderStars(review.rating)}
                 </div>
               </div>
+              
               <Button variant="ghost" size="icon" className="h-8 w-8">
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </div>
+            
             <div className="mt-3">
               <p className="text-sm leading-relaxed">
                 {truncateText(review.content)}
@@ -117,6 +131,8 @@ export function FoodReviewCard({
                 )}
               </p>
             </div>
+            
+            {/* Зурагууд байвал харуулах */}
             {review.images && review.images.length > 0 && (
               <div className="mt-3 grid grid-cols-3 gap-2">
                 {review.images.slice(0, 3).map((image, index) => (
@@ -132,6 +148,8 @@ export function FoodReviewCard({
                       alt={`Review ${index + 1}`} 
                       className="w-full h-full object-cover"
                     />
+                    
+                    {/* Хэрэв 3-с илүү зураг байвал сүүлийн зураг дээр хэдэн зураг үлдсэнийг харуулах */}
                     {index === 2 && review.images && review.images.length > 3 && (
                       <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white font-medium">
                         +{review.images.length - 3}
@@ -141,6 +159,8 @@ export function FoodReviewCard({
                 ))}
               </div>
             )}
+            
+            {/* Эможи реакц харуулах хэсэг */}
             <div className="mt-4">
               <FoodEmojiReaction 
                 foodId={review.foodId}
@@ -154,7 +174,9 @@ export function FoodReviewCard({
           </div>
         </div>
       </CardContent>
+      
       <Separator />
+      
       <CardFooter className="p-2 flex justify-between">
         <Button 
           variant="ghost" 
@@ -168,6 +190,7 @@ export function FoodReviewCard({
           <ThumbsUp className="h-4 w-4" /> 
           <span>Таалагдлаа • {likeCount}</span>
         </Button>
+        
         <Button 
           variant="ghost" 
           size="sm" 
@@ -177,6 +200,7 @@ export function FoodReviewCard({
           <MessageCircle className="h-4 w-4" /> 
           <span>Сэтгэгдэл • {review.comments}</span>
         </Button>
+        
         <Button 
           variant="ghost" 
           size="sm" 

@@ -13,6 +13,7 @@ import {
   CheckCircle
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+
 interface OrderCardProps {
   id: string;
   restaurant: {
@@ -24,14 +25,15 @@ interface OrderCardProps {
   estimatedEarnings: number;
   isAvailable?: boolean;
   status?: string;
-  needsPreparation?: boolean;
-  businessType?: string;
+  needsPreparation?: boolean; // Is this a restaurant order (true) or grocery/pharmacy (false)
+  businessType?: string; // restaurant, grocery, pharmacy
   customer?: {
     name: string;
     address: string;
   };
   onStatusChange: () => void;
 }
+
 export function OrderCard({
   id,
   restaurant,
@@ -44,16 +46,20 @@ export function OrderCard({
   customer,
   onStatusChange
 }: OrderCardProps) {
+  
   const getStatusBadge = () => {
     if (isAvailable) {
+      // Show if this order is for pickup (restaurant) or shopping (grocery/pharmacy)
       if (needsPreparation) {
         return <Badge variant="secondary">Хоол авах</Badge>;
       } else {
         return <Badge variant="secondary">Худалдан авах</Badge>;
       }
     }
+    
     let variant: "default" | "secondary" | "outline" = "default";
     let label = "";
+    
     switch (status) {
       case "ready":
       case "ready_for_pickup":
@@ -84,13 +90,17 @@ export function OrderCard({
         variant = "outline";
         label = status || "Бэлэн";
     }
+    
     return <Badge variant={variant}>{label}</Badge>;
   };
+  
   const getActionButton = () => {
+    // Get emoji for button
     const getButtonEmoji = () => {
       if (isAvailable) {
         return needsPreparation ? "🍽️" : "🛒";
       }
+      
       switch (status) {
         case "ready":
         case "ready_for_pickup": return "🍽️";
@@ -102,10 +112,13 @@ export function OrderCard({
         default: return "➡️";
       }
     };
+    
+    // Get gradient for button
     const getButtonGradient = () => {
       if (isAvailable) {
         return "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600";
       }
+      
       switch (status) {
         case "ready":
         case "ready_for_pickup":
@@ -120,7 +133,9 @@ export function OrderCard({
           return "bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600";
       }
     };
+    
     if (isAvailable) {
+      // Different button text based on business type
       return (
         <Button 
           onClick={onStatusChange} 
@@ -136,7 +151,10 @@ export function OrderCard({
         </Button>
       );
     }
+    
+    // Different flow based on whether this is restaurant or grocery/pharmacy
     if (needsPreparation) {
+      // Restaurant flow
       switch (status) {
         case "ready":
         case "ready_for_pickup":
@@ -204,6 +222,7 @@ export function OrderCard({
           );
       }
     } else {
+      // Grocery/Pharmacy flow
       switch (status) {
         case "new":
         case "accepted":
@@ -285,6 +304,8 @@ export function OrderCard({
       }
     }
   };
+  
+  // Get business type emoji
   const getBusinessEmoji = () => {
     switch(businessType) {
       case "grocery": return "🛒";
@@ -292,8 +313,11 @@ export function OrderCard({
       default: return "🍔";
     }
   };
+  
+  // Get status emoji
   const getStatusEmoji = () => {
     if (isAvailable) return "🆕";
+    
     switch(status) {
       case "ready":
       case "ready_for_pickup": return "✅";
@@ -305,8 +329,11 @@ export function OrderCard({
       default: return "📋";
     }
   };
+  
+  // Get the background gradient based on status
   const getCardBackground = () => {
     if (isAvailable) return "bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 hover:shadow-amber-100";
+    
     switch(status) {
       case "ready":
       case "ready_for_pickup": 
@@ -320,12 +347,14 @@ export function OrderCard({
         return "bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200 hover:shadow-indigo-100";
     }
   };
+
   return (
     <Card className={`overflow-hidden border hover:shadow-lg transition-all duration-300 ${getCardBackground()}`}>
       <CardContent className="p-0">
         <div className="p-4">
           <div className="flex justify-between items-start mb-3">
             <div className="flex gap-3">
+              {/* Restaurant Image with animation */}
               <div className="w-14 h-14 bg-white rounded-md overflow-hidden flex-shrink-0 shadow-sm border border-gray-100 jelly">
                 {restaurant.imageUrl ? (
                   <img 
@@ -339,9 +368,11 @@ export function OrderCard({
                   </div>
                 )}
               </div>
+              
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <span className="font-medium bg-gradient-to-r from-indigo-700 to-blue-600 bg-clip-text text-transparent">{restaurant.name}</span>
+                  {/* Status badge with emoji */}
                   <div className="relative">
                     {getStatusBadge()}
                     <span className="absolute -top-1 -right-1 text-xs tada">{getStatusEmoji()}</span>
@@ -351,6 +382,7 @@ export function OrderCard({
                   <Building className="mr-1 h-4 w-4 text-indigo-400 wiggle" />
                   <span>{restaurant.distance} зайтай</span>
                 </div>
+                {/* Show business type */}
                 <div className="text-xs text-indigo-500 mt-1 flex items-center">
                   <span className="mr-1">{getBusinessEmoji()}</span>
                   <span>
@@ -368,6 +400,7 @@ export function OrderCard({
               </div>
             </div>
           </div>
+          
           <div className="grid grid-cols-2 gap-3 mb-3">
             <div className="bg-white rounded-md p-3 shadow-sm border border-gray-100 slide-in-left">
               <div className="text-xs text-gray-500 flex items-center">
@@ -384,9 +417,11 @@ export function OrderCard({
               <div className="font-medium text-amber-600">15-20 мин</div>
             </div>
           </div>
+          
           {!isAvailable && customer && (
             <>
               <Separator className="my-3" />
+              
               <div className="space-y-3 mb-3 fade-in">
                 <div className="flex items-start gap-2 bg-white p-2 rounded-lg shadow-sm border border-gray-100">
                   <MapPin className="h-5 w-5 text-red-500 mt-0.5 jelly" />
@@ -398,6 +433,7 @@ export function OrderCard({
                     <div className="text-sm text-gray-600">{customer.address}</div>
                   </div>
                 </div>
+                
                 <div className="flex items-center gap-2 bg-white p-2 rounded-lg shadow-sm border border-gray-100">
                   <PhoneCall className="h-5 w-5 text-green-500 wiggle" />
                   <div>
@@ -411,6 +447,8 @@ export function OrderCard({
               </div>
             </>
           )}
+          
+          {/* Action button with animation */}
           <div className="mt-4 fade-in-delayed">
             {getActionButton()}
           </div>

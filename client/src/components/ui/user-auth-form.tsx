@@ -23,12 +23,16 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/auth-context";
 import { registerUser, loginUser, loginWithGoogle } from "@/lib/firebase";
 import { useLocation } from "wouter";
+
+// Schema for login
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
   password: z.string().min(6, {
     message: "Password must be at least 6 characters",
   }),
 });
+
+// Schema for registration with conditional fields based on role
 const registerSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -39,6 +43,7 @@ const registerSchema = z.object({
   role: z.enum(["customer", "business", "delivery"], {
     required_error: "Please select a role",
   }),
+  // Optional fields that depend on role
   businessName: z.string().optional(),
   businessType: z.string().optional(),
   vehicleType: z.string().optional(),
@@ -47,6 +52,7 @@ const registerSchema = z.object({
   message: "Passwords do not match",
   path: ["confirmPassword"],
 }).refine((data) => {
+  // Business role requires business fields
   if (data.role === "business") {
     return !!data.businessName && !!data.businessType;
   }
@@ -55,6 +61,7 @@ const registerSchema = z.object({
   message: "Business name and type are required for business accounts",
   path: ["businessName"],
 }).refine((data) => {
+  // Delivery role requires vehicle fields
   if (data.role === "delivery") {
     return !!data.vehicleType && !!data.licenseNumber;
   }
@@ -63,17 +70,22 @@ const registerSchema = z.object({
   message: "Vehicle type and license number are required for delivery accounts",
   path: ["vehicleType"],
 });
+
 type LoginFormValues = z.infer<typeof loginSchema>;
 type RegisterFormValues = z.infer<typeof registerSchema>;
+
 export interface UserAuthFormProps {
   isLogin?: boolean;
   onToggleForm: () => void;
 }
+
 export function UserAuthForm({ isLogin = true, onToggleForm }: UserAuthFormProps) {
   const { toast } = useToast();
   const { setUser } = useAuth();
   const [, setLocation] = useLocation();
   const [isLoading, setIsLoading] = useState(false);
+
+  // Login form
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -81,6 +93,8 @@ export function UserAuthForm({ isLogin = true, onToggleForm }: UserAuthFormProps
       password: "",
     },
   });
+
+  // Register form with conditional fields
   const registerForm = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -96,7 +110,9 @@ export function UserAuthForm({ isLogin = true, onToggleForm }: UserAuthFormProps
     },
     mode: "onChange",
   });
+
   const selectedRole = registerForm.watch("role");
+
   async function onLoginSubmit(data: LoginFormValues) {
     setIsLoading(true);
     try {
@@ -105,6 +121,7 @@ export function UserAuthForm({ isLogin = true, onToggleForm }: UserAuthFormProps
         title: "Login successful",
         description: "Welcome back!",
       });
+      // Auth context will handle redirects based on user role
     } catch (error: any) {
       toast({
         title: "Login failed",
@@ -115,13 +132,16 @@ export function UserAuthForm({ isLogin = true, onToggleForm }: UserAuthFormProps
       setIsLoading(false);
     }
   }
+
   async function onRegisterSubmit(data: RegisterFormValues) {
     setIsLoading(true);
     try {
+      // Prepare user data based on role
       let userData: any = {
         name: data.name,
         role: data.role,
       };
+
       if (data.role === "business") {
         userData = {
           ...userData,
@@ -135,11 +155,15 @@ export function UserAuthForm({ isLogin = true, onToggleForm }: UserAuthFormProps
           licenseNumber: data.licenseNumber,
         };
       }
+
       await registerUser(data.email, data.password, userData);
+      
       toast({
         title: "Registration successful",
         description: "Welcome to GobiGo!",
       });
+      
+      // Auth context will handle redirects based on user role
     } catch (error: any) {
       toast({
         title: "Registration failed",
@@ -150,6 +174,7 @@ export function UserAuthForm({ isLogin = true, onToggleForm }: UserAuthFormProps
       setIsLoading(false);
     }
   }
+
   async function handleGoogleLogin() {
     setIsLoading(true);
     try {
@@ -158,6 +183,7 @@ export function UserAuthForm({ isLogin = true, onToggleForm }: UserAuthFormProps
         title: "Login successful",
         description: "Welcome back!",
       });
+      // Auth context will handle redirects based on user role
     } catch (error: any) {
       toast({
         title: "Google login failed",
@@ -168,6 +194,7 @@ export function UserAuthForm({ isLogin = true, onToggleForm }: UserAuthFormProps
       setIsLoading(false);
     }
   }
+
   return (
     <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-gray-100">
       <div className="sm:mx-auto sm:w-full sm:max-w-md slide-in-top">
@@ -189,9 +216,11 @@ export function UserAuthForm({ isLogin = true, onToggleForm }: UserAuthFormProps
           </button>
         </p>
       </div>
+
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md slide-in-bottom">
         <div className="bg-white py-8 px-4 shadow-lg sm:rounded-lg sm:px-10 border border-gray-100 hover:border-indigo-200 transition-all duration-300">
           {isLogin ? (
+            // Login Form
             <Form {...loginForm}>
               <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-6">
                 <FormField
@@ -213,6 +242,7 @@ export function UserAuthForm({ isLogin = true, onToggleForm }: UserAuthFormProps
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={loginForm.control}
                   name="password"
@@ -231,6 +261,7 @@ export function UserAuthForm({ isLogin = true, onToggleForm }: UserAuthFormProps
                     </FormItem>
                   )}
                 />
+
                 <div className="fade-in-delayed">
                   <Button
                     type="submit"
@@ -242,6 +273,7 @@ export function UserAuthForm({ isLogin = true, onToggleForm }: UserAuthFormProps
                     </span>
                   </Button>
                 </div>
+
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-gray-300"></div>
@@ -252,6 +284,7 @@ export function UserAuthForm({ isLogin = true, onToggleForm }: UserAuthFormProps
                     </span>
                   </div>
                 </div>
+
                 <div className="grid grid-cols-2 gap-3 fade-in-delayed">
                   <Button
                     type="button"
@@ -280,6 +313,7 @@ export function UserAuthForm({ isLogin = true, onToggleForm }: UserAuthFormProps
               </form>
             </Form>
           ) : (
+            // Registration Form
             <Form {...registerForm}>
               <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-6">
                 <FormField
@@ -308,6 +342,7 @@ export function UserAuthForm({ isLogin = true, onToggleForm }: UserAuthFormProps
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={registerForm.control}
                   name="name"
@@ -324,6 +359,7 @@ export function UserAuthForm({ isLogin = true, onToggleForm }: UserAuthFormProps
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={registerForm.control}
                   name="email"
@@ -342,6 +378,7 @@ export function UserAuthForm({ isLogin = true, onToggleForm }: UserAuthFormProps
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={registerForm.control}
                   name="password"
@@ -360,6 +397,7 @@ export function UserAuthForm({ isLogin = true, onToggleForm }: UserAuthFormProps
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={registerForm.control}
                   name="confirmPassword"
@@ -378,6 +416,8 @@ export function UserAuthForm({ isLogin = true, onToggleForm }: UserAuthFormProps
                     </FormItem>
                   )}
                 />
+
+                {/* Business-specific fields */}
                 {selectedRole === "business" && (
                   <div className="space-y-6">
                     <FormField
@@ -396,6 +436,7 @@ export function UserAuthForm({ isLogin = true, onToggleForm }: UserAuthFormProps
                         </FormItem>
                       )}
                     />
+
                     <FormField
                       control={registerForm.control}
                       name="businessType"
@@ -425,6 +466,8 @@ export function UserAuthForm({ isLogin = true, onToggleForm }: UserAuthFormProps
                     />
                   </div>
                 )}
+
+                {/* Delivery-specific fields */}
                 {selectedRole === "delivery" && (
                   <div className="space-y-6">
                     <FormField
@@ -454,6 +497,7 @@ export function UserAuthForm({ isLogin = true, onToggleForm }: UserAuthFormProps
                         </FormItem>
                       )}
                     />
+
                     <FormField
                       control={registerForm.control}
                       name="licenseNumber"
@@ -472,6 +516,7 @@ export function UserAuthForm({ isLogin = true, onToggleForm }: UserAuthFormProps
                     />
                   </div>
                 )}
+
                 <Button
                   type="submit"
                   className="w-full bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600 transition-all duration-300 hover:shadow-md hover:scale-105 fade-in-delayed"

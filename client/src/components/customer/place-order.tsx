@@ -11,6 +11,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { useLocation } from "wouter";
 import { LoaderCircle, CreditCard, Smartphone, MapPin, Clock } from "lucide-react";
+
 interface PlaceOrderProps {
   businessId: string;
   businessName: string;
@@ -23,6 +24,7 @@ interface PlaceOrderProps {
   onClose: () => void;
   open: boolean;
 }
+
 export function PlaceOrder({ 
   businessId, 
   businessName,
@@ -42,14 +44,20 @@ export function PlaceOrder({
   const [paymentStep, setPaymentStep] = useState(false);
   const [qpayData, setQpayData] = useState<any>(null);
   const [orderId, setOrderId] = useState<string | null>(null);
+
+  // Auto-fill user data if available
   useEffect(() => {
     if (user) {
+      // In a real app, we would populate the user's default address here
       setDeliveryAddress(user.address || "");
     }
   }, [user]);
+
+  // Calculate totals
   const subtotal = selectedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const deliveryFee = 2490;
+  const deliveryFee = 2490; // Fixed delivery fee for demonstration
   const total = subtotal + deliveryFee;
+
   const handleSubmitOrder = async () => {
     if (!user) {
       toast({
@@ -57,12 +65,14 @@ export function PlaceOrder({
         description: "Та эхлээд бүртгэлдээ нэвтэрнэ үү",
         variant: "destructive"
       });
+      // Redirect to login page after showing toast
       setTimeout(() => {
         onClose();
         setLocation("/login");
       }, 1500);
       return;
     }
+    
     if (!deliveryAddress) {
       toast({
         title: "Хүргэлтийн хаяг оруулна уу",
@@ -71,8 +81,11 @@ export function PlaceOrder({
       });
       return;
     }
+
     try {
       setLoading(true);
+
+      // Prepare order data
       const orderData = {
         order: {
           customerUid: user.uid,
@@ -91,29 +104,42 @@ export function PlaceOrder({
           price: item.price
         }))
       };
+
+      // Create order in the database
       const response = await apiRequest("POST", "/api/orders", orderData);
       const result = await response.json();
+      
+      // Store the order ID for reference
       setOrderId(result.id.toString());
+      
       if (paymentMethod === "card") {
+        // Create payment intent for credit card payment
         const paymentData = {
           amount: total,
           orderId: result.id,
           customerName: user.displayName || user.email,
           customerEmail: user.email
         };
+        
         const paymentResponse = await apiRequest("POST", "/api/create-payment-intent", paymentData);
         const paymentResult = await paymentResponse.json();
+        
+        // Navigate to checkout page with payment intent
         setLocation(`/checkout?paymentIntentId=${paymentResult.paymentIntentId}&clientSecret=${paymentResult.clientSecret}&orderId=${result.id}`);
         onClose();
       } else if (paymentMethod === "qpay") {
+        // Create QPay payment request
         const qpayData = {
           amount: total,
           orderId: result.id,
           customerName: user.displayName || user.email,
           customerPhone: user.phoneNumber || ""
         };
+        
         const qpayResponse = await apiRequest("POST", "/api/create-qpay-payment", qpayData);
         const qpayResult = await qpayResponse.json();
+        
+        // Show QPay payment information
         setQpayData(qpayResult);
         setPaymentStep(true);
       }
@@ -128,12 +154,16 @@ export function PlaceOrder({
       setLoading(false);
     }
   };
+
   const handleCheckStatus = async () => {
     if (!orderId) return;
+    
     try {
       setLoading(true);
+      
       const response = await apiRequest("GET", `/api/orders/${orderId}`);
       const orderData = await response.json();
+      
       if (orderData.order.paymentStatus === "completed") {
         toast({
           title: "Төлбөр амжилттай",
@@ -153,6 +183,7 @@ export function PlaceOrder({
       setLoading(false);
     }
   };
+
   return (
     <Dialog open={open} onOpenChange={(open) => {
       if (!open) onClose();
@@ -163,9 +194,13 @@ export function PlaceOrder({
             {!paymentStep ? "Захиалга хийх" : "QPay төлбөр"}
           </DialogTitle>
         </DialogHeader>
+        
         {!paymentStep ? (
+          // Order form
           <div className="grid gap-4 py-4">
             <div className="font-medium text-lg">{businessName}</div>
+            
+            {/* Selected items */}
             <div className="rounded-md bg-gray-50 p-4">
               <h3 className="font-medium mb-2">Сонгосон хоолнууд</h3>
               {selectedItems.map((item, index) => (
@@ -190,6 +225,8 @@ export function PlaceOrder({
                 <span>{total}₮</span>
               </div>
             </div>
+            
+            {/* Delivery details */}
             <div>
               <Label htmlFor="address" className="text-base font-medium flex items-center gap-2">
                 <MapPin className="w-4 h-4" /> Хүргэлтийн хаяг
@@ -203,6 +240,7 @@ export function PlaceOrder({
                 required
               />
             </div>
+            
             <div>
               <Label htmlFor="notes" className="text-base font-medium">Нэмэлт тэмдэглэл</Label>
               <Textarea
@@ -213,6 +251,8 @@ export function PlaceOrder({
                 className="mt-1"
               />
             </div>
+            
+            {/* Delivery time */}
             <div>
               <Label className="text-base font-medium flex items-center gap-2">
                 <Clock className="w-4 h-4" /> Хүргэлтийн цаг
@@ -227,6 +267,7 @@ export function PlaceOrder({
                   <Label htmlFor="custom">Тодорхой цаг сонгох</Label>
                 </div>
               </RadioGroup>
+              
               {selectedTime === "custom" && (
                 <Input
                   type="time"
@@ -237,6 +278,8 @@ export function PlaceOrder({
                 />
               )}
             </div>
+            
+            {/* Payment method */}
             <div>
               <Label className="text-base font-medium">Төлбөрийн хэлбэр</Label>
               <RadioGroup 
@@ -260,6 +303,7 @@ export function PlaceOrder({
             </div>
           </div>
         ) : (
+          // QPay payment information
           <div className="py-4">
             {qpayData ? (
               <div className="flex flex-col items-center">
@@ -268,6 +312,7 @@ export function PlaceOrder({
                   <p className="text-gray-600">Захиалгын дугаар: {qpayData.paymentIntentId}</p>
                   <p className="text-gray-600">Төлөх дүн: {qpayData.amount}₮</p>
                 </div>
+                
                 <div className="mb-4">
                   <img 
                     src={qpayData.qrCodeUrl} 
@@ -275,6 +320,7 @@ export function PlaceOrder({
                     className="w-48 h-48 mx-auto"
                   />
                 </div>
+                
                 <div className="text-center mb-6">
                   <p className="text-sm text-gray-600 mb-2">
                     QPay апп-аар уншуулан төлбөрөө төлнө үү
@@ -288,6 +334,7 @@ export function PlaceOrder({
                     ) : "Төлбөр шалгах"}
                   </Button>
                 </div>
+                
                 {qpayData.deepLink && (
                   <div className="flex gap-2 w-full">
                     <Button 
@@ -315,6 +362,7 @@ export function PlaceOrder({
             )}
           </div>
         )}
+        
         <DialogFooter>
           {!paymentStep ? (
             <>

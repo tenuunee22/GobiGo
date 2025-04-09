@@ -1,9 +1,13 @@
 import { motion } from "framer-motion";
+
 interface CategoryLoaderProps {
   count?: number;
 }
+
 export function CategoryLoader({ count = 5 }: CategoryLoaderProps) {
+  // Food emoji set for different categories
   const foodEmojis = ["🍔", "🍕", "🍜", "🍣", "🥗", "🍲", "🍩", "🍖", "🥪", "🌮"];
+  
   return (
     <div className="flex items-center gap-3 overflow-x-auto py-2 px-1 pb-4 no-scrollbar">
       {Array.from({ length: count }).map((_, index) => (
@@ -14,6 +18,7 @@ export function CategoryLoader({ count = 5 }: CategoryLoaderProps) {
           transition={{ delay: index * 0.1 }}
           className="flex-shrink-0 rounded-full h-20 w-20 bg-gray-100 flex flex-col items-center justify-center relative overflow-hidden group"
         >
+          {/* Background shimmer effect */}
           <motion.div 
             className="absolute inset-0 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100"
             animate={{
@@ -26,6 +31,8 @@ export function CategoryLoader({ count = 5 }: CategoryLoaderProps) {
               delay: index * 0.2 % 1,
             }}
           />
+          
+          {/* Bouncing food emoji */}
           <motion.div
             animate={{ 
               y: [0, -8, 0],
@@ -40,6 +47,8 @@ export function CategoryLoader({ count = 5 }: CategoryLoaderProps) {
           >
             {foodEmojis[index % foodEmojis.length]}
           </motion.div>
+          
+          {/* Category name skeleton */}
           <div className="h-3 bg-gray-200 w-12 rounded-full mt-2 relative z-10">
             <motion.div 
               className="h-full bg-gray-300 rounded-full w-1/2"

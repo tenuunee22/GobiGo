@@ -4,19 +4,24 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Search, MapPin } from 'lucide-react';
+
+// Default center - Ulaanbaatar city center
 const defaultCenter = {
   lat: 47.9184676,
   lng: 106.917693,
 };
+
 const mapContainerStyle = {
   width: '100%',
   height: '400px',
 };
+
 interface LocationPickerProps {
   initialLocation?: { lat: number; lng: number };
   onLocationChange: (location: { lat: number; lng: number; address: string }) => void;
   businessName?: string;
 }
+
 export function LocationPicker({ 
   initialLocation = defaultCenter, 
   onLocationChange,
@@ -28,16 +33,21 @@ export function LocationPicker({
   const [searchBoxRef, setSearchBoxRef] = useState<google.maps.places.SearchBox | null>(null);
   const [searchInput, setSearchInput] = useState("");
   const [loading, setLoading] = useState(false);
+
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
     libraries: ["places"],
   });
+
   const onMapLoad = useCallback((map: google.maps.Map) => {
     setMap(map);
   }, []);
+
   const onSearchBoxLoad = useCallback((ref: google.maps.places.SearchBox) => {
     setSearchBoxRef(ref);
   }, []);
+
+  // Handler for map clicks to set the marker position
   const onMapClick = useCallback((e: google.maps.MapMouseEvent) => {
     if (e.latLng) {
       const newPosition = {
@@ -45,6 +55,8 @@ export function LocationPicker({
         lng: e.latLng.lng()
       };
       setMarkerPosition(newPosition);
+      
+      // Get address from coordinates (reverse geocoding)
       const geocoder = new google.maps.Geocoder();
       geocoder.geocode({ location: newPosition }, (results, status) => {
         if (status === "OK" && results && results[0]) {
@@ -55,18 +67,25 @@ export function LocationPicker({
       });
     }
   }, []);
+
+  // Handler for search box place changes
   const onPlacesChanged = () => {
     if (searchBoxRef) {
       const places = searchBoxRef.getPlaces();
+      
       if (places && places.length > 0) {
         const place = places[0];
+        
         if (place.geometry && place.geometry.location) {
           const newPosition = {
             lat: place.geometry.location.lat(),
             lng: place.geometry.location.lng()
           };
+          
           setMarkerPosition(newPosition);
           setAddress(place.formatted_address || "");
+          
+          // Center the map on the selected place
           if (map) {
             map.panTo(newPosition);
             map.setZoom(16);
@@ -75,19 +94,28 @@ export function LocationPicker({
       }
     }
   };
+
+  // Save the selected location
   const handleSaveLocation = () => {
     setLoading(true);
+    
+    // Wait to simulate API call
     setTimeout(() => {
       onLocationChange({
         ...markerPosition,
         address: address
       });
+      
       setLoading(false);
     }, 500);
   };
+
+  // Update marker when initialLocation changes (e.g. when component receives new props)
   useEffect(() => {
     if (initialLocation) {
       setMarkerPosition(initialLocation);
+      
+      // Get address for initial location
       if (isLoaded) {
         const geocoder = new google.maps.Geocoder();
         geocoder.geocode({ location: initialLocation }, (results, status) => {
@@ -98,6 +126,7 @@ export function LocationPicker({
       }
     }
   }, [initialLocation, isLoaded]);
+
   if (loadError) {
     return (
       <Card>
@@ -111,6 +140,7 @@ export function LocationPicker({
       </Card>
     );
   }
+
   if (!isLoaded) {
     return (
       <Card>
@@ -124,6 +154,7 @@ export function LocationPicker({
       </Card>
     );
   }
+
   return (
     <Card>
       <CardHeader>
@@ -153,6 +184,7 @@ export function LocationPicker({
             </div>
           </StandaloneSearchBox>
         </div>
+
         <div className="rounded-md overflow-hidden border h-80">
           <GoogleMap
             mapContainerStyle={mapContainerStyle}
@@ -164,6 +196,7 @@ export function LocationPicker({
             <Marker position={markerPosition} />
           </GoogleMap>
         </div>
+
         <div>
           <p className="text-sm font-medium">Сонгосон хаяг:</p>
           <p className="text-sm mt-1">{address || "Хаяг сонгоогүй байна"}</p>

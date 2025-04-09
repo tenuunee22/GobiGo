@@ -8,6 +8,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
+
+// Cart item type
 interface CartItem {
   id: string;
   name: string;
@@ -15,6 +17,7 @@ interface CartItem {
   quantity: number;
   imageUrl?: string;
 }
+
 export default function Cart() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -28,22 +31,32 @@ export default function Cart() {
     getTotal 
   } = useCart();
   const [loading, setLoading] = useState(false);
+  
+  // Handle remove from cart with toast notification
   const handleRemoveItem = (id: string) => {
     removeItem(id);
+    
     toast({
       title: "Бүтээгдэхүүн хасагдлаа",
       description: "Сагснаас бүтээгдэхүүн амжилттай хасагдлаа",
     });
   };
+  
+  // Handle clearing cart with toast notification
   const handleClearCart = () => {
     clearCart();
+    
     toast({
       title: "Сагс цэвэрлэгдлээ",
       description: "Таны сагсанд байсан бүх бүтээгдэхүүн хасагдлаа",
     });
   };
+  
+  // Handle checkout - Direct to Stripe static checkout
   const handleCheckout = () => {
     setLoading(true);
+    
+    // Create mock order object for demonstration
     const order = {
       id: Date.now().toString(),
       items: cartItems,
@@ -52,12 +65,17 @@ export default function Cart() {
       subtotal: getSubtotal(),
       date: new Date(),
     };
+    
+    // Store order in localStorage for demo purposes
     localStorage.setItem('currentOrder', JSON.stringify(order));
+    
     try {
-      window.location.href = "/checkout";
+      // Redirect to static Stripe test checkout URL (already setup in server/routes.ts)
+      window.location.href = "https://buy.stripe.com/test_8wM15p4kW8886cw000";
     } catch (error) {
       console.error("Error redirecting to Stripe checkout:", error);
       setLoading(false);
+      
       toast({
         title: "Алдаа гарлаа",
         description: "Төлбөр хийх хуудас руу шилжих үед алдаа гарлаа. Дахин оролдоно уу.",
@@ -65,9 +83,11 @@ export default function Cart() {
       });
     }
   };
+  
   if (cartItems.length === 0) {
     return (
       <div className="mobile-container py-6 md:py-10">
+        {/* Буцах товч */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -82,6 +102,7 @@ export default function Cart() {
             </Button>
           </Link>
         </motion.div>
+        
         <div className="max-w-md mx-auto text-center px-4">
           <motion.div 
             initial={{ scale: 0.5, opacity: 0 }}
@@ -116,6 +137,7 @@ export default function Cart() {
               </motion.div>
             </div>
           </motion.div>
+          
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -126,6 +148,7 @@ export default function Cart() {
               Таны сагс хоосон байна
             </h1>
           </motion.div>
+          
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -168,6 +191,7 @@ export default function Cart() {
               </motion.span>
             </div>
           </motion.div>
+          
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -191,6 +215,7 @@ export default function Cart() {
       </div>
     );
   }
+  
   return (
     <div className="mobile-container py-4 md:py-10">
       <motion.div
@@ -207,7 +232,9 @@ export default function Cart() {
           </Button>
         </Link>
       </motion.div>
+      
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Cart items */}
         <motion.div 
           className="lg:col-span-8"
           initial={{ opacity: 0, x: -20 }}
@@ -242,6 +269,8 @@ export default function Cart() {
                   </CardDescription>
                 </div>
               </div>
+              
+              {/* Утасны хэмжээнд харагдах товч */}
               <motion.div whileTap={{ scale: 0.9 }} className="md:hidden">
                 <Button 
                   variant="ghost" 
@@ -252,6 +281,8 @@ export default function Cart() {
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </motion.div>
+              
+              {/* Том дэлгэцэнд харагдах товч */}
               <motion.div 
                 whileHover={{ scale: 1.05 }} 
                 whileTap={{ scale: 0.95 }}
@@ -267,6 +298,7 @@ export default function Cart() {
                 </Button>
               </motion.div>
             </CardHeader>
+            
             <CardContent className="p-0">
               <div className="divide-y divide-gray-100">
                 {cartItems.map((item, index) => (
@@ -278,6 +310,7 @@ export default function Cart() {
                     className="cart-item p-4 md:p-5 hover:bg-gray-50/80"
                   >
                     <div className="flex flex-col sm:flex-row gap-4">
+                      {/* Зураг */}
                       <div className="cart-item-image shadow-sm mx-auto sm:mx-0">
                         {item.imageUrl ? (
                           <motion.img 
@@ -293,12 +326,16 @@ export default function Cart() {
                           </div>
                         )}
                       </div>
+                      
                       <div className="cart-item-details">
+                        {/* Нэр, үнэ */}
                         <div className="flex justify-between items-start">
                           <div>
                             <h3 className="font-semibold text-base sm:text-lg">{item.name}</h3>
                             <p className="text-gray-600 text-sm">{item.price.toLocaleString()}₮ / ширхэг</p>
                           </div>
+                          
+                          {/* Утасны дэлгэцэнд хасах товч */}
                           <motion.div 
                             whileHover={{ scale: 1.1 }} 
                             whileTap={{ scale: 0.9 }}
@@ -314,6 +351,8 @@ export default function Cart() {
                             </Button>
                           </motion.div>
                         </div>
+                        
+                        {/* Тоо болон үнийн мэдээлэл */}
                         <div className="flex flex-wrap sm:flex-nowrap justify-between items-center gap-2 sm:gap-4 mt-4">
                           <div className="cart-quantity-controls">
                             <motion.button 
@@ -339,10 +378,13 @@ export default function Cart() {
                               +
                             </motion.button>
                           </div>
+                          
                           <div className="flex items-center justify-between w-full sm:w-auto sm:justify-end gap-3">
                             <div className="text-right font-semibold text-lg bg-gradient-to-r from-primary to-indigo-600 bg-clip-text text-transparent">
                               {(item.price * item.quantity).toLocaleString()}₮
                             </div>
+                            
+                            {/* Том дэлгэцэнд хасах товч */}
                             <motion.div 
                               whileHover={{ scale: 1.1 }} 
                               whileTap={{ scale: 0.9 }}
@@ -367,6 +409,8 @@ export default function Cart() {
             </CardContent>
           </Card>
         </motion.div>
+        
+        {/* Order summary */}
         <motion.div 
           className="lg:col-span-4"
           initial={{ opacity: 0, x: 20 }}
@@ -413,6 +457,7 @@ export default function Cart() {
                     {getTotal().toLocaleString()}₮
                   </span>
                 </motion.div>
+                
                 {getSubtotal() < 50000 && (
                   <motion.div 
                     className="bg-gradient-to-r from-amber-50 to-amber-100/50 border border-amber-200 text-amber-800 rounded-xl p-4 text-xs md:text-sm mt-4"

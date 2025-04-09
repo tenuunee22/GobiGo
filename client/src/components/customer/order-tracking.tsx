@@ -1,19 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { motion, AnimatePresence } from "framer-motion";
-import { Separator } from "@/components/ui/separator";
-import { 
-  CheckCircle, 
-  Clock, 
-  Truck, 
-  ChefHat, 
-  Package, 
-  MapPin, 
-  Phone,
-  Navigation
-} from "lucide-react";
+import { useState, useEffect } from "react";
+import { GoogleMapComponent } from "@/components/shared/google-map";
+import { GoogleMapWithDirections } from "@/components/shared/google-map-with-directions";
 
 interface OrderItem {
   name: string;
@@ -55,221 +44,224 @@ export function OrderTracking({
   deliveryFee,
   total,
   currentLocation,
-  destination
+  destination,
 }: OrderTrackingProps) {
-  const [expanded, setExpanded] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState(20);
-  const [elapsedTime, setElapsedTime] = useState(0);
+  // Animation state management
+  const [animating, setAnimating] = useState(false);
+  const [prevStatus, setPrevStatus] = useState<string | null>(null);
   
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (status === "on-the-way" && timeRemaining > 0) {
-        setTimeRemaining(prev => Math.max(0, prev - 1));
-      }
-      
-      if (status !== "delivered") {
-        setElapsedTime(prev => prev + 1);
-      }
-    }, 60000); // Update every minute
-    
-    return () => clearInterval(interval);
-  }, [status, timeRemaining]);
-  
-  const getStatusIcon = (
-    currentStatus: string,
-    checkStatus: string,
-    icon: React.ReactNode,
-    text: string
-  ) => {
-    const statusIndex = {
-      placed: 0,
-      preparing: 1,
-      "on-the-way": 2,
-      delivered: 3
-    };
-    
-    const currentIdx = statusIndex[currentStatus as keyof typeof statusIndex];
-    const checkIdx = statusIndex[checkStatus as keyof typeof statusIndex];
-    
-    return (
-      <div className="flex flex-col items-center">
-        <div 
-          className={`w-12 h-12 rounded-full flex items-center justify-center mb-2
-            ${currentIdx >= checkIdx 
-              ? 'bg-green-500 text-white' 
-              : 'bg-gray-200 text-gray-400'}`}
-        >
-          {icon}
-        </div>
-        <span className={`text-xs font-medium ${currentIdx >= checkIdx ? 'text-green-600' : 'text-gray-400'}`}>
-          {text}
-        </span>
-      </div>
-    );
+  // Status emojis and descriptions
+  const statusInfo = {
+    placed: { emoji: "📝", label: "Захиалга өгсөн", description: "Таны захиалгыг хүлээн авлаа!" },
+    preparing: { emoji: "👨‍🍳", label: "Бэлтгэж байна", description: "Таны хоолыг бэлтгэж байна" },
+    "on-the-way": { emoji: "🛵", label: "Замд явж байна", description: "Хоол замдаа явж байна" },
+    delivered: { emoji: "🎉", label: "Хүргэгдсэн", description: "Сайхан хооллоорой!" }
   };
   
-  const getDeliveryProgress = () => {
+  // Watch for status changes to trigger animation
+  useEffect(() => {
+    if (prevStatus && prevStatus !== status) {
+      setAnimating(true);
+      const timer = setTimeout(() => setAnimating(false), 600);
+      return () => clearTimeout(timer);
+    }
+    setPrevStatus(status);
+  }, [status, prevStatus]);
+  
+  const getStatusPercentage = () => {
     switch (status) {
       case "placed":
-        return 0;
+        return 25;
       case "preparing":
-        return 33;
+        return 50;
       case "on-the-way":
-        return 66;
+        return 75;
       case "delivered":
         return 100;
       default:
         return 0;
     }
   };
-  
-  const progressValue = getDeliveryProgress();
-  
+
   return (
-    <div className="mb-4">
-      <Card className="border border-amber-200 overflow-hidden">
-        <CardHeader className="bg-amber-50 p-4 pb-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1">
-            <CardTitle className="text-base font-medium flex items-center text-amber-800">
-              <Package className="h-5 w-5 mr-2 text-amber-600" />
-              Захиалга #{orderId}
-            </CardTitle>
-            <Badge className={`${status === "delivered" ? "bg-green-600" : "bg-amber-500"}`}>
-              {status === "placed" && "Захиалга хүлээн авсан"}
-              {status === "preparing" && "Бэлтгэж байна"}
-              {status === "on-the-way" && "Хүргэлтэнд гарсан"}
-              {status === "delivered" && "Хүргэгдсэн"}
-            </Badge>
-          </div>
-          <div className="mt-2 relative">
-            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-              <motion.div 
-                className="h-full bg-amber-500"
-                initial={{ width: 0 }}
-                animate={{ width: `${progressValue}%` }}
-                transition={{ duration: 1, ease: "easeInOut" }}
-              />
-            </div>
-            <div className="flex justify-between mt-2">
-              <div className="flex justify-between w-full">
-                {getStatusIcon("placed", "placed", <CheckCircle className="h-5 w-5" />, "Хүлээн авсан")}
-                {getStatusIcon(status, "preparing", <ChefHat className="h-5 w-5" />, "Бэлтгэж байна")}
-                {getStatusIcon(status, "on-the-way", <Truck className="h-5 w-5" />, "Хүргэлтэнд гарсан")}
-                {getStatusIcon(status, "delivered", <CheckCircle className="h-5 w-5" />, "Хүргэгдсэн")}
-              </div>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="p-4 pt-2">
-          {status === "on-the-way" && driver && (
-            <motion.div 
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-blue-50 rounded-lg p-3 mb-3 border border-blue-100"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="relative">
-                    <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-blue-300">
-                      {driver.imageUrl ? (
-                        <img 
-                          src={driver.imageUrl} 
-                          alt={driver.name} 
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-blue-200 flex items-center justify-center">
-                          <Truck className="h-6 w-6 text-blue-500" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="absolute -bottom-1 -right-1 bg-green-500 w-4 h-4 rounded-full border-2 border-white"></div>
-                  </div>
-                  <div className="ml-3">
-                    <div className="font-medium">{driver.name}</div>
-                    <div className="text-sm text-gray-500 flex items-center">
-                      <Clock className="h-3 w-3 mr-1" />
-                      {driver.arrivalTime}
-                    </div>
-                  </div>
+    <section className="mb-12">
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <h2 className="text-xl font-bold text-gray-900 mb-4">
+          {statusInfo[status]?.description || "Таны захиалга замд яваа"}
+        </h2>
+        
+        {driver && (
+          <div className="flex items-center mb-6">
+            <div className="flex-shrink-0 h-12 w-12 rounded-full overflow-hidden mr-4">
+              {driver.imageUrl ? (
+                <img src={driver.imageUrl} alt={driver.name} className="h-full w-full object-cover" />
+              ) : (
+                <div className="h-full w-full bg-gray-200 flex items-center justify-center text-gray-500">
+                  {driver.name.charAt(0)}
                 </div>
-                <Button size="sm" variant="ghost" className="text-blue-600 hover:text-blue-800">
-                  <Phone className="h-4 w-4 mr-2" />
-                  Залгах
-                </Button>
+              )}
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">{driver.name}</h3>
+              <p className="text-sm text-gray-500">Таны хүргэлтийн жолооч • {driver.arrivalTime}-д ирнэ</p>
+            </div>
+            <div className="ml-auto">
+              <Button>
+                <Phone className="h-4 w-4 mr-2" />
+                Холбогдох
+              </Button>
+            </div>
+          </div>
+        )}
+        
+        {/* Animated timeline with emojis */}
+        <div className="relative mb-10">
+          {/* Progress bar */}
+          <div className="h-2 bg-gray-200 rounded-full">
+            <div
+              className="h-2 bg-primary rounded-full transition-all duration-400 ease-in-out"
+              style={{ width: `${getStatusPercentage()}%` }}
+            ></div>
+          </div>
+          
+          {/* Timeline points with emojis */}
+          <div className="absolute top-6 left-0 w-full flex justify-between">
+            {/* Placed */}
+            <div className="flex flex-col items-center">
+              <div 
+                className={`w-10 h-10 flex items-center justify-center rounded-full mb-1 
+                  ${status === "placed" || status === "preparing" || status === "on-the-way" || status === "delivered" 
+                    ? "bg-primary text-white" 
+                    : "bg-gray-200 text-gray-400"} 
+                  ${status === "placed" && animating ? "animate-bounce" : ""} 
+                  transition-all duration-300`}
+              >
+                <span className="text-lg" role="img" aria-label="Захиалга өгсөн">
+                  {statusInfo.placed.emoji}
+                </span>
               </div>
-            </motion.div>
+              <span className={`text-xs font-medium ${status === "placed" || status === "preparing" || status === "on-the-way" || status === "delivered" ? "text-gray-700" : "text-gray-400"}`}>
+                {statusInfo.placed.label}
+              </span>
+            </div>
+            
+            {/* Preparing */}
+            <div className="flex flex-col items-center">
+              <div 
+                className={`w-10 h-10 flex items-center justify-center rounded-full mb-1 
+                  ${status === "preparing" || status === "on-the-way" || status === "delivered" 
+                    ? "bg-primary text-white" 
+                    : "bg-gray-200 text-gray-400"} 
+                  ${status === "preparing" && animating ? "animate-bounce" : ""} 
+                  transition-all duration-300`}
+              >
+                <span className="text-lg" role="img" aria-label="Бэлтгэж байна">
+                  {statusInfo.preparing.emoji}
+                </span>
+              </div>
+              <span className={`text-xs font-medium ${status === "preparing" || status === "on-the-way" || status === "delivered" ? "text-gray-700" : "text-gray-400"}`}>
+                {statusInfo.preparing.label}
+              </span>
+            </div>
+            
+            {/* On the way */}
+            <div className="flex flex-col items-center">
+              <div 
+                className={`w-10 h-10 flex items-center justify-center rounded-full mb-1 
+                  ${status === "on-the-way" || status === "delivered" 
+                    ? "bg-primary text-white" 
+                    : "bg-gray-200 text-gray-400"} 
+                  ${status === "on-the-way" && animating ? "animate-bounce" : ""} 
+                  transition-all duration-300`}
+              >
+                <span className="text-lg" role="img" aria-label="Замд явж байна">
+                  {statusInfo["on-the-way"].emoji}
+                </span>
+              </div>
+              <span className={`text-xs font-medium ${status === "on-the-way" || status === "delivered" ? "text-gray-700" : "text-gray-400"}`}>
+                {statusInfo["on-the-way"].label}
+              </span>
+            </div>
+            
+            {/* Delivered */}
+            <div className="flex flex-col items-center">
+              <div 
+                className={`w-10 h-10 flex items-center justify-center rounded-full mb-1 
+                  ${status === "delivered" 
+                    ? "bg-primary text-white" 
+                    : "bg-gray-200 text-gray-400"} 
+                  ${status === "delivered" && animating ? "animate-bounce" : ""} 
+                  transition-all duration-300`}
+              >
+                <span className="text-lg" role="img" aria-label="Хүргэгдсэн">
+                  {statusInfo.delivered.emoji}
+                </span>
+              </div>
+              <span className={`text-xs font-medium ${status === "delivered" ? "text-gray-700" : "text-gray-400"}`}>
+                {statusInfo.delivered.label}
+              </span>
+            </div>
+          </div>
+        </div>
+        
+        {/* Google Maps integration */}
+        <div className="w-full h-32 rounded-lg mb-4 relative overflow-hidden">
+          {/* Import Google Maps Component */}
+          {status === "on-the-way" && currentLocation && destination ? (
+            <GoogleMapWithDirections 
+              origin={currentLocation} 
+              destination={destination} 
+              driverName={driver?.name || "Жолооч"}
+            />
+          ) : (
+            <GoogleMapComponent 
+              center={destination || { lat: 47.9184676, lng: 106.9177016 }}
+              markers={[
+                {
+                  position: destination || { lat: 47.9184676, lng: 106.9177016 },
+                  title: "Хүргэлтийн хаяг"
+                },
+                ...(currentLocation ? [{
+                  position: currentLocation,
+                  title: "Жолоочийн байршил",
+                  icon: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png"
+                }] : [])
+              ]}
+              zoom={15}
+            />
           )}
           
-          <div 
-            onClick={() => setExpanded(!expanded)}
-            className="cursor-pointer hover:bg-gray-50 rounded-lg p-2 transition-colors"
-          >
-            <div className="flex items-center justify-between">
-              <span className="font-medium">Захиалгын дэлгэрэнгүй</span>
-              <svg
-                className={`h-5 w-5 text-gray-500 transform transition-transform ${expanded ? 'rotate-180' : ''}`}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          <div className="absolute bottom-2 right-2">
+            <button className="p-2 bg-white rounded-full shadow hover:shadow-md focus:outline-none" aria-label="Миний байршил">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-700" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
               </svg>
-            </div>
+            </button>
           </div>
-          
-          <AnimatePresence>
-            {expanded && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="overflow-hidden"
-              >
-                <div className="pt-2 pb-1">
-                  <div className="space-y-2">
-                    {items.map((item, index) => (
-                      <div key={index} className="flex justify-between text-sm">
-                        <div>
-                          <span className="font-medium">{item.quantity}x</span> {item.name}
-                        </div>
-                        <div>{(item.price * item.quantity).toLocaleString()}₮</div>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  <Separator className="my-2" />
-                  
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-sm">
-                      <span>Дүн:</span>
-                      <span>{subtotal.toLocaleString()}₮</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span>Хүргэлтийн төлбөр:</span>
-                      <span>{deliveryFee.toLocaleString()}₮</span>
-                    </div>
-                    <div className="flex justify-between font-bold mt-1">
-                      <span>Нийт дүн:</span>
-                      <span>{total.toLocaleString()}₮</span>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-          
-          {(currentLocation && destination) && (
-            <div className="mt-3 rounded-lg overflow-hidden h-48 bg-blue-50 flex items-center justify-center">
-              <div className="text-blue-500 flex flex-col items-center">
-                <Navigation className="h-8 w-8 mb-2" />
-                <p className="text-sm font-medium">Хүргэлтийн явцыг харах</p>
-              </div>
+        </div>
+        
+        <div className="border-t border-gray-200 pt-4">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Захиалгын дэлгэрэнгүй</h3>
+          {items.map((item, index) => (
+            <div key={index} className="flex justify-between text-sm text-gray-600 mb-1">
+              <span>{item.quantity}x {item.name}</span>
+              <span>{(item.quantity * item.price).toFixed(2)}₮</span>
             </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+          ))}
+          <div className="flex justify-between text-sm text-gray-600 mb-1">
+            <span>Дэд дүн</span>
+            <span>{subtotal.toFixed(2)}₮</span>
+          </div>
+          <div className="flex justify-between text-sm text-gray-600 mb-1">
+            <span>Хүргэлтийн төлбөр</span>
+            <span>{deliveryFee.toFixed(2)}₮</span>
+          </div>
+          <div className="flex justify-between text-sm font-semibold text-gray-900 mt-2 pt-2 border-t border-gray-200">
+            <span>Нийт дүн</span>
+            <span>{total.toFixed(2)}₮</span>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }

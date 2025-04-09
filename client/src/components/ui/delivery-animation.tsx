@@ -1,9 +1,12 @@
 import { motion } from "framer-motion";
+
 interface DeliveryAnimationProps {
   status: "preparing" | "on-the-way" | "arriving" | "delivered";
   size?: "sm" | "md" | "lg";
 }
+
 export function DeliveryAnimation({ status, size = "md" }: DeliveryAnimationProps) {
+  // Size configurations
   const sizeConfig = {
     sm: {
       container: "h-16 w-32",
@@ -27,10 +30,14 @@ export function DeliveryAnimation({ status, size = "md" }: DeliveryAnimationProp
       road: "h-2",
     },
   };
+  
   const selectedSize = sizeConfig[size];
+  
+  // Animation state based on delivery status
   let progress = 0;
   let vehicleEmoji = "🛵";
   let animationDelay = 0;
+  
   switch (status) {
     case "preparing":
       progress = 0;
@@ -53,6 +60,8 @@ export function DeliveryAnimation({ status, size = "md" }: DeliveryAnimationProp
       animationDelay = 0.9;
       break;
   }
+  
+  // Animation variants for the different elements
   const roadVariants = {
     preparing: {
       background: "linear-gradient(90deg, #e2e8f0 0%, #e2e8f0 100%)",
@@ -62,6 +71,7 @@ export function DeliveryAnimation({ status, size = "md" }: DeliveryAnimationProp
       backgroundSize: `${progress}% 100%`,
     },
   };
+
   const vehicleVariants = {
     preparing: {
       x: "10%",
@@ -74,6 +84,7 @@ export function DeliveryAnimation({ status, size = "md" }: DeliveryAnimationProp
       rotate: [0, 5, 0],
     },
   };
+  
   const packageVariants = {
     idle: {
       x: "90%",
@@ -82,8 +93,10 @@ export function DeliveryAnimation({ status, size = "md" }: DeliveryAnimationProp
       opacity: status === "delivered" ? 1 : 0.5,
     },
   };
+  
   return (
     <div className={`relative ${selectedSize.container}`}>
+      {/* The road/path */}
       <motion.div
         className={`absolute bottom-1/3 left-0 w-full ${selectedSize.road} bg-gray-200 rounded-full overflow-hidden`}
         initial="preparing"
@@ -97,6 +110,8 @@ export function DeliveryAnimation({ status, size = "md" }: DeliveryAnimationProp
           transition={{ duration: 1, delay: 0.2 }}
         ></motion.div>
       </motion.div>
+      
+      {/* The delivery vehicle */}
       <motion.div
         className={`absolute bottom-1/3 left-0 ${selectedSize.vehicle}`}
         initial="preparing"
@@ -110,6 +125,8 @@ export function DeliveryAnimation({ status, size = "md" }: DeliveryAnimationProp
       >
         {vehicleEmoji}
       </motion.div>
+      
+      {/* The destination/package */}
       <motion.div
         className={`absolute bottom-1/3 left-0 ${selectedSize.package}`}
         initial="idle"
@@ -122,6 +139,8 @@ export function DeliveryAnimation({ status, size = "md" }: DeliveryAnimationProp
       >
         {status === "delivered" ? "😋" : "🏠"}
       </motion.div>
+      
+      {/* Description text */}
       <motion.div
         className="absolute bottom-0 left-0 w-full text-center text-sm text-gray-600"
         initial={{ opacity: 0 }}

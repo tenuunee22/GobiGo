@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/contexts/auth-context";
+
 interface ChatMessage {
   id: string;
   text: string;
@@ -14,6 +15,7 @@ interface ChatMessage {
   status: "sending" | "sent" | "delivered" | "read";
   attachmentUrl?: string;
 }
+
 interface DeliveryChatProps {
   orderId: string;
   customerName: string;
@@ -24,6 +26,7 @@ interface DeliveryChatProps {
   onSendMessage?: (message: string) => void;
   onClose?: () => void;
 }
+
 export function DeliveryChat({
   orderId,
   customerName,
@@ -39,8 +42,12 @@ export function DeliveryChat({
   const [newMessage, setNewMessage] = useState("");
   const [isExpanded, setIsExpanded] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  // Determine if current user is customer or driver
   const userRole = user?.role || "customer";
   const isCustomer = userRole === "customer";
+
+  // Add system welcome message if no initial messages
   useEffect(() => {
     if (messages.length === 0) {
       setMessages([
@@ -54,11 +61,17 @@ export function DeliveryChat({
       ]);
     }
   }, [isCustomer, customerName, driverName, messages.length]);
+
+  // Auto scroll to bottom of messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Mock function to simulate sending a message
   const handleSendMessage = () => {
     if (!newMessage.trim()) return;
+
+    // Create the new message object
     const message: ChatMessage = {
       id: Date.now().toString(),
       text: newMessage,
@@ -66,11 +79,19 @@ export function DeliveryChat({
       timestamp: new Date(),
       status: "sending",
     };
+
+    // Add to messages
     setMessages((prev) => [...prev, message]);
+    
+    // Clear input
     setNewMessage("");
+    
+    // Call the parent component's callback if provided
     if (onSendMessage) {
       onSendMessage(newMessage);
     }
+    
+    // Simulate message being delivered
     setTimeout(() => {
       setMessages((prev) => 
         prev.map((msg) => 
@@ -79,6 +100,8 @@ export function DeliveryChat({
             : msg
         )
       );
+      
+      // Simulate a response from the other party after 1-3 seconds
       if (Math.random() > 0.5) {
         const delay = 1000 + Math.random() * 2000;
         const responses = [
@@ -88,6 +111,7 @@ export function DeliveryChat({
           "Хаалганы код хэрэгтэй юу?",
           "Баярлалаа!",
         ];
+        
         setTimeout(() => {
           const responseMsg: ChatMessage = {
             id: Date.now().toString(),
@@ -96,20 +120,26 @@ export function DeliveryChat({
             timestamp: new Date(),
             status: "delivered",
           };
+          
           setMessages((prev) => [...prev, responseMsg]);
         }, delay);
       }
     }, 800);
   };
+
+  // Handle pressing Enter to send message
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
   };
+
+  // Format time for display
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
+
   return (
     <motion.div
       initial={{ y: 20, opacity: 0 }}
@@ -118,6 +148,7 @@ export function DeliveryChat({
       className="delivery-chat-container fixed bottom-4 right-4 z-40 w-full max-w-sm bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200"
       style={{ maxHeight: isExpanded ? "500px" : "56px" }}
     >
+      {/* Chat header */}
       <div className="chat-header p-3 bg-gradient-to-r from-primary/90 to-primary-foreground/90 text-white flex items-center justify-between">
         <div className="flex items-center">
           <div className="relative">
@@ -136,6 +167,7 @@ export function DeliveryChat({
             <p className="text-xs text-white/80">Хүргэлтийн захиалга #{orderId}</p>
           </div>
         </div>
+        
         <div className="flex items-center space-x-1">
           <TooltipProvider>
             <Tooltip>
@@ -149,6 +181,7 @@ export function DeliveryChat({
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
+          
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -168,6 +201,7 @@ export function DeliveryChat({
           </TooltipProvider>
         </div>
       </div>
+      
       <AnimatePresence>
         {isExpanded && (
           <motion.div
@@ -176,6 +210,7 @@ export function DeliveryChat({
             exit={{ height: 0, opacity: 0 }}
             className="chat-body bg-gray-50"
           >
+            {/* Messages container */}
             <div className="messages-container h-80 overflow-y-auto p-3 space-y-3">
               {messages.map((message) => (
                 <div
@@ -214,6 +249,7 @@ export function DeliveryChat({
                           </AvatarFallback>
                         </Avatar>
                       )}
+                      
                       <div className={`message-bubble ${
                         message.sender === (isCustomer ? "customer" : "driver")
                           ? "bg-primary text-white"
@@ -247,6 +283,8 @@ export function DeliveryChat({
               ))}
               <div ref={messagesEndRef} />
             </div>
+            
+            {/* Message input */}
             <div className="message-input p-2 border-t border-gray-200 bg-white">
               <div className="flex items-center space-x-2">
                 <TooltipProvider>
@@ -261,6 +299,7 @@ export function DeliveryChat({
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
+                
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -273,6 +312,7 @@ export function DeliveryChat({
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
+                
                 <Input
                   type="text"
                   placeholder="Мессеж бичих..."
@@ -281,6 +321,7 @@ export function DeliveryChat({
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyDown={handleKeyDown}
                 />
+                
                 <Button
                   variant="ghost"
                   size="icon"

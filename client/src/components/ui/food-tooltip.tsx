@@ -2,12 +2,14 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FoodEmojiType } from "./food-emoji-reaction";
 import { cn } from "@/lib/utils";
+
 interface FoodTooltipProps {
   children: React.ReactNode;
   onEmojiSelect?: (emoji: FoodEmojiType) => void;
   position?: "top" | "bottom";
   className?: string;
 }
+
 export function FoodTooltip({
   children,
   onEmojiSelect,
@@ -16,12 +18,16 @@ export function FoodTooltip({
 }: FoodTooltipProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedEmoji, setSelectedEmoji] = useState<FoodEmojiType | null>(null);
+
+  // Бүх боломжит эможинууд
   const emojis: FoodEmojiType[] = ["😋", "🍕", "🍔", "🍜", "🍣", "🥗", "🔥", "👍", "❤️"];
+
   const handleEmojiClick = (emoji: FoodEmojiType) => {
     setSelectedEmoji(emoji);
     onEmojiSelect && onEmojiSelect(emoji);
     setIsOpen(false);
   };
+
   return (
     <div className="relative inline-block">
       <div 
@@ -30,6 +36,7 @@ export function FoodTooltip({
       >
         {children}
       </div>
+
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -62,6 +69,8 @@ export function FoodTooltip({
                 </motion.button>
               ))}
             </div>
+
+            {/* Хуудас дээрээ байрлал тохируулах гурвалжин сум */}
             <div
               className={cn(
                 "absolute left-1/2 transform -translate-x-1/2 h-0 w-0",
@@ -77,6 +86,8 @@ export function FoodTooltip({
     </div>
   );
 }
+
+// Дэлгэрэнгүй эможитой огтолцуур - хоолны дэлгэрэнгүй хуудсанд ашиглана
 export function DetailedFoodTooltip({
   children,
   onEmojiSelect,
@@ -84,6 +95,8 @@ export function DetailedFoodTooltip({
   className
 }: FoodTooltipProps) {
   const [isOpen, setIsOpen] = useState(false);
+
+  // Эможины нэр ба тайлбар
   const emojiGroups = [
     {
       title: "Үнэлгээ",
@@ -105,10 +118,12 @@ export function DetailedFoodTooltip({
       ]
     }
   ];
+
   const handleEmojiClick = (emoji: FoodEmojiType) => {
     onEmojiSelect && onEmojiSelect(emoji);
     setIsOpen(false);
   };
+
   return (
     <div className="relative inline-block">
       <div 
@@ -117,6 +132,7 @@ export function DetailedFoodTooltip({
       >
         {children}
       </div>
+
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -154,6 +170,8 @@ export function DetailedFoodTooltip({
                 </div>
               ))}
             </div>
+
+            {/* Хуудас дээрээ байрлал тохируулах гурвалжин сум */}
             <div
               className={cn(
                 "absolute left-1/2 transform -translate-x-1/2 h-0 w-0",

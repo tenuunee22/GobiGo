@@ -22,6 +22,8 @@ import {
   MapPin,
   SmileyWink
 } from 'phosphor-react';
+
+// Animation variants
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: { 
@@ -39,6 +41,7 @@ const containerVariants = {
     }
   }
 };
+
 const itemVariants = {
   hidden: { y: 20, opacity: 0 },
   visible: { 
@@ -52,6 +55,8 @@ const itemVariants = {
   },
   exit: { y: -20, opacity: 0 }
 };
+
+// Onboarding steps content
 const steps = [
   {
     title: "GobiGo-д тавтай морил!",
@@ -96,6 +101,7 @@ const steps = [
             <span className="text-gray-400">Хоол хайх...</span>
           </motion.div>
         </motion.div>
+        
         <motion.div 
           className="grid grid-cols-2 gap-3 w-4/5"
           variants={containerVariants}
@@ -130,6 +136,7 @@ const steps = [
           transition={{ duration: 0.6 }}
         >
           <div className="text-lg font-medium mb-2">Таны захиалга</div>
+          
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
@@ -155,6 +162,7 @@ const steps = [
               <span>25,400₮</span>
             </div>
           </motion.div>
+          
           <motion.div
             className="mt-4"
             initial={{ opacity: 0 }}
@@ -168,6 +176,7 @@ const steps = [
             <div className="h-8 bg-gray-100 rounded w-full"></div>
           </motion.div>
         </motion.div>
+        
         <motion.button
           className="bg-primary text-white px-4 py-2 rounded-md font-medium"
           whileHover={{ scale: 1.05 }}
@@ -211,6 +220,7 @@ const steps = [
           </div>
           <span className="text-sm font-medium">Төлбөр амжилттай</span>
         </motion.div>
+        
         <motion.div
           className="absolute flex items-center justify-center"
           initial={{ scale: 0, opacity: 0 }}
@@ -230,6 +240,7 @@ const steps = [
             <Truck size={64} className="text-primary" />
           </motion.div>
         </motion.div>
+        
         <motion.div 
           className="absolute left-1/2 bottom-0 transform -translate-x-1/2"
           initial={{ y: 100, opacity: 0 }}
@@ -242,6 +253,7 @@ const steps = [
     )
   }
 ];
+
 const OnboardingModal: React.FC = () => {
   const { 
     isFirstVisit,
@@ -253,8 +265,12 @@ const OnboardingModal: React.FC = () => {
     nextStep,
     prevStep
   } = useOnboarding();
+  
+  // Only show modal if user is in onboarding process or on first visit
   const showModal = (isFirstVisit || (!isOnboardingDone && !isFirstVisit)) && window.location.pathname === "/";
+  
   if (!showModal) return null;
+  
   return (
     <Dialog open={showModal}>
       <DialogContent className="sm:max-w-md">
@@ -266,6 +282,7 @@ const OnboardingModal: React.FC = () => {
             {isFirstVisit ? "Танилцуулга" : steps[currentStep].description}
           </DialogDescription>
         </DialogHeader>
+        
         <AnimatePresence mode="wait">
           {isFirstVisit ? (
             <motion.div
@@ -292,6 +309,7 @@ const OnboardingModal: React.FC = () => {
               >
                 <SmileyWink size={128} weight="duotone" className="text-primary" />
               </motion.div>
+              
               <p className="text-muted-foreground mb-6 text-center">
                 Та энэхүү богино танилцуулга хэсгийг үзэж манай аппликэйшнийг хэрхэн ашиглахыг судлах уу?
               </p>
@@ -307,10 +325,12 @@ const OnboardingModal: React.FC = () => {
             >
               <div className="mb-2">{steps[currentStep].icon}</div>
               <p className="text-muted-foreground mb-4">{steps[currentStep].description}</p>
+              
               {steps[currentStep].animation}
             </motion.div>
           )}
         </AnimatePresence>
+        
         <DialogFooter className="flex flex-col sm:flex-row gap-2">
           {isFirstVisit ? (
             <>
@@ -318,6 +338,7 @@ const OnboardingModal: React.FC = () => {
                 variant="outline"
                 onClick={() => {
                   skipOnboarding();
+                  // Force reload page to apply changes
                   window.location.reload();
                 }}
                 className="sm:flex-1"
@@ -341,6 +362,7 @@ const OnboardingModal: React.FC = () => {
                 >
                   Өмнөх
                 </Button>
+                
                 <div className="flex items-center gap-1">
                   {Array.from({ length: totalSteps }).map((_, index) => (
                     <motion.div
@@ -354,6 +376,7 @@ const OnboardingModal: React.FC = () => {
                     />
                   ))}
                 </div>
+                
                 <Button
                   onClick={() => {
                     if (currentStep === totalSteps - 1) {
@@ -374,4 +397,5 @@ const OnboardingModal: React.FC = () => {
     </Dialog>
   );
 };
+
 export default OnboardingModal;

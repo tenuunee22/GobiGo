@@ -8,9 +8,11 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/contexts/auth-context";
 import { motion } from "framer-motion";
+
 interface LoginFormProps {
   onToggleForm: () => void;
 }
+
 export function LoginForm({ onToggleForm }: LoginFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,28 +21,36 @@ export function LoginForm({ onToggleForm }: LoginFormProps) {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const { setUser } = useAuth();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+
     try {
       const userCredential = await loginUser(email, password);
       toast({
         title: "Амжилттай нэвтэрлээ",
         description: "Тавтай морил!",
       });
+      
+      // Get user data from Firestore to determine role
       const userData = await import("@/lib/firebase").then(m => m.getUserData(userCredential.uid));
       if (userData) {
+        // Set user data in auth context
         setUser({
           uid: userCredential.uid,
           email: userCredential.email,
           displayName: userCredential.displayName,
           ...userData
         });
+        
+        // Redirect based on role
         if (userData.role === 'business') {
           setLocation("/dashboard/store");
         } else if (userData.role === 'delivery') {
           setLocation("/dashboard/driver");
         } else {
+          // Customer or default role
           setLocation("/dashboard");
         }
       }
@@ -55,10 +65,16 @@ export function LoginForm({ onToggleForm }: LoginFormProps) {
       setIsLoading(false);
     }
   };
+
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     try {
       await loginWithGoogle();
+      // No need to handle the result here as we now use redirect flow
+      // The redirect will happen automatically and the result will be
+      // processed by the handleAuthRedirect in AuthContext on return
+      
+      // We'll show a toast to indicate the process has started
       toast({
         title: "Google нэвтрэлт эхэллээ",
         description: "Google хуудас руу шилжиж байна...",
@@ -73,10 +89,16 @@ export function LoginForm({ onToggleForm }: LoginFormProps) {
       setIsLoading(false);
     }
   };
+  
   const handleFacebookLogin = async () => {
     setIsLoading(true);
     try {
       await loginWithFacebook();
+      // No need to handle the result here as we now use redirect flow
+      // The redirect will happen automatically and the result will be
+      // processed by the handleAuthRedirect in AuthContext on return
+      
+      // We'll show a toast to indicate the process has started
       toast({
         title: "Facebook нэвтрэлт эхэллээ",
         description: "Facebook хуудас руу шилжиж байна...",
@@ -91,6 +113,7 @@ export function LoginForm({ onToggleForm }: LoginFormProps) {
       setIsLoading(false);
     }
   };
+
   return (
     <motion.div 
       className="bg-white py-6 px-4 shadow sm:rounded-lg overflow-hidden border border-indigo-100"
@@ -109,6 +132,7 @@ export function LoginForm({ onToggleForm }: LoginFormProps) {
         </span>
         <span className="text-xl tada">👋</span>
       </motion.h2>
+      
       <motion.p 
         className="mb-6 text-center text-sm text-gray-600"
         initial={{ opacity: 0 }}
@@ -128,6 +152,7 @@ export function LoginForm({ onToggleForm }: LoginFormProps) {
           <span className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-400 to-blue-400 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
         </a>
       </motion.p>
+      
       <motion.form 
         className="space-y-6"
         onSubmit={handleSubmit}
@@ -162,6 +187,7 @@ export function LoginForm({ onToggleForm }: LoginFormProps) {
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-indigo-400 wiggle">@</span>
             </div>
           </motion.div>
+
           <motion.div 
             className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg slide-in-right"
             initial={{ x: 20, opacity: 0 }}
@@ -189,6 +215,7 @@ export function LoginForm({ onToggleForm }: LoginFormProps) {
             </div>
           </motion.div>
         </div>
+
         <motion.div 
           className="flex items-center justify-between fade-in"
           initial={{ opacity: 0 }}
@@ -213,10 +240,12 @@ export function LoginForm({ onToggleForm }: LoginFormProps) {
               </span>
             </Label>
           </div>
+          
           <a href="#" className="text-sm text-indigo-600 hover:text-indigo-500">
             Нууц үг мартсан?
           </a>
         </motion.div>
+
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -234,6 +263,7 @@ export function LoginForm({ onToggleForm }: LoginFormProps) {
           </Button>
         </motion.div>
       </motion.form>
+
       <motion.div 
         className="mt-6"
         initial={{ opacity: 0 }}
@@ -251,6 +281,7 @@ export function LoginForm({ onToggleForm }: LoginFormProps) {
             </span>
           </div>
         </div>
+
         <div className="mt-6 grid grid-cols-2 gap-4">
           <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
             <Button
@@ -268,6 +299,7 @@ export function LoginForm({ onToggleForm }: LoginFormProps) {
               <span className="font-medium">Google</span>
             </Button>
           </motion.div>
+
           <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
             <Button
               variant="outline" 
