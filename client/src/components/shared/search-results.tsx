@@ -33,28 +33,28 @@ export function SearchResults({ query, isVisible, onClose }: SearchResultsProps)
           id: '1',
           name: 'Хүслэн Ресторан',
           type: 'restaurant',
-          imageUrl: 'https:
+          imageUrl: 'https://example.com/search-image.jpg',
           description: 'Монгол үндэсний хоолны газар'
         },
         {
           id: '2',
           name: 'Пицца',
           type: 'product',
-          imageUrl: 'https:
+          imageUrl: 'https://example.com/search-image.jpg',
           description: 'Пепперони пицца'
         },
         {
           id: '3',
           name: 'Монгол Амтат',
           type: 'restaurant',
-          imageUrl: 'https:
+          imageUrl: 'https://example.com/search-image.jpg',
           description: 'Үндэсний хоолны газар'
         },
         {
           id: '4',
           name: 'Хамбургер',
           type: 'product',
-          imageUrl: 'https:
+          imageUrl: 'https://example.com/search-image.jpg',
           description: 'Тахианы махан бургер'
         },
         {

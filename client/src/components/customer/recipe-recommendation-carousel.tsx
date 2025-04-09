@@ -43,9 +43,9 @@ export function RecipeRecommendationCarousel() {
         {
           id: '1',
           name: 'Ногоотой Хуушуур',
-          imageUrl: 'https:
+          imageUrl: 'https://example.com/recipe.jpg',
           restaurantName: 'Хүслэн Ресторан',
-          restaurantLogoUrl: 'https:
+          restaurantLogoUrl: 'https://example.com/restaurant.jpg',
           rating: 4.8,
           price: 8000,
           deliveryTime: '20-30 мин',
@@ -55,9 +55,9 @@ export function RecipeRecommendationCarousel() {
         {
           id: '2',
           name: 'Өндөгтэй будаа',
-          imageUrl: 'https:
+          imageUrl: 'https://example.com/recipe.jpg',
           restaurantName: 'Garden Cafe',
-          restaurantLogoUrl: 'https:
+          restaurantLogoUrl: 'https://example.com/restaurant.jpg',
           rating: 4.5,
           price: 9500,
           deliveryTime: '15-25 мин',
@@ -67,9 +67,9 @@ export function RecipeRecommendationCarousel() {
         {
           id: '3',
           name: 'Том Бургер',
-          imageUrl: 'https:
+          imageUrl: 'https://example.com/recipe.jpg',
           restaurantName: 'Big Burger',
-          restaurantLogoUrl: 'https:
+          restaurantLogoUrl: 'https://example.com/restaurant.jpg',
           rating: 4.7,
           price: 12000,
           deliveryTime: '25-35 мин',
@@ -79,9 +79,9 @@ export function RecipeRecommendationCarousel() {
         {
           id: '4',
           name: 'Пепперони Пицца',
-          imageUrl: 'https:
+          imageUrl: 'https://example.com/recipe.jpg',
           restaurantName: 'Pizza Hub',
-          restaurantLogoUrl: 'https:
+          restaurantLogoUrl: 'https://example.com/restaurant.jpg',
           rating: 4.6,
           price: 24000,
           deliveryTime: '30-40 мин',
@@ -91,9 +91,9 @@ export function RecipeRecommendationCarousel() {
         {
           id: '5',
           name: 'Буузны цуглаан',
-          imageUrl: 'https:
+          imageUrl: 'https://example.com/recipe.jpg',
           restaurantName: 'Монгол Гуанз',
-          restaurantLogoUrl: 'https:
+          restaurantLogoUrl: 'https://example.com/restaurant.jpg',
           rating: 4.9,
           price: 15000,
           deliveryTime: '20-30 мин',

@@ -249,7 +249,7 @@ export function DeliveryDashboard() {
                   onClick={() => {
                     const customerLat = currentOrder.deliveryLat || 47.9234676;
                     const customerLng = currentOrder.deliveryLng || 106.9237016;
-                    const mapsUrl = `https:
+                    const mapsUrl = `https://example.com/maps?
                     window.open(mapsUrl, '_blank');
                   }}
                 >
