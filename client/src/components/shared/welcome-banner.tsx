@@ -2,16 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/auth-context';
-
 interface WelcomeBannerProps {
   className?: string;
 }
-
 export function WelcomeBanner({ className = '' }: WelcomeBannerProps) {
   const { user } = useAuth();
   const [greeting, setGreeting] = useState('Сайн байна уу?');
-
-  // Set appropriate greeting based on time of day
   useEffect(() => {
     const hour = new Date().getHours();
     if (hour >= 5 && hour < 12) {
@@ -22,24 +18,15 @@ export function WelcomeBanner({ className = '' }: WelcomeBannerProps) {
       setGreeting('Оройн мэнд!');
     }
   }, []);
-
-  // Get user's first name or full display name
   const userName = user?.name || user?.displayName || '';
   const firstName = userName.split(' ')[0];
-
-  // Get user's initials for avatar fallback
   const getInitials = (name: string) => {
     if (!name) return '?';
-    
     const names = name.split(' ');
     if (names.length === 1) return names[0].charAt(0).toUpperCase();
-    
     return (names[0].charAt(0) + names[names.length - 1].charAt(0)).toUpperCase();
   };
-
-  // If user is not logged in, don't show the banner
   if (!user) return null;
-
   return (
     <motion.div 
       className={`p-4 bg-gradient-to-r from-indigo-500 to-blue-600 rounded-lg shadow-lg text-white mb-6 overflow-hidden relative ${className}`}
@@ -60,7 +47,6 @@ export function WelcomeBanner({ className = '' }: WelcomeBannerProps) {
             </AvatarFallback>
           </Avatar>
         </motion.div>
-        
         <div className="ml-4">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -69,7 +55,6 @@ export function WelcomeBanner({ className = '' }: WelcomeBannerProps) {
           >
             <h2 className="text-xl font-semibold">{greeting}</h2>
           </motion.div>
-          
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -81,7 +66,6 @@ export function WelcomeBanner({ className = '' }: WelcomeBannerProps) {
           </motion.div>
         </div>
       </div>
-      
       <motion.div 
         className="absolute -bottom-6 -right-6 w-24 h-24 bg-white/10 rounded-full"
         animate={{ 
@@ -94,7 +78,6 @@ export function WelcomeBanner({ className = '' }: WelcomeBannerProps) {
           repeatType: 'reverse'
         }}
       />
-      
       <motion.div 
         className="absolute top-2 right-8 w-12 h-12 bg-white/10 rounded-full"
         animate={{ 

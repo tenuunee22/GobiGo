@@ -17,7 +17,6 @@ import {
 } from "@/components/ui/select";
 import { Car, Settings, User2 } from "lucide-react";
 import { DeliveryDashboard } from "@/components/delivery/delivery-dashboard";
-
 export default function DriverProfile() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -28,8 +27,6 @@ export default function DriverProfile() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [licenseNumber, setLicenseNumber] = useState("");
   const [vehicleType, setVehicleType] = useState("");
-  
-  // Load profile data
   useEffect(() => {
     async function loadUserData() {
       if (user && user.uid) {
@@ -39,23 +36,18 @@ export default function DriverProfile() {
             if (userData.profileImage) {
               setProfileImage(userData.profileImage);
             }
-            
             if (userData.vehicleImage) {
               setVehicleImage(userData.vehicleImage);
             }
-            
             if (userData.name) {
               setName(userData.name);
             }
-            
             if (userData.phoneNumber) {
               setPhoneNumber(userData.phoneNumber);
             }
-            
             if (userData.licenseNumber) {
               setLicenseNumber(userData.licenseNumber);
             }
-            
             if (userData.vehicleType) {
               setVehicleType(userData.vehicleType);
             }
@@ -65,24 +57,15 @@ export default function DriverProfile() {
         }
       }
     }
-    
     loadUserData();
   }, [user]);
-  
-  // Handle profile image upload
   const handleProfileImageUpload = async (file: File) => {
     if (!user || !user.uid) return;
-    
     setIsUploading(true);
     try {
       const downloadUrl = await uploadFile(user.uid, file, 'profile');
-      
-      // Update user profile in Firestore
       await updateBusinessProfile(user.uid, { profileImage: downloadUrl });
-      
-      // Update local state
       setProfileImage(downloadUrl);
-      
       toast({
         title: "Профайл зураг амжилттай оруулсан",
         description: "Таны профайл зураг амжилттай хадгалагдлаа",
@@ -98,21 +81,13 @@ export default function DriverProfile() {
       setIsUploading(false);
     }
   };
-  
-  // Handle vehicle image upload
   const handleVehicleImageUpload = async (file: File) => {
     if (!user || !user.uid) return;
-    
     setIsUploading(true);
     try {
       const downloadUrl = await uploadFile(user.uid, file, 'vehicles');
-      
-      // Update user profile in Firestore
       await updateBusinessProfile(user.uid, { vehicleImage: downloadUrl });
-      
-      // Update local state
       setVehicleImage(downloadUrl);
-      
       toast({
         title: "Машины зураг амжилттай оруулсан",
         description: "Таны машины зураг амжилттай хадгалагдлаа",
@@ -128,11 +103,8 @@ export default function DriverProfile() {
       setIsUploading(false);
     }
   };
-  
-  // Handle profile information update
   const handleProfileUpdate = async () => {
     if (!user || !user.uid) return;
-    
     try {
       await updateBusinessProfile(user.uid, {
         name,
@@ -140,7 +112,6 @@ export default function DriverProfile() {
         licenseNumber,
         vehicleType
       });
-      
       toast({
         title: "Мэдээлэл шинэчлэгдлээ",
         description: "Таны хувийн мэдээлэл амжилттай шинэчлэгдлээ",
@@ -154,7 +125,6 @@ export default function DriverProfile() {
       });
     }
   };
-
   return (
     <div className="p-6">
       <Tabs defaultValue="dashboard">
@@ -172,15 +142,13 @@ export default function DriverProfile() {
             Тохиргоо
           </TabsTrigger>
         </TabsList>
-        
         <TabsContent value="dashboard">
           <DeliveryDashboard />
         </TabsContent>
-        
         <TabsContent value="images">
           <div className="max-w-4xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Profile picture upload section */}
+              {}
               <Card>
                 <CardHeader>
                   <CardTitle>Профайл зураг</CardTitle>
@@ -203,8 +171,7 @@ export default function DriverProfile() {
                   </div>
                 </CardContent>
               </Card>
-
-              {/* Vehicle image upload section */}
+              {}
               <Card>
                 <CardHeader>
                   <CardTitle>Машины зураг</CardTitle>
@@ -230,7 +197,6 @@ export default function DriverProfile() {
             </div>
           </div>
         </TabsContent>
-        
         <TabsContent value="settings">
           <div className="max-w-4xl mx-auto">
             <Card>
@@ -251,7 +217,6 @@ export default function DriverProfile() {
                       placeholder="Нэрээ оруулна уу"
                     />
                   </div>
-                  
                   <div>
                     <Label htmlFor="phone">Утасны дугаар</Label>
                     <Input
@@ -261,7 +226,6 @@ export default function DriverProfile() {
                       placeholder="88001234"
                     />
                   </div>
-                  
                   <div>
                     <Label htmlFor="license">Жолооны үнэмлэхний дугаар</Label>
                     <Input
@@ -271,7 +235,6 @@ export default function DriverProfile() {
                       placeholder="1234567"
                     />
                   </div>
-                  
                   <div>
                     <Label htmlFor="vehicle-type">Тээврийн хэрэгслийн төрөл</Label>
                     <Select 
@@ -290,7 +253,6 @@ export default function DriverProfile() {
                       </SelectContent>
                     </Select>
                   </div>
-                  
                   <Button 
                     className="mt-2"
                     onClick={handleProfileUpdate}

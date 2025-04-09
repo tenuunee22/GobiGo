@@ -12,13 +12,10 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { DeliveryChat } from "@/components/shared/delivery-chat";
 import { DeliveryAnimation } from "@/components/ui/delivery-animation";
-
-// Make sure to call loadStripe outside of a component's render
 if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
   throw new Error("VITE_STRIPE_PUBLIC_KEY not found in environment variables");
 }
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
-
 function CheckoutForm({ clientSecret, orderId }: { clientSecret: string, orderId: string }) {
   const stripe = useStripe();
   const elements = useElements();
@@ -28,43 +25,31 @@ function CheckoutForm({ clientSecret, orderId }: { clientSecret: string, orderId
   const [errorMessage, setErrorMessage] = useState("");
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [showDeliveryChat, setShowDeliveryChat] = useState(false);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!stripe || !elements) {
       return;
     }
-
     setLoading(true);
     setErrorMessage("");
-
     try {
-      // For the demo, let's simulate a successful payment
-      // In a real app, this would be handled by the confirmPayment() method
       const simulateSuccess = Math.random() > 0.2;
-      
       if (simulateSuccess) {
-        // Simulate successful payment
         setLoading(false);
         setPaymentSuccess(true);
         setShowDeliveryChat(true);
-        
         toast({
           title: "Төлбөр амжилттай",
           description: "Таны захиалга баталгаажлаа. Хүргэгчтэй холбогдох боломжтой.",
         });
-        
-        return; // Skip the real payment confirmation in demo mode
+        return; 
       }
-      
       const { error } = await stripe.confirmPayment({
         elements,
         confirmParams: {
           return_url: window.location.origin + `/order/${orderId}`,
         },
       });
-
       if (error) {
         console.error("Payment error:", error);
         setErrorMessage(error.message || "Төлбөр хийхэд алдаа гарлаа");
@@ -74,7 +59,6 @@ function CheckoutForm({ clientSecret, orderId }: { clientSecret: string, orderId
           variant: "destructive",
         });
       } else {
-        // The payment was processed or the customer has been redirected
         setPaymentSuccess(true);
         setShowDeliveryChat(true);
         toast({
@@ -89,8 +73,6 @@ function CheckoutForm({ clientSecret, orderId }: { clientSecret: string, orderId
       setLoading(false);
     }
   };
-
-  // If payment was successful, show the success screen
   if (paymentSuccess) {
     return (
       <div className="space-y-6">
@@ -100,7 +82,6 @@ function CheckoutForm({ clientSecret, orderId }: { clientSecret: string, orderId
           <p className="text-gray-600 mb-4">
             Таны захиалга амжилттай бүртгэгдлээ. Хүргэлтийн хүсэлт илгээгдсэн бөгөөд хүргэгчтэй холбогдох боломжтой.
           </p>
-          
           <div className="flex flex-col sm:flex-row gap-3 justify-center mt-6">
             <Button onClick={() => setLocation(`/order/${orderId}`)}>
               <CheckCircle className="mr-2 h-4 w-4" /> Захиалга харах
@@ -110,11 +91,9 @@ function CheckoutForm({ clientSecret, orderId }: { clientSecret: string, orderId
             </Button>
           </div>
         </div>
-        
-        {/* Show the delivery information */}
+        {}
         <div className="p-6 border rounded-lg">
           <h3 className="text-lg font-semibold mb-4">Хүргэлтийн мэдээлэл</h3>
-          
           <div className="flex flex-col gap-4">
             <div className="flex justify-between items-center">
               <div>
@@ -125,7 +104,6 @@ function CheckoutForm({ clientSecret, orderId }: { clientSecret: string, orderId
                 {showDeliveryChat ? "Чат хаах" : "Чат нээх"}
               </Button>
             </div>
-            
             <div className="flex justify-between items-center">
               <div>
                 <p className="text-sm text-gray-500">Хүргэлтийн хугацаа</p>
@@ -136,7 +114,6 @@ function CheckoutForm({ clientSecret, orderId }: { clientSecret: string, orderId
                 <p className="font-medium">{orderId}</p>
               </div>
             </div>
-            
             <div className="py-4">
               <div className="relative pt-4">
                 <DeliveryAnimation status="on-the-way" size="md" />
@@ -144,7 +121,6 @@ function CheckoutForm({ clientSecret, orderId }: { clientSecret: string, orderId
             </div>
           </div>
         </div>
-        
         {showDeliveryChat && (
           <DeliveryChat
             orderId={orderId}
@@ -156,18 +132,14 @@ function CheckoutForm({ clientSecret, orderId }: { clientSecret: string, orderId
       </div>
     );
   }
-
-  // Default payment form when not yet paid
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <PaymentElement />
-      
       {errorMessage && (
         <div className="p-3 bg-red-50 border border-red-200 text-red-800 rounded-md">
           {errorMessage}
         </div>
       )}
-      
       <div className="flex gap-3 justify-end">
         <Button 
           type="button" 
@@ -189,7 +161,6 @@ function CheckoutForm({ clientSecret, orderId }: { clientSecret: string, orderId
     </form>
   );
 }
-
 export default function Checkout() {
   const [searchParams] = useLocation();
   const { toast } = useToast();
@@ -198,24 +169,19 @@ export default function Checkout() {
   const [orderId, setOrderId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
-    // Parse the URL query parameters
     const params = new URLSearchParams(searchParams);
     const secret = params.get("clientSecret");
     const id = params.get("orderId");
-
     if (!secret || !id) {
       setError("Төлбөрийн мэдээлэл дутуу байна");
       setLoading(false);
       return;
     }
-
     setClientSecret(secret);
     setOrderId(id);
     setLoading(false);
   }, [searchParams, toast]);
-
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh]">
@@ -224,7 +190,6 @@ export default function Checkout() {
       </div>
     );
   }
-
   if (error || !clientSecret || !orderId) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh]">
@@ -237,15 +202,10 @@ export default function Checkout() {
       </div>
     );
   }
-
-  // Get total amount from the URL query parameters
   const params = new URLSearchParams(searchParams);
   const amount = parseInt(params.get("amount") || "0", 10);
-
-  // If orderId is a string, it's safe to use it directly
   const orderIdStr = orderId as string;
   const paymentIntentId = "pi_" + Math.random().toString(36).substring(2, 15);
-
   return (
     <div className="container max-w-3xl py-10">
       <Card>
@@ -263,11 +223,10 @@ export default function Checkout() {
                 Карт
               </TabsTrigger>
               <TabsTrigger value="qpay" className="flex items-center gap-2">
-                <img src="https://qpay.mn/q-mark.png" alt="QPay" className="h-4 w-4" />
+                <img src="https://example.com/qpay-logo.png" className="h-4 w-4" alt="QPay logo" />
                 QPay
               </TabsTrigger>
             </TabsList>
-            
             <TabsContent value="card" className="mt-4">
               <Elements 
                 stripe={stripePromise} 
@@ -279,13 +238,12 @@ export default function Checkout() {
                       colorPrimary: '#9d7b4d',
                     }
                   },
-                  locale: 'en' // Unfortunately Stripe doesn't support Mongolian yet
+                  locale: 'en' 
                 }}
               >
                 <CheckoutForm clientSecret={clientSecret} orderId={orderIdStr} />
               </Elements>
             </TabsContent>
-            
             <TabsContent value="qpay" className="mt-4">
               <div className="space-y-6">
                 <div className="bg-muted/50 p-4 rounded-md mb-4">
@@ -299,13 +257,11 @@ export default function Checkout() {
                     <span className="font-bold text-lg">{amount.toLocaleString()}₮</span>
                   </div>
                 </div>
-                
                 <QPayPayment 
                   orderId={orderIdStr} 
                   paymentIntentId={paymentIntentId}
                   amount={amount} 
                 />
-                
                 <Button 
                   variant="outline" 
                   className="w-full mt-2"

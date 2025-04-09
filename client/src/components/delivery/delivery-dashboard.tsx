@@ -15,7 +15,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
 export function DeliveryDashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -32,8 +31,6 @@ export function DeliveryDashboard() {
     distance: 0,
     completed: 0
   });
-  
-  // Handle logout and redirect to login page
   const handleLogout = async () => {
     try {
       await logoutUser();
@@ -41,7 +38,6 @@ export function DeliveryDashboard() {
         title: "Системээс гарлаа",
         description: "Та амжилттай системээс гарлаа",
       });
-      // Redirect to login page after logout
       setLocation("/login");
     } catch (error: any) {
       toast({
@@ -51,40 +47,28 @@ export function DeliveryDashboard() {
       });
     }
   };
-
   useEffect(() => {
     const fetchData = async () => {
       if (!user?.uid) return;
-
       try {
         setLoading(true);
-        
-        // Fetch available orders
         const availableOrders = await getAvailableOrders();
         setAllOrders(availableOrders);
-        
-        // Fetch orders assigned to this driver
         const driverOrders = await getDriverOrders(user.uid);
         setMyOrders(driverOrders);
-        
-        // Calculate earnings and stats
         let todayEarnings = 0;
         let weekEarnings = 0;
         let monthEarnings = 0;
         let totalDistance = 0;
         let completedOrders = 0;
-        
         const today = new Date();
         const weekAgo = new Date();
         weekAgo.setDate(today.getDate() - 7);
         const monthAgo = new Date();
         monthAgo.setMonth(today.getMonth() - 1);
-        
         driverOrders.forEach(order => {
           const orderDate = new Date(order.createdAt || new Date());
           const earnings = order.deliveryFee || 0;
-          
-          // Today's earnings
           if (
             orderDate.getDate() === today.getDate() &&
             orderDate.getMonth() === today.getMonth() &&
@@ -92,26 +76,17 @@ export function DeliveryDashboard() {
           ) {
             todayEarnings += earnings;
           }
-          
-          // This week's earnings
           if (orderDate >= weekAgo) {
             weekEarnings += earnings;
           }
-          
-          // This month's earnings
           if (orderDate >= monthAgo) {
             monthEarnings += earnings;
           }
-          
-          // Total distance (in km)
           totalDistance += parseFloat(order.distance || "0");
-          
-          // Count completed orders
           if (order.status === "delivered" || order.status === "completed") {
             completedOrders++;
           }
         });
-        
         setEarnings({
           today: todayEarnings,
           week: weekEarnings,
@@ -130,19 +105,13 @@ export function DeliveryDashboard() {
         setLoading(false);
       }
     };
-
     fetchData();
   }, [user, toast]);
-
   const handleStatusChange = async (orderId: string) => {
     try {
-      // Find the order to update
       const order = [...myOrders, ...allOrders].find(o => o.id === orderId);
       if (!order) return;
-      
       let newStatus: string;
-      
-      // Determine next status based on current status
       switch (order.status) {
         case "ready":
           newStatus = "on-the-way";
@@ -156,17 +125,11 @@ export function DeliveryDashboard() {
         default:
           newStatus = "on-the-way";
       }
-      
-      // Update order status
       await updateOrderStatus(orderId, newStatus, user?.uid);
-      
-      // Update local state
       const updateOrderInList = (list: any[]) => 
         list.map(o => o.id === orderId ? { ...o, status: newStatus } : o);
-      
       setAllOrders(prev => updateOrderInList(prev));
       setMyOrders(prev => updateOrderInList(prev));
-      
       toast({
         title: "Захиалгын төлөв шинэчлэгдлээ",
         description: `Захиалга ${getStatusText(newStatus)} төлөвт оруулав`,
@@ -180,7 +143,6 @@ export function DeliveryDashboard() {
       });
     }
   };
-
   const getStatusText = (status: string) => {
     switch (status) {
       case "placed": return "Хүлээн авсан";
@@ -193,20 +155,15 @@ export function DeliveryDashboard() {
       default: return status;
     }
   };
-
   const handleAcceptOrder = async (orderId: string) => {
     try {
-      // Update order status and assign driver
       await updateOrderStatus(orderId, "on-the-way", user?.uid);
-      
-      // Move order from available to my orders
       const order = allOrders.find(o => o.id === orderId);
       if (order) {
         const updatedOrder = { ...order, status: "on-the-way", driverId: user?.uid };
         setMyOrders(prev => [...prev, updatedOrder]);
         setAllOrders(prev => prev.filter(o => o.id !== orderId));
       }
-      
       toast({
         title: "Захиалга хүлээн авлаа",
         description: "Та энэ захиалгыг хүргэх болно",
@@ -220,37 +177,26 @@ export function DeliveryDashboard() {
       });
     }
   };
-  
-  // Filter orders by search query and status
   const filterOrders = (orderList: any[]) => {
     return orderList.filter(order => {
-      // Filter by search query
       const matchesQuery = !searchQuery || 
         (order.id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         order.restaurant?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         order.customer?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         order.customer?.address?.toLowerCase().includes(searchQuery.toLowerCase()));
-      
-      // Filter by status
       const matchesStatus = !filterStatus || order.status === filterStatus;
-      
       return matchesQuery && matchesStatus;
     });
   };
-  
   const filteredAllOrders = filterOrders(allOrders);
   const filteredMyOrders = filterOrders(myOrders);
-  
-  // Sort orders by creation date (newest first)
   const sortOrders = (orders: any[]) => {
     return [...orders].sort((a, b) => {
       return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
     });
   };
-  
   const sortedAllOrders = sortOrders(filteredAllOrders);
   const sortedMyOrders = sortOrders(filteredMyOrders);
-
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
@@ -258,7 +204,6 @@ export function DeliveryDashboard() {
           <span className="bg-gradient-to-r from-indigo-600 to-red-600 text-transparent bg-clip-text">Хүргэлтийн жолооч</span>
           <span className="ml-3 tada text-xl">🚚</span>
         </h1>
-        
         <Button
           variant="outline"
           size="sm"
@@ -270,7 +215,6 @@ export function DeliveryDashboard() {
           <LogOut className="h-4 w-4 ml-1" />
         </Button>
       </div>
-      
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 bounce-in">
         <Card className="hover:shadow-lg transition-all duration-300 dashboard-card-hover overflow-hidden border-t-4 border-green-500 slide-in-bottom" style={{ animationDelay: "0.1s" }}>
           <CardHeader className="pb-2">
@@ -286,7 +230,6 @@ export function DeliveryDashboard() {
             </div>
           </CardContent>
         </Card>
-        
         <Card className="hover:shadow-lg transition-all duration-300 dashboard-card-hover overflow-hidden border-t-4 border-blue-500 slide-in-bottom" style={{ animationDelay: "0.2s" }}>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
@@ -300,7 +243,6 @@ export function DeliveryDashboard() {
             </div>
           </CardContent>
         </Card>
-        
         <Card className="hover:shadow-lg transition-all duration-300 dashboard-card-hover overflow-hidden border-t-4 border-amber-500 slide-in-bottom" style={{ animationDelay: "0.3s" }}>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
@@ -315,7 +257,6 @@ export function DeliveryDashboard() {
             </div>
           </CardContent>
         </Card>
-        
         <Card className="hover:shadow-lg transition-all duration-300 dashboard-card-hover overflow-hidden border-t-4 border-indigo-500 slide-in-bottom" style={{ animationDelay: "0.4s" }}>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
@@ -330,7 +271,6 @@ export function DeliveryDashboard() {
           </CardContent>
         </Card>
       </div>
-      
       <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6 slide-in-right">
         <div className="relative">
           <Input
@@ -347,7 +287,6 @@ export function DeliveryDashboard() {
             </div>
           )}
         </div>
-        
         <div className="flex gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -375,7 +314,6 @@ export function DeliveryDashboard() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          
           <Button className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all hover:shadow-md">
             <Map className="h-4 w-4 bounce-soft" />
             <span className="flex items-center">
@@ -385,7 +323,6 @@ export function DeliveryDashboard() {
           </Button>
         </div>
       </div>
-      
       <Tabs defaultValue="my-orders" className="fade-in" style={{ animationDelay: "0.3s" }}>
         <TabsList className="mb-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 p-1 rounded-xl shadow-sm">
           <TabsTrigger 
@@ -417,7 +354,6 @@ export function DeliveryDashboard() {
             </span>
           </TabsTrigger>
         </TabsList>
-        
         <TabsContent value="my-orders" className="space-y-4">
           {loading ? (
             <div className="flex items-center justify-center h-40 bg-gray-50 rounded-xl">
@@ -458,9 +394,7 @@ export function DeliveryDashboard() {
                 variant="outline" 
                 className="mt-2 bg-white border-indigo-200 text-indigo-700 hover:bg-indigo-50"
                 onClick={() => {
-                // Switch to available orders tab programmatically
                 const tabs = document.querySelectorAll("button[role='tab']");
-                // Find the second tab (Available Orders) and click it
                 if (tabs.length > 1) {
                   (tabs[1] as HTMLElement).click();
                 }
@@ -474,7 +408,6 @@ export function DeliveryDashboard() {
             </div>
           )}
         </TabsContent>
-        
         <TabsContent value="available-orders" className="space-y-4">
           {loading ? (
             <div className="flex items-center justify-center h-40 bg-gray-50 rounded-xl">

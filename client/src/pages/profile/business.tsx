@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/select";
 import { Store, ImageIcon, MapPin, Settings } from "lucide-react";
 import { BusinessDashboard } from "@/components/business/business-dashboard";
-
 export default function BusinessProfile() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -30,8 +29,6 @@ export default function BusinessProfile() {
   const [category, setCategory] = useState("restaurant");
   const [location, setLocation] = useState<{ lat: number; lng: number; address: string } | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  
-  // Load profile data
   useEffect(() => {
     async function loadBusinessData() {
       if (user && user.uid) {
@@ -41,15 +38,12 @@ export default function BusinessProfile() {
             setBusinessName(userData.businessName || "");
             setDescription(userData.description || "");
             setCategory(userData.category || "restaurant");
-            
             if (userData.location) {
               setLocation(userData.location);
             }
-            
             if (userData.logoUrl) {
               setLogoImage(userData.logoUrl);
             }
-            
             if (userData.coverUrl) {
               setCoverImage(userData.coverUrl);
             }
@@ -59,24 +53,15 @@ export default function BusinessProfile() {
         }
       }
     }
-    
     loadBusinessData();
   }, [user]);
-  
-  // Handle logo image upload
   const handleLogoUpload = async (file: File) => {
     if (!user || !user.uid) return;
-    
     setIsUploading(true);
     try {
       const downloadUrl = await uploadFile(user.uid, file, 'logos');
-      
-      // Update business profile in Firestore
       await updateBusinessProfile(user.uid, { logoUrl: downloadUrl });
-      
-      // Update local state
       setLogoImage(downloadUrl);
-      
       toast({
         title: "Лого амжилттай оруулсан",
         description: "Таны бизнесийн лого амжилттай хадгалагдлаа",
@@ -92,21 +77,13 @@ export default function BusinessProfile() {
       setIsUploading(false);
     }
   };
-  
-  // Handle cover image upload
   const handleCoverUpload = async (file: File) => {
     if (!user || !user.uid) return;
-    
     setIsUploading(true);
     try {
       const downloadUrl = await uploadFile(user.uid, file, 'covers');
-      
-      // Update business profile in Firestore
       await updateBusinessProfile(user.uid, { coverUrl: downloadUrl });
-      
-      // Update local state
       setCoverImage(downloadUrl);
-      
       toast({
         title: "Ковер зураг амжилттай оруулсан",
         description: "Таны бизнесийн үндсэн зураг амжилттай хадгалагдлаа",
@@ -122,18 +99,14 @@ export default function BusinessProfile() {
       setIsUploading(false);
     }
   };
-  
-  // Handle business information update
   const handleInfoUpdate = async () => {
     if (!user || !user.uid) return;
-    
     try {
       await updateBusinessProfile(user.uid, {
         businessName,
         description,
         category
       });
-      
       toast({
         title: "Мэдээлэл шинэчлэгдлээ",
         description: "Таны бизнесийн мэдээлэл амжилттай шинэчлэгдлээ",
@@ -147,17 +120,11 @@ export default function BusinessProfile() {
       });
     }
   };
-  
-  // Handle location update
   const handleLocationChange = async (newLocation: { lat: number; lng: number; address: string }) => {
     if (!user || !user.uid) return;
-    
     try {
       await updateBusinessProfile(user.uid, { location: newLocation });
-      
-      // Update local state
       setLocation(newLocation);
-      
       toast({
         title: "Байршил шинэчлэгдлээ",
         description: "Таны бизнесийн байршил амжилттай шинэчлэгдлээ",
@@ -171,7 +138,6 @@ export default function BusinessProfile() {
       });
     }
   };
-
   return (
     <div className="p-6">
       <Tabs defaultValue="dashboard">
@@ -193,15 +159,13 @@ export default function BusinessProfile() {
             Тохиргоо
           </TabsTrigger>
         </TabsList>
-        
         <TabsContent value="dashboard">
           <BusinessDashboard />
         </TabsContent>
-        
         <TabsContent value="images">
           <div className="max-w-4xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Logo upload section */}
+              {}
               <Card>
                 <CardHeader>
                   <CardTitle>Бизнесийн лого</CardTitle>
@@ -225,8 +189,7 @@ export default function BusinessProfile() {
                   </div>
                 </CardContent>
               </Card>
-
-              {/* Cover image upload section */}
+              {}
               <Card>
                 <CardHeader>
                   <CardTitle>Бизнесийн ковер зураг</CardTitle>
@@ -253,7 +216,6 @@ export default function BusinessProfile() {
             </div>
           </div>
         </TabsContent>
-        
         <TabsContent value="location">
           <div className="max-w-4xl mx-auto">
             <Card>
@@ -286,7 +248,6 @@ export default function BusinessProfile() {
             </Card>
           </div>
         </TabsContent>
-        
         <TabsContent value="settings">
           <div className="max-w-4xl mx-auto">
             <Card>
@@ -307,7 +268,6 @@ export default function BusinessProfile() {
                       placeholder="Ресторан/Дэлгүүрийн нэрээ оруулна уу"
                     />
                   </div>
-                  
                   <div>
                     <Label htmlFor="description">Тайлбар</Label>
                     <Textarea
@@ -318,7 +278,6 @@ export default function BusinessProfile() {
                       rows={4}
                     />
                   </div>
-                  
                   <div>
                     <Label htmlFor="category">Ангилал</Label>
                     <Select 
@@ -339,7 +298,6 @@ export default function BusinessProfile() {
                       </SelectContent>
                     </Select>
                   </div>
-                  
                   <Button onClick={handleInfoUpdate} className="mt-2">
                     Хадгалах
                   </Button>

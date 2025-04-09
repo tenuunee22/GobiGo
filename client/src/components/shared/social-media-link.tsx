@@ -1,7 +1,6 @@
 import { useState, ReactNode } from "react";
 import { motion } from "framer-motion";
 import { toast } from "@/hooks/use-toast";
-
 interface SocialMediaLinkProps {
   href: string;
   icon: ReactNode;
@@ -13,7 +12,6 @@ interface SocialMediaLinkProps {
   showToast?: boolean;
   toastMessage?: string;
 }
-
 export function SocialMediaLink({
   href,
   icon,
@@ -27,11 +25,8 @@ export function SocialMediaLink({
 }: SocialMediaLinkProps) {
   const [isHovering, setIsHovering] = useState(false);
   const [isClicked, setIsClicked] = useState(false);
-
   const handleClick = () => {
     setIsClicked(true);
-    
-    // Show toast notification
     if (showToast) {
       toast({
         title: toastMessage || `${label} хуудас руу очиж байна`,
@@ -39,16 +34,11 @@ export function SocialMediaLink({
         variant: "default",
       });
     }
-    
-    // Open the link in a new tab
     window.open(href, "_blank");
-    
-    // Reset the click state after animation completes
     setTimeout(() => {
       setIsClicked(false);
     }, 300);
   };
-
   return (
     <motion.div
       className="flex flex-col items-center"
@@ -74,7 +64,7 @@ export function SocialMediaLink({
         }}
         transition={{ type: "spring", stiffness: 400, damping: 15 }}
       >
-        {/* Icon */}
+        {}
         <motion.div
           animate={{
             scale: isHovering ? 1.1 : 1,
@@ -85,8 +75,7 @@ export function SocialMediaLink({
         >
           {icon}
         </motion.div>
-
-        {/* Ripple effect */}
+        {}
         {isClicked && (
           <motion.div
             className="absolute inset-0 bg-white rounded-full"
@@ -95,8 +84,7 @@ export function SocialMediaLink({
             transition={{ duration: 0.5 }}
           />
         )}
-
-        {/* Background animation */}
+        {}
         <motion.div
           className="absolute inset-0 bg-white opacity-0 rounded-full"
           animate={{
@@ -105,8 +93,7 @@ export function SocialMediaLink({
           transition={{ duration: 0.3 }}
         />
       </motion.button>
-
-      {/* Label with pulse on hover */}
+      {}
       <motion.span 
         className="text-amber-900 font-medium"
         animate={{

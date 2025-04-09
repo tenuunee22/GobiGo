@@ -4,11 +4,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Heart } from "lucide-react";
-
-// Хоолны эможи төрлүүд
 export type FoodEmojiType = "🍕" | "🍔" | "🍜" | "🍣" | "🥗" | "😋" | "🔥" | "👍" | "❤️";
-
-// Эможигийн нэр болон тайлбар
 const emojiInfo: Record<FoodEmojiType, { name: string; description: string }> = {
   "🍕": { name: "Пицца", description: "Маш амттай байсан" },
   "🍔": { name: "Бургер", description: "Гайхалтай амттай" },
@@ -20,7 +16,6 @@ const emojiInfo: Record<FoodEmojiType, { name: string; description: string }> = 
   "👍": { name: "Сайн", description: "Сайн чанартай" },
   "❤️": { name: "Хайртай", description: "Хайртай хоол" }
 };
-
 interface FoodEmojiReactionProps {
   foodId: string;
   initialReactions?: Record<FoodEmojiType, number>;
@@ -30,7 +25,6 @@ interface FoodEmojiReactionProps {
   variant?: "horizontal" | "grid" | "compact";
   className?: string;
 }
-
 export function FoodEmojiReaction({
   foodId,
   initialReactions = {} as Record<FoodEmojiType, number>,
@@ -40,19 +34,11 @@ export function FoodEmojiReaction({
   variant = "horizontal",
   className
 }: FoodEmojiReactionProps) {
-  // Хэрэглэгчийн сонгосон эможи
   const [selectedEmoji, setSelectedEmoji] = useState<FoodEmojiType | null>(userReaction);
-  
-  // Эможи бүрийн тоо
   const [reactions, setReactions] = useState<Record<FoodEmojiType, number>>(initialReactions);
-  
-  // Tooltip нээлттэй эсэх
   const [openTooltip, setOpenTooltip] = useState<FoodEmojiType | null>(null);
-
-  // Эможи сонгох үед
   const handleReaction = (emoji: FoodEmojiType) => {
     if (selectedEmoji === emoji) {
-      // Сонгосон эможиг дахин дарвал устгана
       setSelectedEmoji(null);
       setReactions(prev => ({
         ...prev,
@@ -60,15 +46,12 @@ export function FoodEmojiReaction({
       }));
       onReaction && onReaction(null as any);
     } else {
-      // Өмнө нь өөр эможи сонгосон бол түүнийг устгаад шинийг нэмнэ
       if (selectedEmoji) {
         setReactions(prev => ({
           ...prev,
           [selectedEmoji]: Math.max(0, (prev[selectedEmoji] || 0) - 1)
         }));
       }
-      
-      // Шинэ эможи сонгох
       setSelectedEmoji(emoji);
       setReactions(prev => ({
         ...prev,
@@ -77,8 +60,6 @@ export function FoodEmojiReaction({
       onReaction && onReaction(emoji);
     }
   };
-
-  // Эможины хэмжээг тохируулах
   const getEmojiSize = () => {
     switch (size) {
       case "sm": return "text-lg";
@@ -86,28 +67,18 @@ export function FoodEmojiReaction({
       default: return "text-xl";
     }
   };
-
-  // Хэрэглэгчийн дэлгэцийн хэмжээнээс хамаарч, харуулах эможины тоог тогтоох
   const getEmojisToShow = (): FoodEmojiType[] => {
-    // Бүх эможи
     const allEmojis: FoodEmojiType[] = ["🍕", "🍔", "🍜", "🍣", "🥗", "😋", "🔥", "👍", "❤️"];
-    
     if (variant === "compact") {
-      // 'compact' горимд зөвхөн хамгийн их сонгогдсон эможинуудыг харуулна
       const sortedEmojis = Object.entries(reactions)
         .filter(([_, count]) => count > 0)
         .sort(([_, countA], [__, countB]) => countB - countA)
         .map(([emoji]) => emoji as FoodEmojiType);
-      
-      // Хэрэв ямар ч эможи сонгогдоогүй бол хамгийн түгээмэл хэрэглэгддэг эможинуудыг харуулна
       return sortedEmojis.length > 0 ? sortedEmojis.slice(0, 3) : ["👍", "🔥", "❤️"];
     }
-    
     return allEmojis;
   };
-
   const emojisToShow = getEmojisToShow();
-
   return (
     <div 
       className={cn(
@@ -137,8 +108,7 @@ export function FoodEmojiReaction({
                   )}
                 >
                   <span className={getEmojiSize()}>{emoji}</span>
-                  
-                  {/* Эможины тоо > 0 байвал харуулна */}
+                  {}
                   {(reactions[emoji] || 0) > 0 && (
                     <motion.div
                       initial={{ scale: 0.5, opacity: 0 }}
@@ -157,8 +127,7 @@ export function FoodEmojiReaction({
             </TooltipContent>
           </Tooltip>
         ))}
-
-        {/* Хэрэв бүх эможи харагдаагүй бол нэмэлт эможинууд харуулах товч */}
+        {}
         {variant === "compact" && emojisToShow.length < Object.keys(emojiInfo).length && (
           <Tooltip>
             <TooltipTrigger asChild>

@@ -60,8 +60,6 @@ import {
   ChevronDown,
   X
 } from "lucide-react";
-
-// Cart item type
 interface CartItem {
   id: string;
   name: string;
@@ -69,8 +67,6 @@ interface CartItem {
   quantity: number;
   imageUrl?: string;
 }
-
-// Search result type
 interface SearchResult {
   id: string;
   name: string;
@@ -78,7 +74,6 @@ interface SearchResult {
   imageUrl?: string;
   description?: string;
 }
-
 export function Header() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -91,8 +86,6 @@ export function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  
-  // Load cart items from localStorage
   useEffect(() => {
     const savedCart = localStorage.getItem('cartItems');
     if (savedCart) {
@@ -103,8 +96,6 @@ export function Header() {
       }
     }
   }, []);
-  
-  // Set greeting based on time of day
   useEffect(() => {
     const hour = new Date().getHours();
     if (hour >= 5 && hour < 12) {
@@ -115,8 +106,6 @@ export function Header() {
       setGreeting("Оройн мэнд");
     }
   }, []);
-  
-  // Change header on scroll
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 10) {
@@ -125,13 +114,11 @@ export function Header() {
         setIsScrolled(false);
       }
     };
-    
     window.addEventListener("scroll", handleScroll);
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
-  
   const handleLogout = async () => {
     try {
       await logoutUser();
@@ -139,7 +126,6 @@ export function Header() {
         title: "Амжилттай гарлаа",
         description: "Таны бүртгэлээс гарлаа",
       });
-      // Redirect to dashboard after logout
       setLocation("/");
     } catch (error) {
       toast({
@@ -149,11 +135,8 @@ export function Header() {
       });
     }
   };
-
-  // Get correct profile link based on user role
   const getProfileLink = () => {
     if (!user) return "/login";
-    
     switch (user.role) {
       case "business":
         return "/profile/business";
@@ -164,8 +147,6 @@ export function Header() {
         return "/profile/user";
     }
   };
-  
-  // Content for customer
   const customerNav = () => (
     <>
       <NavigationMenuItem>
@@ -184,8 +165,6 @@ export function Header() {
       </NavigationMenuItem>
     </>
   );
-  
-  // Content for business
   const businessNav = () => (
     <>
       <NavigationMenuItem>
@@ -218,8 +197,6 @@ export function Header() {
       </NavigationMenuItem>
     </>
   );
-  
-  // Content for delivery driver
   const deliveryNav = () => (
     <>
       <NavigationMenuItem>
@@ -238,11 +215,8 @@ export function Header() {
       </NavigationMenuItem>
     </>
   );
-  
-  // Mobile drawer content
   const mobileNavItems = () => {
     if (!user) return customerNav();
-    
     switch (user.role) {
       case "business":
         return businessNav();
@@ -253,73 +227,57 @@ export function Header() {
         return customerNav();
     }
   };
-  
-  // Handle search
   const handleSearch = () => {
     if (!searchQuery.trim()) {
       setSearchResults([]);
       return;
     }
-    
-    // Mock search results - in a real app, this would be an API call
     setIsSearchOpen(true);
-    
-    // Simulate API call
     setTimeout(() => {
       const mockResults = [
         {
           id: '1',
           name: 'Хүслэн Ресторан',
           type: 'restaurant' as const,
-          imageUrl: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80',
+          imageUrl: 'https://example.com/avatar.jpg',
           description: 'Монгол үндэсний хоолны ресторан'
         },
         {
           id: '2',
           name: 'Пицца',
           type: 'product' as const,
-          imageUrl: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80',
+          imageUrl: 'https://example.com/avatar.jpg',
           description: 'Пепперони пицца'
         },
         {
           id: '3',
           name: 'Монгол Амтат',
           type: 'restaurant' as const,
-          imageUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80',
+          imageUrl: 'https://example.com/avatar.jpg',
           description: 'Үндэсний хоолны газар'
         }
       ];
-      
       const results: SearchResult[] = mockResults.filter(item => 
         item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
         (item.description && item.description.toLowerCase().includes(searchQuery.toLowerCase()))
       );
-      
       setSearchResults(results);
     }, 300);
   };
-  
-  // Remove item from cart
   const removeFromCart = (id: string) => {
     const updatedCart = cartItems.filter(item => item.id !== id);
     setCartItems(updatedCart);
     localStorage.setItem('cartItems', JSON.stringify(updatedCart));
-    
     toast({
       title: "Бүтээгдэхүүн хасагдлаа",
       description: "Сагснаас бүтээгдэхүүн амжилттай хасагдлаа",
     });
   };
-  
-  // Calculate total cart price
   const getTotalPrice = () => {
     return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
   };
-
-  // Desktop navigation content
   const desktopNavItems = () => {
     if (!user) return customerNav();
-    
     switch (user.role) {
       case "business":
         return businessNav();
@@ -330,25 +288,22 @@ export function Header() {
         return customerNav();
     }
   };
-  
   return (
     <header className={`sticky top-0 z-50 transition-all duration-300 ${isScrolled ? "bg-white shadow-md" : "bg-transparent"}`}>
       <div className="container mx-auto px-4 py-3">
         <div className="flex justify-between items-center">
-          {/* Logo and Welcome Message */}
+          {}
           <div className="flex items-center gap-2">
             <Link href="/">
               <span className="text-xl font-bold text-primary cursor-pointer">GobiGo</span>
             </Link>
-            
             {user && (
               <div className="hidden md:block ml-4 text-sm text-gray-600">
                 {greeting}, {user.name || user.displayName || "Хэрэглэгч"}!
               </div>
             )}
           </div>
-          
-          {/* Navigation - Desktop */}
+          {}
           {!isMobile && (
             <NavigationMenu className="hidden md:block">
               <NavigationMenuList className="flex gap-1">
@@ -356,25 +311,22 @@ export function Header() {
               </NavigationMenuList>
             </NavigationMenu>
           )}
-          
-          {/* User Menu and Actions */}
+          {}
           <div className="flex items-center gap-4">
-            {/* Search Bar */}
+            {}
             <div className="hidden md:block w-64">
               <SearchBar 
                 placeholder="Рестораны нэр, хоол, хүргэлт хайх..." 
                 expandOnMobile={false}
               />
             </div>
-            
-            {/* Mobile Search Button */}
+            {}
             <div className="md:hidden">
               <SearchBar 
                 expandOnMobile={true}
               />
             </div>
-            
-            {/* Cart Popover - only show when user is logged in as customer */}
+            {}
             {user && user.role === 'customer' ? (
               <Popover open={isCartOpen} onOpenChange={setIsCartOpen}>
                 <PopoverTrigger asChild>
@@ -392,7 +344,6 @@ export function Header() {
                     <div className="font-medium">Миний сагс</div>
                     <div className="text-sm text-gray-500">{cartItems.length} бүтээгдэхүүн</div>
                   </div>
-                  
                   {cartItems.length > 0 ? (
                     <>
                       <div className="max-h-80 overflow-y-auto">
@@ -436,22 +387,16 @@ export function Header() {
                           onClick={() => {
                             setIsCartOpen(false);
                             if (cartItems.length > 0) {
-                              // Create mock order object for demonstration
                               const order = {
                                 id: Date.now().toString(),
                                 items: cartItems,
                                 totalAmount: getTotalPrice(),
                                 date: new Date(),
                               };
-                              
-                              // Store order in localStorage for demo purposes
                               localStorage.setItem('currentOrder', JSON.stringify(order));
-                              
-                              // Go directly to Stripe checkout for small carts
                               if (cartItems.length <= 3) {
                                 window.location.href = "/api/stripe-static-checkout";
                               } else {
-                                // For larger carts, go to cart page first
                                 setLocation("/cart");
                               }
                             } else {
@@ -482,8 +427,7 @@ export function Header() {
                 </PopoverContent>
               </Popover>
             ) : null}
-            
-            {/* User Profile Menu */}
+            {}
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -525,8 +469,7 @@ export function Header() {
                 <Link href="/login">Нэвтрэх</Link>
               </Button>
             )}
-            
-            {/* Mobile Menu Trigger */}
+            {}
             {isMobile && (
               <Drawer>
                 <DrawerTrigger asChild>

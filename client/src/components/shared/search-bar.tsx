@@ -5,12 +5,10 @@ import { SearchResults } from "./search-results";
 import { Search, X } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { motion, AnimatePresence } from "framer-motion";
-
 interface SearchBarProps {
   placeholder?: string;
   expandOnMobile?: boolean;
 }
-
 export function SearchBar({ 
   placeholder = "Хайх...", 
   expandOnMobile = true 
@@ -20,7 +18,6 @@ export function SearchBar({
   const [query, setQuery] = useState("");
   const [showResults, setShowResults] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
-  
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
@@ -28,13 +25,11 @@ export function SearchBar({
         setShowResults(false);
       }
     }
-    
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-  
   useEffect(() => {
     if (query.trim()) {
       setShowResults(true);
@@ -42,8 +37,6 @@ export function SearchBar({
       setShowResults(false);
     }
   }, [query]);
-  
-  // Handle non-expanding search in desktop mode
   if (!isMobile || !expandOnMobile) {
     return (
       <div className="relative w-full" ref={searchRef}>
@@ -68,7 +61,6 @@ export function SearchBar({
             </Button>
           )}
         </div>
-        
         <SearchResults
           query={query}
           isVisible={showResults}
@@ -77,8 +69,6 @@ export function SearchBar({
       </div>
     );
   }
-  
-  // Mobile expandable search
   return (
     <div className="relative" ref={searchRef}>
       <AnimatePresence>
@@ -130,7 +120,6 @@ export function SearchBar({
           </motion.div>
         )}
       </AnimatePresence>
-      
       <SearchResults
         query={query}
         isVisible={expanded && showResults}

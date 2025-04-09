@@ -6,7 +6,6 @@ import { OrderItem } from "@/components/business/order-item";
 import { ProductForm } from "@/components/business/product-form";
 import { WelcomeBanner } from "@/components/shared/welcome-banner";
 import { ClipboardList, DollarSign, Star } from "lucide-react";
-
 export function BusinessDashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -14,24 +13,18 @@ export function BusinessDashboard() {
   const [orderHistory, setOrderHistory] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState("active-orders");
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     const fetchOrders = async () => {
       if (!user || !user.uid) return;
-      
       try {
         setLoading(true);
         const orders = await getBusinessOrders(user.uid);
-        
-        // Split orders into active and history
         const active = orders.filter(order => 
           ["new", "accepted", "ready", "picked_up"].includes(order.status)
         );
-        
         const history = orders.filter(order => 
           ["delivered", "declined", "cancelled"].includes(order.status)
         );
-        
         setActiveOrders(active);
         setOrderHistory(history);
       } catch (error) {
@@ -45,23 +38,18 @@ export function BusinessDashboard() {
         setLoading(false);
       }
     };
-    
     fetchOrders();
   }, [user, toast]);
-
   const handleOrderStatusChange = () => {
-    // Refetch orders when status changes
     if (user && user.uid) {
       getBusinessOrders(user.uid)
         .then(orders => {
           const active = orders.filter(order => 
             ["new", "accepted", "ready", "picked_up"].includes(order.status)
           );
-          
           const history = orders.filter(order => 
             ["delivered", "declined", "cancelled"].includes(order.status)
           );
-          
           setActiveOrders(active);
           setOrderHistory(history);
         })
@@ -70,27 +58,22 @@ export function BusinessDashboard() {
         });
     }
   };
-
-  // Mock data for the stats
   const stats = {
     todaysOrders: activeOrders.length,
     todaysRevenue: activeOrders.reduce((sum, order) => sum + (order.total || 0), 0),
     customerRating: 4.8
   };
-
   return (
     <div className="py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Welcome Banner */}
+        {}
         {user && <WelcomeBanner className="mb-6" />}
-        
-        {/* Business overview section */}
+        {}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Бизнесийн хяналтын самбар</h1>
           <p className="text-gray-600 mt-2">Өнөөдрийн борлуулалт, {user?.businessName || user?.name || "Дэлгүүрийн эзэн"}</p>
         </div>
-        
-        {/* Stats cards */}
+        {}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white shadow rounded-lg p-6">
             <div className="flex items-center">
@@ -103,7 +86,6 @@ export function BusinessDashboard() {
               </div>
             </div>
           </div>
-          
           <div className="bg-white shadow rounded-lg p-6">
             <div className="flex items-center">
               <div className="p-3 rounded-full bg-green-100 text-green-600">
@@ -115,7 +97,6 @@ export function BusinessDashboard() {
               </div>
             </div>
           </div>
-          
           <div className="bg-white shadow rounded-lg p-6">
             <div className="flex items-center">
               <div className="p-3 rounded-full bg-amber-100 text-amber-600">
@@ -128,8 +109,7 @@ export function BusinessDashboard() {
             </div>
           </div>
         </div>
-        
-        {/* Manage products and orders tabs */}
+        {}
         <div className="bg-white shadow rounded-lg mb-8">
           <div className="border-b border-gray-200">
             <nav className="flex -mb-px">
@@ -165,8 +145,7 @@ export function BusinessDashboard() {
               </button>
             </nav>
           </div>
-          
-          {/* Tab content */}
+          {}
           <div className="p-6">
             {activeTab === "active-orders" && (
               <div className="flow-root">
@@ -200,7 +179,6 @@ export function BusinessDashboard() {
                 )}
               </div>
             )}
-            
             {activeTab === "order-history" && (
               <div className="flow-root">
                 {loading ? (
@@ -233,7 +211,6 @@ export function BusinessDashboard() {
                 )}
               </div>
             )}
-            
             {activeTab === "manage-products" && (
               <ProductForm 
                 onSave={(productData) => {

@@ -1,13 +1,11 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-
 interface OnboardingStepProps {
   title: string;
   description: string;
   icon: React.ReactNode;
   animation: React.ReactNode;
 }
-
 const OnboardingStep: React.FC<OnboardingStepProps> = ({
   title,
   description,
@@ -24,10 +22,8 @@ const OnboardingStep: React.FC<OnboardingStepProps> = ({
     >
       <div className="mb-2">{icon}</div>
       <p className="text-muted-foreground mb-4">{description}</p>
-      
       {animation}
     </motion.div>
   );
 };
-
 export default OnboardingStep;

@@ -3,18 +3,14 @@ import { useAuth } from "@/contexts/auth-context";
 import { BusinessDashboard } from "@/components/business/business-dashboard";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
-
 export default function BusinessDashboardPage() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
-
   useEffect(() => {
-    // Redirect if not a business user
     if (user && user.role !== "business") {
       setLocation("/dashboard");
     }
   }, [user, setLocation]);
-
   if (!user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -29,6 +25,5 @@ export default function BusinessDashboardPage() {
       </div>
     );
   }
-
   return <BusinessDashboard />;
 }

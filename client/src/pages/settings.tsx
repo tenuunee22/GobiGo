@@ -9,16 +9,12 @@ import { Separator } from "@/components/ui/separator";
 import { Link } from "wouter";
 import { useAuth } from "@/contexts/auth-context";
 import { Bell, Check, CreditCard, Key, Lock, Map, Plus, Shield, ShieldCheck, Trash2, User } from "lucide-react";
-
 export default function Settings() {
   const { user } = useAuth();
-  
-  // Mock data for payment methods
   const cardList = [
     { id: "1", type: "visa", number: "•••• •••• •••• 4242", expiry: "12/24", isDefault: true },
     { id: "2", type: "mastercard", number: "•••• •••• •••• 8840", expiry: "06/25", isDefault: false },
   ];
-
   return (
     <div className="container mx-auto px-4 py-6 md:py-10 max-w-5xl">
       <motion.h1 
@@ -32,7 +28,6 @@ export default function Settings() {
         </span>
         Хэрэглэгчийн тохиргоо
       </motion.h1>
-
       <Tabs defaultValue="profile" className="w-full fade-in">
         <TabsList className="grid w-full grid-cols-3 mb-5 md:mb-8 bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-100 p-1 rounded-xl shadow-sm">
           <TabsTrigger 
@@ -66,7 +61,6 @@ export default function Settings() {
             </span>
           </TabsTrigger>
         </TabsList>
-
         <TabsContent value="profile">
           <div className="grid gap-6 lg:grid-cols-2">
             <motion.div 
@@ -100,7 +94,6 @@ export default function Settings() {
                         <div className="border p-2 md:p-3 rounded-md mt-1 bg-gray-50 text-sm md:text-base overflow-hidden text-ellipsis">{user?.email || "Имэйл байхгүй"}</div>
                       </div>
                     </motion.div>
-                    
                     <motion.div 
                       className="flex flex-col md:flex-row gap-3 md:gap-4"
                       initial={{ opacity: 0, y: 10 }}
@@ -155,7 +148,6 @@ export default function Settings() {
                 </CardFooter>
               </Card>
             </motion.div>
-
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -190,7 +182,6 @@ export default function Settings() {
                         </motion.div>
                       </div>
                     </div>
-                    
                     <div className="rounded-lg border-2 border-dashed border-gray-200 p-3 md:p-4 text-center hover:border-primary/30 transition-colors">
                       <div className="text-xs md:text-sm text-gray-500">
                         Та өөрийн байршлыг зөв оруулснаар хүргэлтийг шуурхай авах боломжтой.
@@ -202,7 +193,6 @@ export default function Settings() {
             </motion.div>
           </div>
         </TabsContent>
-
         <TabsContent value="payment">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -227,7 +217,7 @@ export default function Settings() {
                     transition={{ delay: index * 0.1 }}
                     className="mobile-payment-card rounded-lg border hover:border-primary/50 transition-all duration-300 hover:shadow-md"
                   >
-                    {/* Том дэлгэцэнд харагдах - хэвтээ */}
+                    {}
                     <div className="hidden sm:flex sm:justify-between sm:items-center">
                       <div className="flex items-center space-x-4">
                         <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-3 rounded-lg text-white">
@@ -252,8 +242,7 @@ export default function Settings() {
                         </Button>
                       </motion.div>
                     </div>
-                    
-                    {/* Утасны хэмжээнд харагдах - босоо */}
+                    {}
                     <div className="sm:hidden">
                       <div className="flex items-start gap-3">
                         <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-3 rounded-lg text-white">
@@ -280,7 +269,6 @@ export default function Settings() {
                     </div>
                   </motion.div>
                 ))}
-                
                 <motion.div 
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -291,7 +279,6 @@ export default function Settings() {
                   </div>
                   <h3 className="font-medium mb-1 text-base">Карт нэмэх</h3>
                   <p className="text-xs md:text-sm text-muted-foreground max-w-[220px] md:max-w-none">Visa, Mastercard, болон бусад картууд.</p>
-                  
                   <motion.div className="mt-4" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                     <Link href="/profile/user">
                       <Button className="mobile-button px-5 rounded-full bg-gradient-to-r from-primary to-indigo-600 text-sm">
@@ -301,8 +288,7 @@ export default function Settings() {
                     </Link>
                   </motion.div>
                 </motion.div>
-                
-                {/* QPay хэрэглэх боломж */}
+                {}
                 <motion.div
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -335,7 +321,6 @@ export default function Settings() {
             </Card>
           </motion.div>
         </TabsContent>
-
         <TabsContent value="privacy">
           <div className="grid gap-6 lg:grid-cols-2">
             <motion.div
@@ -369,7 +354,6 @@ export default function Settings() {
                     </div>
                     <Switch id="twoFactor" className="ml-3 data-[state=checked]:bg-purple-600" />
                   </div>
-
                   <div className="bg-white rounded-md overflow-hidden p-3 shadow-sm border border-purple-100 hover:border-purple-200 transition-colors">
                     <div className="flex items-start gap-3">
                       <div className="bg-gradient-to-r from-indigo-500 to-blue-500 p-2 rounded-lg text-white jelly">
@@ -401,7 +385,6 @@ export default function Settings() {
                 </CardContent>
               </Card>
             </motion.div>
-            
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -433,7 +416,6 @@ export default function Settings() {
                     </div>
                     <Switch id="orderNotifications" defaultChecked className="ml-3 data-[state=checked]:bg-blue-600" />
                   </div>
-                  
                   <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-blue-100 hover:border-blue-200 transition-colors shadow-sm">
                     <div className="space-y-0.5">
                       <Label htmlFor="marketingNotifications" className="text-sm font-medium flex items-center">
@@ -444,7 +426,6 @@ export default function Settings() {
                     </div>
                     <Switch id="marketingNotifications" className="ml-3 data-[state=checked]:bg-blue-600" />
                   </div>
-                  
                   <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-blue-100 hover:border-blue-200 transition-colors shadow-sm">
                     <div className="space-y-0.5">
                       <Label htmlFor="securityNotifications" className="text-sm font-medium flex items-center">
@@ -470,7 +451,6 @@ export default function Settings() {
                 </CardFooter>
               </Card>
             </motion.div>
-            
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -512,7 +492,6 @@ export default function Settings() {
                       </span>
                     </Button>
                   </div>
-                  
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-white rounded-lg border border-teal-100 hover:border-teal-200 transition-colors shadow-sm">
                     <div className="space-y-0.5 mb-2 sm:mb-0">
                       <Label htmlFor="cookiePolicy" className="text-sm font-medium flex items-center">
@@ -544,7 +523,6 @@ export default function Settings() {
                       </Button>
                     </div>
                   </div>
-                  
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-white rounded-lg border border-teal-100 hover:border-teal-200 transition-colors shadow-sm">
                     <div className="space-y-0.5 mb-2 sm:mb-0">
                       <Label className="text-sm font-medium flex items-center">

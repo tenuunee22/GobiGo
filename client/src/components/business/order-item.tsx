@@ -19,7 +19,6 @@ import {
   Ban
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-
 interface OrderItemProps {
   id: string;
   orderNumber: string;
@@ -36,7 +35,6 @@ interface OrderItemProps {
   requestedTime: string;
   onStatusChange: () => void;
 }
-
 export function OrderItem({
   id,
   orderNumber,
@@ -49,11 +47,9 @@ export function OrderItem({
   onStatusChange
 }: OrderItemProps) {
   const [open, setOpen] = useState(false);
-  
   const getStatusBadge = () => {
     let variant: "default" | "secondary" | "outline" = "default";
     let label = "";
-    
     switch (status) {
       case "placed":
         variant = "outline";
@@ -87,10 +83,8 @@ export function OrderItem({
         variant = "outline";
         label = status;
     }
-    
     return <Badge variant={variant}>{label}</Badge>;
   };
-  
   const getStatusButtonLabel = () => {
     switch (status) {
       case "placed":
@@ -111,9 +105,7 @@ export function OrderItem({
         return "Статус шинэчлэх";
     }
   };
-
   const isActionDisabled = status === "completed" || status === "cancelled";
-  
   return (
     <Card className="mb-4">
       <Collapsible open={open} onOpenChange={setOpen}>
@@ -138,7 +130,6 @@ export function OrderItem({
               </CollapsibleTrigger>
             </div>
           </div>
-          
           <CollapsibleContent>
             <div className="mt-4 space-y-4">
               <div>
@@ -147,7 +138,7 @@ export function OrderItem({
                   {items.map((item, index) => (
                     <div key={index} className="flex items-center justify-between text-sm">
                       <div className="flex items-center gap-2">
-                        {/* Item image */}
+                        {}
                         <div className="w-10 h-10 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
                           {item.imageUrl ? (
                             <img 
@@ -177,7 +168,6 @@ export function OrderItem({
                   <span>{total.toLocaleString()}₮</span>
                 </div>
               </div>
-              
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm">
                   <MapPin size={16} />
@@ -188,7 +178,6 @@ export function OrderItem({
                   <span>{requestedTime}</span>
                 </div>
               </div>
-              
               <div className="flex justify-between pt-2">
                 <Button 
                   variant="outline" 
@@ -196,7 +185,6 @@ export function OrderItem({
                   disabled={isActionDisabled}
                   onClick={() => {
                     if (window.confirm("Захиалгыг цуцлах уу?")) {
-                      // In a real app, this would call an API to cancel the order
                       alert("Захиалга цуцлагдлаа");
                     }
                   }}
@@ -204,7 +192,6 @@ export function OrderItem({
                   <Ban size={16} className="mr-1" /> 
                   Цуцлах
                 </Button>
-                
                 <Button 
                   size="sm"
                   disabled={isActionDisabled}
