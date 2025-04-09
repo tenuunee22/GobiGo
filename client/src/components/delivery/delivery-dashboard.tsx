@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/auth-context";
-import { getAvailableOrders, getDriverOrders, updateOrderStatus } from "@/lib/firebase";
+import { getAvailableOrders, getDriverOrders, updateOrderStatus, logoutUser } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OrderCard } from "@/components/delivery/order-card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Map, ChevronDown } from "lucide-react";
+import { Search, Map, ChevronDown, LogOut } from "lucide-react";
+import { useLocation } from "wouter";
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -23,6 +24,7 @@ export function DeliveryDashboard() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<string | null>(null);
+  const [, setLocation] = useLocation();
   const [earnings, setEarnings] = useState({
     today: 0,
     week: 0,
@@ -30,6 +32,25 @@ export function DeliveryDashboard() {
     distance: 0,
     completed: 0
   });
+  
+  // Handle logout and redirect to login page
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+      toast({
+        title: "Системээс гарлаа",
+        description: "Та амжилттай системээс гарлаа",
+      });
+      // Redirect to login page after logout
+      setLocation("/login");
+    } catch (error: any) {
+      toast({
+        title: "Алдаа гарлаа",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -232,10 +253,23 @@ export function DeliveryDashboard() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6 slide-in-left flex items-center">
-        <span className="bg-gradient-to-r from-indigo-600 to-red-600 text-transparent bg-clip-text">Хүргэлтийн жолооч</span>
-        <span className="ml-3 tada text-xl">🚚</span>
-      </h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold slide-in-left flex items-center">
+          <span className="bg-gradient-to-r from-indigo-600 to-red-600 text-transparent bg-clip-text">Хүргэлтийн жолооч</span>
+          <span className="ml-3 tada text-xl">🚚</span>
+        </h1>
+        
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-2 border-red-200 hover:bg-red-50 hover:text-red-600 transition-all slide-in-right"
+          onClick={handleLogout}
+        >
+          <span className="text-xs jelly">👋</span>
+          <span>Гарах</span>
+          <LogOut className="h-4 w-4 ml-1" />
+        </Button>
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 bounce-in">
         <Card className="hover:shadow-lg transition-all duration-300 dashboard-card-hover overflow-hidden border-t-4 border-green-500 slide-in-bottom" style={{ animationDelay: "0.1s" }}>

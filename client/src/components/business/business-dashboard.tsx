@@ -118,7 +118,7 @@ export function BusinessDashboard() {
   const [deleteDialog, setDeleteDialog] = useState({ open: false, product: null as any });
   const [, setLocation] = useLocation();
   
-  // Handle logout and redirect to homepage
+  // Handle logout and redirect to login page
   const handleLogout = async () => {
     try {
       await logoutUser();
@@ -126,8 +126,8 @@ export function BusinessDashboard() {
         title: "Системээс гарлаа",
         description: "Та амжилттай системээс гарлаа",
       });
-      // Redirect to homepage after logout
-      setLocation("/");
+      // Redirect to login page after logout
+      setLocation("/login");
     } catch (error: any) {
       toast({
         title: "Алдаа гарлаа",
