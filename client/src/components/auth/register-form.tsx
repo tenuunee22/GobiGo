@@ -144,7 +144,7 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
     }
   };
   
-  // Social login handlers removed
+
 
   const selectedUserType = userTypeInfo[userType as keyof typeof userTypeInfo];
 
@@ -556,7 +556,7 @@ export function RegisterForm({ onToggleForm }: RegisterFormProps) {
               </motion.div>
             </motion.div>
             
-            {/* Social login buttons removed as requested */}
+
           </form>
         </motion.div>
       </div>

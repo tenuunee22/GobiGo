@@ -66,7 +66,6 @@ export function LoginForm({ onToggleForm }: LoginFormProps) {
     }
   };
 
-  // Social login handlers removed
 
   return (
     <motion.div 
@@ -218,7 +217,7 @@ export function LoginForm({ onToggleForm }: LoginFormProps) {
         </motion.div>
       </motion.form>
 
-      {/* Social login buttons removed as requested */}
+
     </motion.div>
   );
 }
