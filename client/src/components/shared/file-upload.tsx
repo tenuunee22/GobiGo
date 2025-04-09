@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
-import { AlertCircle, ImagePlus, X, Camera, FileUp, FileImage } from "lucide-react";
+import { AlertCircle, FileUp, FileImage, X } from "lucide-react";
+
 interface FileUploadProps {
   onFileSelect: (file: File) => void;
   onFileRemove?: () => void;
@@ -13,15 +13,56 @@ interface FileUploadProps {
   acceptedTypes?: string;
   disabled?: boolean;
 }
+
 export function FileUpload({
   onFileSelect,
   onFileRemove,
   label = "Файл оруулах",
   previewUrl,
   maxSizeMB = 5,
+  acceptedTypes = "image/*",
+  disabled = false
+}: FileUploadProps) {
+  const [isDragging, setIsDragging] = useState(false);
+  const [preview, setPreview] = useState<string | undefined>(previewUrl);
+  const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setPreview(previewUrl);
+  }, [previewUrl]);
+
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragging(false);
+
+    if (disabled) return;
+
+    if (event.dataTransfer.files && event.dataTransfer.files.length > 0) {
+      handleFile(event.dataTransfer.files[0]);
+    }
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files.length > 0) {
+      handleFile(event.target.files[0]);
+    }
+  };
+
+  const handleFile = (file: File) => {
+    // Check file size
+    if (file.size > maxSizeMB * 1024 * 1024) {
+      setError(`Файлын хэмжээ хэт том байна. Дээд хэмжээ: ${maxSizeMB}MB`);
+      return;
+    }
+
+    // Check file type
+    if (acceptedTypes && !file.type.match(acceptedTypes.replace(/\*/g, ".*"))) {
       setError(`Зөвшөөрөгдөөгүй файлын төрөл. Зөвшөөрөгдсөн төрлүүд: ${acceptedTypes}`);
       return;
     }
+
     if (file.type.startsWith("image/")) {
       const reader = new FileReader();
       reader.onload = () => {
@@ -31,23 +72,28 @@ export function FileUpload({
     } else {
       setPreview(undefined);
     }
+
     setError(null);
     onFileSelect(file);
   };
+
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     if (!disabled) {
       setIsDragging(true);
     }
   };
+
   const handleDragLeave = () => {
     setIsDragging(false);
   };
+
   const handleBrowseClick = () => {
     if (fileInputRef.current && !disabled) {
       fileInputRef.current.click();
     }
   };
+
   const handleClear = () => {
     setPreview(undefined);
     setError(null);
@@ -58,6 +104,7 @@ export function FileUpload({
       onFileRemove();
     }
   };
+
   return (
     <div className="space-y-2">
       <Label htmlFor="file-upload">{label}</Label>

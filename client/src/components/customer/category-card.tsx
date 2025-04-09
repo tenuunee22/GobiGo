@@ -1,4 +1,6 @@
-import { ReactNode } from "react";
+import React, { ReactNode } from "react";
+import { motion } from "framer-motion";
+
 interface CategoryCardProps {
   name: string;
   icon: ReactNode;
@@ -6,29 +8,28 @@ interface CategoryCardProps {
   isActive?: boolean;
   emoji?: string;
 }
+
 export function CategoryCard({ name, icon, onClick, isActive = false, emoji }: CategoryCardProps) {
   return (
-    <div 
-      className={`${
-        isActive 
-          ? "bg-primary text-white shadow-md" 
-          : "bg-white text-gray-900 shadow hover:shadow-md"
-      } rounded-lg transition-all duration-200 p-4 text-center cursor-pointer relative`}
+    <motion.div
+      whileHover={{ y: -5, scale: 1.03 }}
+      whileTap={{ scale: 0.97 }}
       onClick={onClick}
+      className={`bg-white border rounded-lg p-4 text-center cursor-pointer transition-all h-full
+        ${isActive 
+          ? 'border-amber-400 shadow-md ring-2 ring-amber-200 ring-opacity-50' 
+          : 'border-gray-200 hover:shadow-md'
+        }`}
     >
-      {emoji && (
-        <span className="absolute top-1 right-1 text-lg">{emoji}</span>
-      )}
-      <div className={`w-12 h-12 mx-auto mb-3 ${
-        isActive 
-          ? "bg-white bg-opacity-20" 
-          : "bg-primary bg-opacity-10"
-      } rounded-full flex items-center justify-center`}>
+      <div className={`
+        mx-auto mb-3 flex items-center justify-center rounded-full w-16 h-16
+        ${isActive ? 'bg-amber-100' : 'bg-amber-50'}
+      `}>
         {icon}
       </div>
-      <span className={`text-sm font-medium ${isActive ? "text-white" : "text-gray-900"}`}>
-        {name}
-      </span>
-    </div>
+      <h3 className={`font-medium ${isActive ? 'text-amber-700' : 'text-gray-800'}`}>
+        {name} {emoji}
+      </h3>
+    </motion.div>
   );
 }
